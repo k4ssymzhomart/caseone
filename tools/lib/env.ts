@@ -21,7 +21,15 @@ export function readEnvFile(path: string): Record<string, string> {
   return out;
 }
 
+/**
+ * The git ignored `.secrets/` folder: ROTA_SECRETS_DIR when set (a git worktree points it at the main checkout),
+ * else `.secrets/` at the repo root.
+ */
+export function secretsDir(): string {
+  return resolve(process.env.ROTA_SECRETS_DIR || resolve(import.meta.dirname, '..', '..', '.secrets'));
+}
+
 /** Loads one of the git ignored files in `.secrets/` by name, for example `supabase`. */
 export function readSecrets(name: string): Record<string, string> {
-  return readEnvFile(resolve(import.meta.dirname, '..', '..', '.secrets', `${name}.env`));
+  return readEnvFile(resolve(secretsDir(), `${name}.env`));
 }
