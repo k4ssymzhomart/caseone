@@ -22,6 +22,9 @@ type Confirm = (options: ConfirmOptions) => Promise<boolean>;
 
 const ConfirmContext = createContext<Confirm | null>(null);
 
+// The scrim is black in both modes; no semantic token holds it, so it is the Rota primitive at these alphas.
+const SCRIM_ALPHA = { dark: 0.62, light: 0.35 } as const;
+
 /** Bottom confirm sheet with 64 px buttons in the thumb zone. `await confirm({...})` → true or false. */
 export function ConfirmProvider({ children }: { children: ReactNode }) {
   const theme = useTheme();
@@ -48,9 +51,16 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   return (
     <ConfirmContext.Provider value={value}>
       {children}
-      <Modal visible={current !== null} transparent animationType="slide" onRequestClose={() => finish(false)}>
+      <Modal
+        visible={current !== null}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={() => finish(false)}
+      >
         <Pressable
-          style={[styles.backdrop, { backgroundColor: withAlpha(primitives.black, theme.mode === 'dark' ? 0.62 : 0.35) }]}
+          style={[styles.backdrop, { backgroundColor: withAlpha(primitives.black, SCRIM_ALPHA[theme.mode]) }]}
           onPress={() => finish(false)}
           accessibilityRole="button"
           accessibilityLabel={current?.cancelLabel ?? t('common.cancel')}

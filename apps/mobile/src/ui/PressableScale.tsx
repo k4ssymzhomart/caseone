@@ -3,6 +3,8 @@ import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from '
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+/** Press in and out duration (PHASE_0 §6.8). */
+const PRESS_MS = 120;
 
 export interface PressableScaleProps extends Omit<PressableProps, 'style' | 'children'> {
   style?: StyleProp<ViewStyle>;
@@ -35,11 +37,11 @@ export function PressableScale({
       disabled={disabled}
       {...rest}
       onPressIn={(e) => {
-        pressed.value = withTiming(1, { duration: 120 });
+        pressed.value = withTiming(1, { duration: PRESS_MS });
         onPressIn?.(e);
       }}
       onPressOut={(e) => {
-        pressed.value = withTiming(0, { duration: 120 });
+        pressed.value = withTiming(0, { duration: PRESS_MS });
         onPressOut?.(e);
       }}
       style={[style, animated]}

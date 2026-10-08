@@ -1,4 +1,4 @@
-import type { TypeVariant } from '@rota/design';
+import { emphasis, fontFamily, type TypeVariant } from '@rota/design';
 import { Text, type TextProps, type TextStyle } from 'react-native';
 
 import { useTheme } from '@/lib/theme';
@@ -21,17 +21,16 @@ export function T({ variant = 'body', tone = 'primary', color, align, weight, st
     primary: theme.color.textPrimary,
     secondary: theme.color.textSecondary,
     disabled: theme.color.textDisabled,
-    critical: theme.status.critical,
+    // Red 500 is under 4.5:1 on white (PHASE_0 §6.2), so light mode sets critical text in the darker accent red.
+    critical: theme.mode === 'light' ? theme.color.textAccent : theme.status.critical,
     inverse: theme.color.textInverse,
     onAccent: theme.color.textOnAccent,
     accent: theme.color.textAccent,
   };
   const v = theme.type[variant];
-  const family = weight
-    ? v.fontFamily.startsWith('GeistMono')
-      ? 'GeistMono_500Medium'
-      : { medium: 'Inter_500Medium', semibold: 'Inter_600SemiBold', bold: 'Inter_700Bold' }[weight]
-    : v.fontFamily;
+  // Android ignores fontWeight on custom fonts, so a weight picks the face: Geist Mono has one heavier cut.
+  const mono = v.fontFamily === fontFamily.mono || v.fontFamily === fontFamily.monoMedium;
+  const family = weight ? (mono ? fontFamily.monoMedium : emphasis[weight]) : v.fontFamily;
   return (
     <Text
       maxFontSizeMultiplier={1.4}
