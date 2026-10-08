@@ -7,7 +7,7 @@
 // Default outputs: docs/landing/shots/desktop.png (1440), docs/landing/shots/mobile.png (390) and
 // docs/screenshots/presentation/web/w00-landing.png (1440). With --out, every width goes to <out>/landing-<w>.png.
 import { spawn } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -152,7 +152,7 @@ try {
     const png = await sharp(raw).png({ palette: true, quality: 90, compressionLevel: 9 }).toBuffer();
     for (const file of files) {
       mkdirSync(dirname(file), { recursive: true });
-      await sharp(png).toFile(file);
+      writeFileSync(file, png);
       console.log(`wrote ${file.replace(`${repo}/`, '')} ${width}×${h} @${dpr}x ${Math.round(png.length / 1024)} KB`);
     }
   }
