@@ -45,7 +45,8 @@ const config: ExpoConfig = {
     ],
   ],
   experiments: { typedRoutes: true, reactCompiler: true },
-  extra: { eas: { projectId: undefined } }, // step 0.9 writes the real id here
+  extra: { eas: { projectId: 'de6b8e43-4d09-49ad-baa3-897694e7b4be' } },
+  owner: 'k4ssym',
 };
 
 export default config;
