@@ -16,6 +16,10 @@ transactional. The sequence sat at 641 while demo orders hold 641 to 659. The si
 and the file ends with a one time `setval` to `max(number)`. Mirror the extra `setval` into migration 07 and
 `supabase/manual/rota_remaining.sql`.
 
+**Status 2026-10-09.** Only the one time `setval` has run on the live project (the sequence was at 642, now 659, so
+`create_order` works again). The `demo_reset()` part of the file is still pending: until it is applied, every failed
+reset from the apps moves the sequence back and `create_order` collides again.
+
 ## 2026-10-08 · `demo_reset()` fails from the apps: «UPDATE requires a WHERE clause» (blocker for Demo Day)
 
 **Symptom.** `rpc('demo_reset')` from either app (and the `RUN_SUPABASE=1` contract suite) fails with

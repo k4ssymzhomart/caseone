@@ -28,6 +28,7 @@
     "check": "npm run tokens && test -z \"$(git status --porcelain -- packages/design/src/generated packages/design/web)\" && npm run typecheck && npm test && npm run build:web",
     "llm:smoke": "tsx tools/llm-smoke.ts",
     "golden": "tsx tools/golden.ts",
+    "ai-verify:check": "tsx tools/ai-verify-check.ts",
     "push:test": "tsx tools/push-test.ts"
   },
   "devDependencies": {

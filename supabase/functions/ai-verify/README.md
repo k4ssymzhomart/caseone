@@ -59,6 +59,9 @@ Entrypoint `ai-verify/index.ts`. Files: `ai-verify/{index,handler,auth,input,ret
   database (mock provider, and anthropic with a fake fetch: retries, rules-only fallback, budget, redaction).
 - `npx tsc --noEmit -p supabase/functions/ai-verify`: type check against `deno-standin.d.ts` and the workspace
   supabase-js types.
+- Live: `npm run ai-verify:check` (`tools/ai-verify-check.ts`) creates an order as 1001 for 2001 on equipment 20,
+  completes it with an «после» photo, calls the function as the worker twice (same review), without credentials
+  (401), as another worker (403) and with the secret key (same review). Free on the mock provider.
 - Live, mock provider, on an order in `ai_review`:
   `curl -X POST "$SUPABASE_URL/functions/v1/ai-verify" -H "apikey: $SUPABASE_SECRET_KEY" -H 'content-type: application/json' -d '{"order_id": 123}'`.
   On an already reviewed order the same call returns the stored review and changes nothing.
