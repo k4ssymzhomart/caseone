@@ -2,6 +2,7 @@
 import 'react-native-url-polyfill/auto';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { RotaDatabase } from '@rota/shared';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { AppState } from 'react-native';
 
@@ -15,9 +16,9 @@ export const apiMode: ApiMode =
 
 export const demoAccounts = process.env.EXPO_PUBLIC_DEMO_ACCOUNTS !== 'false';
 
-export const supabase: SupabaseClient | null =
+export const supabase: SupabaseClient<RotaDatabase> | null =
   apiMode === 'supabase' && url && key
-    ? createClient(url, key, {
+    ? createClient<RotaDatabase>(url, key, {
         auth: {
           storage: AsyncStorage,
           persistSession: true,

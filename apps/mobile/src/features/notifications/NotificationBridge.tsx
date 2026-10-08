@@ -12,6 +12,7 @@ import { AppState } from 'react-native';
 import { newActionId, useApi, useSession } from '@/lib/api';
 import { haptic } from '@/lib/haptics';
 import { t } from '@/lib/i18n';
+import { liveHub } from '@/lib/liveHub';
 import { configureNotifications, orderIdOf, urlOf } from '@/lib/notifications';
 import { playDing } from '@/lib/siren';
 import { useHud } from '@/ui/Hud';
@@ -43,16 +44,14 @@ export function NotificationBridge() {
     void configureNotifications();
   }, []);
 
-  // In-app toasts and the emergency screen from realtime.
+  // In-app toasts and the emergency screen from realtime (liveHub: createLiveSync or the mock's events).
   useEffect(() => {
     if (!uid) return;
-    return api.realtime.subscribe('notifications', (e) => {
-      if (e.type !== 'INSERT' || !e.row) return;
-      const n = e.row as AppNotification;
+    return liveHub.onNotification((n: AppNotification) => {
       if (n.recipient_id !== uid) return;
       if (n.kind === 'emergency' && n.order_id && role === 'worker') {
         lastEmergency.current = n.order_id;
-        openEmergency(n.order_id);
+        router.push(`/emergency/${n.order_id}` as Href);
         return;
       }
       playDing();
