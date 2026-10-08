@@ -48,3 +48,6 @@ _archive/
 
 # VM bootstrap with the deploy public key (generated)
 deploy/vm/*.generated.ps1
+
+# Vercel static upload folder (built locally)
+deploy/vercel/dist/
