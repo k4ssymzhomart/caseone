@@ -1,0 +1,117 @@
+/* Small landing primitives: reveal, glow, outlined chapter numbers, the phone frame, link pills, verdict icons. */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 500ms ease,
+    transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.reveal[data-shown] {
+  opacity: 1;
+  transform: none;
+}
+
+/* A blurred red ellipse behind a section's visual. */
+.glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  width: var(--glow-w, 700px);
+  height: var(--glow-h, 560px);
+  max-width: 160vw;
+  background: radial-gradient(closest-side, rgb(255 59 48 / var(--glow-a, 0.3)), transparent);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Outlined numeral behind a visual. */
+.chapterNumber {
+  position: absolute;
+  z-index: 0;
+  color: transparent;
+  font-family: var(--font-sans);
+  font-size: var(--cn-size, 400px);
+  font-weight: 700;
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  -webkit-text-stroke: 2px rgb(255 255 255 / 0.06);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Phone frame around a real screenshot (docs/LANDING.md §3.1). Width from --pw, smaller under 768 px via --pwm. */
+.phone {
+  --w: var(--pw, 300px);
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: var(--w);
+  margin: 0;
+  padding: 8px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: calc(var(--w) * 0.17);
+  background: var(--rota-gray-850);
+  box-shadow:
+    0 40px 100px rgb(0 0 0 / 0.6),
+    0 0 120px rgb(255 59 48 / 0.16);
+  transform: rotate(var(--tilt, 0deg));
+}
+
+.phone img {
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--w) * 0.145);
+  background: var(--color-bg-canvas);
+}
+
+/* Link pills reuse the kit Button look; this is the disabled «· скоро» state. */
+.soon {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.soonText {
+  color: var(--rota-gray-600);
+}
+
+/* ✓ and ✕ as drawn icons */
+.icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+.icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.icon[data-ok] {
+  background: var(--status-free-soft);
+  color: var(--status-free);
+}
+
+.icon:not([data-ok]) {
+  background: var(--status-critical-soft);
+  color: var(--status-critical);
+}
+
+@media (max-width: 767px) {
+  .phone {
+    --w: var(--pwm, var(--pw, 240px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

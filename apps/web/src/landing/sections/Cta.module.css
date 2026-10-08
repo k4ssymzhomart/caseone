@@ -1,0 +1,159 @@
+.card {
+  position: relative;
+  overflow: hidden;
+  padding: 88px 48px 72px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 40px;
+  background:
+    radial-gradient(60% 70% at 50% 0%, rgb(255 59 48 / 0.55), transparent 70%),
+    radial-gradient(50% 60% at 0% 100%, rgb(195 16 8 / 0.45), transparent 70%),
+    radial-gradient(50% 60% at 100% 60%, rgb(143 10 5 / 0.45), transparent 70%),
+    #120302;
+}
+
+.wrench {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+}
+
+.cheer {
+  position: absolute;
+  right: 28px;
+  bottom: 24px;
+}
+
+.body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.body h2 {
+  margin-top: 0;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 760px;
+  margin-top: 32px;
+}
+
+.try {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 48px;
+}
+
+.accounts {
+  padding: 22px 26px;
+  border-radius: 24px;
+  background: rgb(0 0 0 / 0.4);
+  text-align: left;
+}
+
+.accountsLabel {
+  margin: 0 0 12px;
+  color: var(--l-eyebrow);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.accounts ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.accounts li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--l-text-2);
+  font-size: 15px;
+}
+
+.role {
+  min-width: 7.5em;
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 600;
+}
+
+.strong {
+  color: #fff;
+  font-weight: 500;
+}
+
+.phone {
+  rotate: 4deg;
+}
+
+@media (max-width: 1023px) {
+  .phone {
+    display: none;
+  }
+
+  .wrench {
+    width: 110px;
+    height: 110px;
+  }
+
+  .cheer {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@media (max-width: 767px) {
+  .card {
+    padding: 112px 18px 140px;
+    border-radius: 28px;
+  }
+
+  .wrench {
+    top: 16px;
+    left: 50%;
+    width: 96px;
+    height: 96px;
+    margin-left: -48px;
+  }
+
+  .cheer {
+    right: 50%;
+    bottom: 12px;
+    width: 112px;
+    height: 112px;
+    margin-right: -56px;
+  }
+
+  .buttons > * {
+    width: 100%;
+  }
+
+  .accounts {
+    width: 100%;
+    padding: 18px;
+  }
+
+  .accounts li {
+    font-size: 14px;
+  }
+
+  .role {
+    min-width: 0;
+  }
+}

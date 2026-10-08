@@ -1,0 +1,99 @@
+.card {
+  max-width: 900px;
+  margin: 56px auto 0;
+  padding: 20px 36px 12px;
+  border-radius: 32px;
+  background: rgb(22 22 23 / 0.8);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table th,
+.table td {
+  padding: 18px 0;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  font-size: 15px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table thead th {
+  padding: 18px 0 22px;
+  font-weight: 500;
+}
+
+.table tbody th {
+  font-weight: 500;
+}
+
+.table thead th:first-child,
+.table tbody th {
+  width: 46%;
+}
+
+.old {
+  color: var(--l-text-2);
+  text-align: center !important;
+}
+
+.table tbody .old {
+  font-size: 13px;
+}
+
+.rota {
+  color: var(--l-soft-red);
+  font-weight: 600;
+  text-align: center !important;
+}
+
+.rota svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.rotaBadge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background: var(--l-red);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  .card {
+    padding: 8px 16px 4px;
+    border-radius: 24px;
+  }
+
+  .table th,
+  .table td {
+    padding: 14px 4px;
+    font-size: 13px;
+  }
+
+  .table thead th:first-child,
+  .table tbody th {
+    width: 42%;
+    padding-left: 0;
+  }
+
+  .table tbody .old {
+    font-size: 12px;
+  }
+
+  .rotaBadge {
+    padding: 4px 10px;
+    font-size: 13px;
+  }
+}

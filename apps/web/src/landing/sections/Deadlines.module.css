@@ -1,0 +1,194 @@
+.visual {
+  padding: 0 0 120px;
+}
+
+.frame {
+  padding: 40px 40px 48px;
+}
+
+/* The watchdog timeline, after deck-05 */
+
+.timeline {
+  position: relative;
+  display: grid;
+  gap: 22px;
+  margin: 0;
+  padding: 24px 24px 24px 20px;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 24px;
+  background: rgb(0 0 0 / 0.45);
+  list-style: none;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.timeline li {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding-left: 26px;
+}
+
+.timeline li::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  bottom: -22px;
+  left: 4px;
+  width: 1px;
+  background: rgb(255 255 255 / 0.14);
+}
+
+.timeline li:last-child::before {
+  display: none;
+}
+
+.tdot {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--status-off);
+}
+
+[data-hot] > .tdot {
+  background: var(--l-red);
+  box-shadow: 0 0 0 4px rgb(255 59 48 / 0.2);
+}
+
+.label {
+  color: var(--l-text-3);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+[data-hot] > .label {
+  color: var(--l-eyebrow);
+}
+
+.title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.text {
+  color: var(--l-text-2);
+  font-size: 13px;
+}
+
+/* The push on the corner */
+
+.push {
+  position: absolute;
+  right: -28px;
+  bottom: 0;
+  z-index: 2;
+  width: min(380px, 86%);
+  padding: 16px 18px 18px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 24px;
+  background: rgb(30 30 32 / 0.78);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(30px) saturate(150%);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+}
+
+.pushHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.appIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #0a0a0a;
+  border: 1px solid rgb(255 255 255 / 0.12);
+}
+
+.app {
+  color: var(--l-text-2);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.time {
+  margin-left: auto;
+  color: var(--l-text-3);
+  font-size: 12px;
+}
+
+.pushTitle {
+  margin: 12px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.pushBody {
+  margin: 6px 0 0;
+  color: rgb(255 255 255 / 0.82);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.search {
+  position: absolute;
+  top: -64px;
+  right: -36px;
+  z-index: 3;
+}
+
+@media (max-width: 1023px) {
+  .push {
+    right: 0;
+  }
+
+  .search {
+    right: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .visual {
+    padding: 64px 0 0;
+  }
+
+  .frame {
+    padding: 20px 16px 24px;
+  }
+
+  .timeline {
+    padding: 18px 16px 18px 14px;
+    gap: 18px;
+  }
+
+  .timeline li::before {
+    bottom: -18px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .push {
+    position: relative;
+    right: auto;
+    width: auto;
+    margin: -24px 12px 0;
+  }
+
+  .search {
+    top: -8px;
+    right: 8px;
+    width: 104px;
+    height: 104px;
+  }
+}
