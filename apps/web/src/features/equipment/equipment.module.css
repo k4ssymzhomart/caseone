@@ -1,0 +1,33 @@
+/* /equipment/:id: KPIs, the weekly chart beside the frequent faults, then the order history table. */
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.description {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 44ch;
+}
+
+.dim {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-2);
+}

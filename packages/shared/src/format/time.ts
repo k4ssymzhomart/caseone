@@ -218,3 +218,41 @@ export function formatAgo(value: DateInput, now: DateInput = new Date()): string
   if (isSameLocalDay(value, toDate(now).getTime() - DAY)) return `вчера ${hhmm(value)}`;
   return formatDateTime(value);
 }
+
+// ---------------------------------------------------------------------------
+// local calendar days as <input type="date"> values (web report filter, custom period)
+// ---------------------------------------------------------------------------
+
+const DAY_INPUT = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/** «2026-10-08»: the local calendar day of an instant, in the format of an `<input type="date">` value. */
+export function toLocalDateInput(value: DateInput): string {
+  const p = localParts(value);
+  return `${p.year}-${pad(p.month)}-${pad(p.day)}`;
+}
+
+/** Local midnight (UTC+5) of a «YYYY-MM-DD» day; null when the text is not a real day. */
+export function fromLocalDateInput(day: string): Date | null {
+  const m = DAY_INPUT.exec(day.trim());
+  if (!m) return null;
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  const date = Number(m[3]);
+  const out = fromLocal(year, month - 1, date);
+  // reject overflow such as 2026-02-31
+  const back = localParts(out);
+  if (back.year !== year || back.month !== month || back.day !== date) return null;
+  return out;
+}
+
+/**
+ * A custom report period from two local days, both inclusive: from the start of the first day to the end of the
+ * last one (`to` exclusive, the next local midnight). Reversed days are swapped; null if either day is invalid.
+ */
+export function localDaysPeriod(fromDay: string, toDay: string): Period | null {
+  const a = fromLocalDateInput(fromDay);
+  const b = fromLocalDateInput(toDay);
+  if (!a || !b) return null;
+  const [start, end] = a.getTime() <= b.getTime() ? [a, b] : [b, a];
+  return { from: start.toISOString(), to: new Date(end.getTime() + DAY).toISOString() };
+}

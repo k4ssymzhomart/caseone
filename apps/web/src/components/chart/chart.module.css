@@ -1,0 +1,110 @@
+.card {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.titles {
+  display: grid;
+  gap: 2px;
+  margin-right: auto;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.plot {
+  min-width: 0;
+}
+
+/* recharts focus outline on click is noise; keyboard focus stays visible through :focus-visible */
+.plot :global(.recharts-wrapper),
+.plot :global(.recharts-surface) {
+  outline: none;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.tooltip {
+  display: grid;
+  gap: 4px;
+  min-width: 160px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-soft);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.tooltipLabel {
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.tooltipRow {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.tooltipName {
+  color: var(--color-text-secondary);
+}
+
+.tooltipValue {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.tooltipTotal {
+  margin-top: 2px;
+  padding-top: 4px;
+  border-top: 1px solid var(--color-border-default);
+}
