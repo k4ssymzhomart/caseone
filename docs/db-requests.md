@@ -38,6 +38,94 @@ busy as (
 '5 hours', now(), '{}') -> 'workload') x;` never shows a share above 1. The web table, the PDF and the AI summary then
 read the corrected numbers without an app change.
 
+## 2026-10-09 · weekly digest cron for ai-insights (Phase 6, CLAUDE.md §15)
+
+**Need.** §15 asks for a cron every Monday at 03:00 UTC (08:00 Asia/Qostanay) that runs `ai-insights` for the past
+week and sends `weekly_digest` to managers and masters. The function side is deployed (`ai-insights` version 1,
+`verify_jwt = false`): `POST {digest: true}` with the secret key in `apikey` computes the cards for the 7 local days
+before today (the model when `LLM_PROVIDER=anthropic`, else `insight_cards`), stores them once per week in
+`ai_insights` (`scope.key = digest|{monday}`), and inserts one `weekly_digest` row per master and manager itself
+(service role, PostgREST upsert, `on conflict (recipient_id, dedupe_key) do nothing`, `dedupe_key =
+digest:{monday}`, `order_id` null, url `/analytics`, body «Сводка ИИ за неделю: 7 выводов. Главное: {title}.»). The
+`notifications_dispatch` trigger then pushes them as usual; `notify-dispatch` already sends the name free
+Telegram text for `weekly_digest`. A second call in the same week finds the stored cards and inserts nothing new.
+A week without findings sends nothing. So only the schedule is missing: no notification SQL is needed.
+
+**SQL** (a new migration, for example `20261008100014_rota_weekly_digest.sql`, and `supabase/manual/`), the same
+pg_net and Vault pattern as step 5 of `internal.watchdog_tick()`:
+
+```sql
+-- the Monday digest: ai-insights computes the week's cards and inserts the weekly_digest notifications itself
+create or replace function internal.weekly_digest()
+returns bigint
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_url text;
+  v_key text;
+  v_id  bigint;
+begin
+  select decrypted_secret into v_url from vault.decrypted_secrets where name = 'project_url';
+  select decrypted_secret into v_key from vault.decrypted_secrets where name = 'secret_key';
+  if v_url is null or v_key is null then
+    raise notice 'weekly_digest: project_url or secret_key missing in Vault';
+    return null;
+  end if;
+  select net.http_post(
+           url     := v_url || '/functions/v1/ai-insights',
+           headers := jsonb_build_object('Content-Type', 'application/json', 'apikey', v_key),
+           body    := jsonb_build_object('digest', true, 'source', 'cron'),
+           timeout_milliseconds := 60000)
+    into v_id;
+  return v_id;
+end $$;
+
+revoke execute on function internal.weekly_digest() from public;
+
+select cron.schedule('rota-weekly-digest', '0 3 * * 1', $$select internal.weekly_digest()$$);
+```
+
+**Check.** `select internal.weekly_digest();` then, a few seconds later,
+`select status_code, content::jsonb -> 'digest' from net._http_response order by id desc limit 1` gives `200` and
+`{"recipients": 3, "notified": 3}` (2 masters, 1 manager); `select recipient_id, body from public.notifications
+where kind = 'weekly_digest'` shows the three rows. Running it again returns `"notified": 0`. Note that the check
+sends real pushes to the masters' and the manager's phones.
+
+## 2026-10-09 · `d_post_ppr` puts a small unit before the planted P3 finding
+
+**Symptom.** For the 92 day history `insight_cards` says «Отказы после ППР: Упаковочная машина УМ-50» (4 of 9 ППР
+followed by a failure, 44%, base 10%). The planted pattern P3 (`tools/seed/PATTERNS.md`), «Дробилка КМД-1750 №2:
+8 of 13 ППР (62%) against 17%, бригада 3», is only the second row, so the rules card and the weekly digest miss it.
+The model cards of `ai-insights` see all three rows and name P3, but the rules fallback (mock provider, no budget)
+does not.
+
+**Cause.** The detector orders by the lift `share / base` (УМ-50 4.4, КМД-1750 №2 3.6, ЭКГ-10 №7 2.5): a unit with
+few ППР and a low base wins.
+
+**Fix.** Order by the failures in excess of the unit's own rate, `(share − base) × planned`: КМД-1750 №2 5.85,
+ЭКГ-10 №7 5.33, УМ-50 3.06. In `public.d_post_ppr` of `supabase/migrations/20261008100010_rota_detectors.sql`
+replace
+
+```sql
+           order by u.share / nullif(u.base, 0) desc nulls last), '[]'::jsonb)
+```
+
+with
+
+```sql
+           order by (u.share - u.base) * u.n desc, u.share / nullif(u.base, 0) desc nulls last), '[]'::jsonb)
+```
+
+and re-run the `create or replace function public.d_post_ppr` block. `insight_cards` takes `post_ppr -> 0`, so its
+card becomes the P3 one with no other change.
+
+**Check.** `select c ->> 'title' from jsonb_array_elements(public.insight_cards('2026-07-08 00:00+05',
+'2026-10-08 00:00+05', '{}')) c where c ->> 'kind' = 'post_ppr'` gives «Отказы после ППР: Дробилка КМД-1750 №2»;
+`npx tsx tools/ai-insights-check.ts --patterns` lists it, and `npx tsx tools/insights-fixtures.ts` refreshes the test
+fixtures (the `ai-insights` tests do not depend on the order).
+
 ## 2026-10-08 · order numbers collide after a failed `demo_reset()` (blocker, same fix file)
 
 **Symptom.** `create_order` returns 409 (unique violation on `orders.number`); the app shows «Проверьте поля наряда».

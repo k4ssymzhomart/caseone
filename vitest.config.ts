@@ -12,6 +12,7 @@ const projects = [
   'supabase/functions/ai-verify',
   'supabase/functions/ai-shift-summary',
   'supabase/functions/ai-explain-rating',
+  'supabase/functions/ai-insights',
   'apps/mobile',
   'apps/web',
 ].filter((dir) => existsSync(dir));

@@ -164,12 +164,15 @@ export function useDashboard(period: Period, filters: ReportFilters = {}) {
   });
 }
 
-/** Insight cards for the period (rpc insight_cards now; LLM cards in Phase 6). */
+/**
+ * Insight cards and the scope they answer: the ai-insights Edge Function (Haiku reads the question, Sonnet writes
+ * the cards), else rpc insight_cards. The function caches by scope, so a rolling period refetch is cheap.
+ */
 export function useInsights(input: InsightsInput) {
   const api = useApi();
   return useQuery({
     queryKey: qk.insights(input),
-    queryFn: () => api.ai.insights(input),
+    queryFn: () => api.ai.ask(input),
     placeholderData: keepPreviousData,
     staleTime: 60_000,
   });

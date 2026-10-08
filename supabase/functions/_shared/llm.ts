@@ -549,13 +549,7 @@ export function mockAnswer<P extends LlmPurpose>(
           title: 'Конвейер К-3: частые внеплановые остановки',
           body: 'Конвейер К-3: 7 внеплановых остановок за 30 дней, 5 из них шифр М-02 (подшипник).',
           recommendation: 'Проверить соосность привода и включить в план ППР.',
-          evidence: {
-            order_ids: [],
-            stats: [
-              { key: 'unplanned_30d', value: 7, unit: 'шт' },
-              { key: 'm02_30d', value: 5, unit: 'шт' },
-            ],
-          },
+          refs: ['top_equipment.0'],
         },
       ],
     }),

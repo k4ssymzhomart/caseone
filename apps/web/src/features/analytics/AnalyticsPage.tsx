@@ -1,7 +1,10 @@
-// /analytics (master, manager): insight cards (CLAUDE.md §15) for the FilterBar period and area: severity as a dot
-// plus a word, the text, the recommendation and «Доказательства» (key numbers, the evidence orders as links to
-// /orders/:id, a weekly mini chart, the unit's history). Cards come from rpc insight_cards now and from the LLM in
-// Phase 6; the ask box stays disabled until then. The mascot «search» shows while the detectors run.
+// /analytics (master, manager): insight cards (CLAUDE.md §15) for the FilterBar period and area, or for a question
+// in the ask box («покажи проблемы участка дробления за месяц»). The ai-insights Edge Function reads the question
+// (Haiku), writes the cards from the detector numbers (Sonnet) and falls back to rpc insight_cards; the scope chips
+// say how the question was understood and where the cards came from. A card shows severity as a dot plus a word,
+// the text, the recommendation and «Доказательства»: key numbers, a mini chart of the detector row, the evidence
+// orders as links to /orders/:id, a weekly chart of those orders and the unit's history. The question lives in the
+// URL (?q=), so an answer can be reloaded and linked. The mascot «search» shows while the detectors run.
 import {
   ddmm,
   formatCount,
@@ -15,12 +18,13 @@ import {
   SEVERITIES,
   type Insight,
   type InsightKind,
+  type InsightScope,
   type Severity,
   type Tone,
 } from '@rota/shared';
-import { useId, useMemo, useState } from 'react';
-import { Link } from 'react-router';
-import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
+import { useEffect, useId, useMemo, useState, type FormEvent } from 'react';
+import { Link, useSearchParams } from 'react-router';
+import { Bar, BarChart, CartesianGrid, LabelList, Tooltip, XAxis, YAxis } from 'recharts';
 import { ChartCard, ChartTooltip } from '@/components/chart';
 import { Button } from '@/components/rota';
 import {
@@ -37,6 +41,8 @@ import {
   Tag,
 } from '@/components/ui';
 import {
+  barProps,
+  chartTokens,
   gridProps,
   series,
   stackedBarProps,
@@ -45,7 +51,7 @@ import {
   yAxisProps,
 } from '@/lib/chart';
 import { useReportFilter } from '@/lib/filters';
-import { t } from '@/lib/i18n';
+import { t, type Key } from '@/lib/i18n';
 import { useInsights } from '@/lib/queries';
 import { paths } from '@/lib/routes';
 import { num, periodEyebrow } from '@/features/reports/format';
@@ -60,33 +66,56 @@ const SEVERITY_TONE: Readonly<Record<Severity, Tone>> = {
   info: 'info',
 };
 
+const MAX_QUERY = 300;
+const EXAMPLES: readonly Key[] = [
+  'analytics.ask.example_1',
+  'analytics.ask.example_2',
+  'analytics.ask.example_3',
+];
+
 export function AnalyticsPage() {
   const { preset, period, filters, fromDay, toDay } = useReportFilter();
-  const insights = useInsights({ ...period, filters });
-  // the evidence orders load once, when the first «Доказательства» opens
+  const [params, setParams] = useSearchParams();
+  const query = (params.get('q') ?? '').trim().slice(0, MAX_QUERY);
+  const insights = useInsights({ ...period, filters, ...(query ? { query } : {}) });
+  const answer = insights.data;
+  // the evidence orders load once, when the first «Доказательства» opens, for the period the cards answer
   const [evidenceWanted, setEvidenceWanted] = useState(false);
-  const evidence = useEvidenceOrders(period, filters, evidenceWanted);
+  const scopePeriod = answer ? { from: answer.scope.from, to: answer.scope.to } : period;
+  const evidence = useEvidenceOrders(scopePeriod, answer?.scope.filters ?? filters, evidenceWanted);
+  const asking = insights.isFetching && (insights.isPlaceholderData || !answer);
+
+  const ask = (q: string) => {
+    setParams((prev) => {
+      const next = new URLSearchParams(prev);
+      const clean = q.replace(/\s+/g, ' ').trim().slice(0, MAX_QUERY);
+      if (clean) next.set('q', clean);
+      else next.delete('q');
+      return next;
+    });
+  };
 
   return (
     <Page title={t('page.analytics')} eyebrow={periodEyebrow(preset, period, fromDay, toDay)}>
-      <AskBox />
-      {insights.data !== undefined ? (
-        insights.data.length === 0 ? (
-          <EmptyState
-            mascot="peek"
-            title={t('analytics.empty_title')}
-            text={t('analytics.empty_text')}
-          />
-        ) : (
-          <Stale stale={insights.isPlaceholderData}>
+      <AskBox query={query} pending={asking} onAsk={ask} />
+      {answer !== undefined ? (
+        <Stale stale={insights.isPlaceholderData}>
+          <ScopeBar scope={answer.scope} />
+          {answer.cards.length === 0 ? (
+            <EmptyState
+              mascot="peek"
+              title={t('analytics.empty_title')}
+              text={t('analytics.empty_text')}
+            />
+          ) : (
             <Section
               title={t('analytics.cards')}
               aside={
-                <span className={rs.note}>{formatCount(insights.data.length, INSIGHT_FORMS)}</span>
+                <span className={rs.note}>{formatCount(answer.cards.length, INSIGHT_FORMS)}</span>
               }
             >
               <div className={styles.cards}>
-                {insights.data.map((card, i) => (
+                {answer.cards.map((card, i) => (
                   <InsightCard
                     key={`${card.kind}:${card.id ?? i}:${card.title}`}
                     card={card}
@@ -97,41 +126,138 @@ export function AnalyticsPage() {
                 ))}
               </div>
             </Section>
-          </Stale>
-        )
+          )}
+        </Stale>
       ) : insights.isError ? (
         <ErrorState error={insights.error} onRetry={() => void insights.refetch()} />
       ) : (
         <EmptyState
           mascot="search"
           title={t('analytics.loading_title')}
-          text={t('analytics.loading_text')}
+          text={query ? t('analytics.ask.asking') : t('analytics.loading_text')}
         />
       )}
     </Page>
   );
 }
 
-/** The question box of Phase 6 (Haiku parses the question into a period, an area and a focus). Disabled for now. */
-function AskBox() {
+// ---------------------------------------------------------------------------
+// the ask box and the scope chips
+// ---------------------------------------------------------------------------
+
+/** The question of the ask box. Submitting puts it into the URL; the page asks ai-insights for it. */
+function AskBox({
+  query,
+  pending,
+  onAsk,
+}: {
+  query: string;
+  pending: boolean;
+  onAsk: (q: string) => void;
+}) {
+  const [draft, setDraft] = useState(query);
+  // a new question from the URL (back button, a link) replaces the draft
+  useEffect(() => setDraft(query), [query]);
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    onAsk(draft);
+  };
   return (
     <Card pad="l">
-      <form className={styles.ask} onSubmit={(e) => e.preventDefault()}>
+      <form className={styles.ask} onSubmit={submit} role="search">
         <div className={styles.askRow}>
           <Field label={t('analytics.ask.label')}>
             {(id) => (
-              <Input id={id} type="text" placeholder={t('analytics.ask.placeholder')} disabled />
+              <Input
+                id={id}
+                type="search"
+                enterKeyHint="search"
+                maxLength={MAX_QUERY}
+                placeholder={t('analytics.ask.placeholder')}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+              />
             )}
           </Field>
-          <Button type="submit" disabled>
+          <Button type="submit" disabled={!draft.trim() || pending}>
             {t('analytics.ask.submit')}
           </Button>
+          {query ? (
+            <Button type="button" variant="secondary" onClick={() => onAsk('')}>
+              {t('analytics.ask.clear')}
+            </Button>
+          ) : null}
         </div>
-        <p className={rs.note}>{t('analytics.ask.soon')}</p>
+        {pending ? (
+          <div className={styles.asking} role="status">
+            <Loading />
+            <span>{t('analytics.ask.asking')}</span>
+          </div>
+        ) : (
+          <div className={styles.examples}>
+            <span className={rs.note}>{t('analytics.ask.examples')}</span>
+            {EXAMPLES.map((k) => (
+              <button
+                key={k}
+                type="button"
+                className={styles.example}
+                onClick={() => {
+                  setDraft(t(k));
+                  onAsk(t(k));
+                }}
+              >
+                {t(k)}
+              </button>
+            ))}
+          </div>
+        )}
+        <p className={rs.note}>{t('analytics.ask.hint')}</p>
       </form>
     </Card>
   );
 }
+
+const SOURCE_TONE: Readonly<Record<InsightScope['source'], Tone>> = {
+  llm: 'info',
+  mixed: 'info',
+  rules: 'neutral',
+};
+
+/** What the cards answer: the period, the dates, the area and the focus, then where the cards came from. */
+function ScopeBar({ scope }: { scope: InsightScope }) {
+  const asked = scope.query != null;
+  const last = Date.parse(scope.to) - 1;
+  const chips = [
+    t('analytics.scope.period', { label: scope.label }),
+    t('analytics.scope.dates', { from: ddmm(scope.from), to: ddmm(last) }),
+    scope.area_name ?? t('analytics.scope.all_areas'),
+    ...scope.focus.map(kindLabel),
+  ];
+  return (
+    <div className={styles.scope}>
+      <Eyebrow>{asked ? t('analytics.scope.question') : t('analytics.scope.period_title')}</Eyebrow>
+      <ul className={styles.chips}>
+        {chips.map((c) => (
+          <li key={c} className={styles.chip}>
+            {c}
+          </li>
+        ))}
+      </ul>
+      <div className={styles.scopeMeta}>
+        <Pill tone={SOURCE_TONE[scope.source]}>{t(`analytics.scope.source.${scope.source}`)}</Pill>
+        {asked && scope.parsed_by ? (
+          <span className={rs.note}>{t(`analytics.scope.parsed.${scope.parsed_by}`)}</span>
+        ) : null}
+        {scope.cached ? <span className={rs.note}>{t('analytics.scope.cached')}</span> : null}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// a card
+// ---------------------------------------------------------------------------
 
 interface InsightCardProps {
   card: Insight;
@@ -144,14 +270,17 @@ function InsightCard({ card, orders, ordersPending, onOpen }: InsightCardProps) 
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const ids = useMemo(() => orderIds(card), [card]);
-  // Phase 6 cards come from the LLM: an unknown severity reads as info rather than a raw key
+  // an unknown severity reads as info rather than a raw key
   const severity: Severity = SEVERITIES.includes(card.severity) ? card.severity : 'info';
+  // model cards list the detector rows they cite; rules cards do not
+  const byModel = Array.isArray(card.evidence?.stats?.refs);
   return (
     <Card pad="l">
       <article className={styles.card}>
         <div className={styles.cardTop}>
           <Pill tone={SEVERITY_TONE[severity]}>{t(`analytics.severity.${severity}`)}</Pill>
           <Tag>{kindLabel(card.kind)}</Tag>
+          {byModel ? <Tag>{t('analytics.card.ai')}</Tag> : null}
         </div>
         <h3 className={styles.cardTitle}>{card.title}</h3>
         <p className={styles.cardBody}>{card.body}</p>
@@ -221,6 +350,7 @@ function Evidence({
   const stats = card.evidence?.stats ?? {};
   const equipmentId = num(stats.equipment_id);
   const facts = useMemo(() => statFacts(stats), [stats]);
+  const chart = useMemo(() => statChart(card.kind, stats), [card.kind, stats]);
 
   const found = useMemo(() => {
     if (!orders) return [];
@@ -244,6 +374,8 @@ function Evidence({
           ))}
         </dl>
       ) : null}
+
+      {chart ? <StatChart spec={chart} /> : null}
 
       <div className={styles.block}>
         <Eyebrow>{t('analytics.evidence.orders')}</Eyebrow>
@@ -286,7 +418,7 @@ function Evidence({
         )}
       </div>
 
-      {found.length > 0 ? <WeeklyChart orders={found} /> : null}
+      {found.length > 0 && card.kind !== 'trend' ? <WeeklyChart orders={found} /> : null}
 
       {equipmentId != null ? (
         <Link
@@ -308,6 +440,8 @@ const STAT_KEYS = [
   'unplanned',
   'downtime_h',
   'ratio_to_median',
+  'units',
+  'per_unit',
   'count',
   'median_days_between',
   'workers',
@@ -339,6 +473,7 @@ const PERCENT: ReadonlySet<StatKey> = new Set([
 ]);
 const INTEGER: ReadonlySet<StatKey> = new Set([
   'unplanned',
+  'units',
   'count',
   'workers',
   'planned',
@@ -375,6 +510,165 @@ function statFacts(stats: Record<string, unknown>): Fact[] {
     });
   }
   return facts;
+}
+
+// ---------------------------------------------------------------------------
+// the mini chart of the detector row (evidence.stats)
+// ---------------------------------------------------------------------------
+
+interface StatChartSpec {
+  title: string;
+  subtitle: string;
+  /** How a value prints: a count, a percent, a quantity with its unit. */
+  format: (v: number) => string;
+  /** Values in the units they print in (shares already as percents), so the axis scales them as they read. */
+  bars: { label: string; value: number }[];
+}
+
+const asCount = (v: number) => formatInt(v);
+const asPercent = (v: number) => `${formatInt(v)}%`;
+
+/** Two numbers of the row side by side; `percent` turns shares (0..1) into whole percents. */
+function pair(
+  stats: Record<string, unknown>,
+  a: [string, Key],
+  b: [string, Key],
+  percent = false,
+): { label: string; value: number }[] | null {
+  const va = num(stats[a[0]]);
+  const vb = num(stats[b[0]]);
+  if (va == null || vb == null) return null;
+  const scale = (v: number) => (percent ? Math.round(v * 100) : v);
+  return [
+    { label: t(a[1]), value: scale(va) },
+    { label: t(b[1]), value: scale(vb) },
+  ];
+}
+
+/** A small chart for the kinds whose row holds a comparison: codes, night and day, worker and team, … */
+function statChart(kind: string, stats: Record<string, unknown>): StatChartSpec | null {
+  switch (kind) {
+    case 'top_equipment': {
+      const codes = Array.isArray(stats.top_codes)
+        ? (stats.top_codes as Record<string, unknown>[])
+        : [];
+      const bars = codes
+        .map((c) => ({ label: String(c.code ?? ''), value: num(c.count) }))
+        .filter((b): b is { label: string; value: number } => b.label !== '' && b.value != null);
+      return bars.length >= 2
+        ? {
+            title: t('analytics.chart.codes'),
+            subtitle: t('analytics.chart.codes_hint'),
+            format: asCount,
+            bars,
+          }
+        : null;
+    }
+    case 'time_patterns': {
+      const bars = pair(stats, ['night', 'analytics.chart.night'], ['day', 'analytics.chart.day']);
+      return bars
+        ? {
+            title: t('analytics.chart.night_day'),
+            subtitle: t('analytics.chart.night_day_hint'),
+            format: asCount,
+            bars,
+          }
+        : null;
+    }
+    case 'worker_repeats': {
+      const bars = pair(
+        stats,
+        ['repeat_share', 'analytics.chart.worker'],
+        ['team_share', 'analytics.chart.team'],
+        true,
+      );
+      return bars
+        ? {
+            title: t('analytics.chart.repeat'),
+            subtitle: t('analytics.chart.repeat_hint'),
+            format: asPercent,
+            bars,
+          }
+        : null;
+    }
+    case 'post_ppr': {
+      const bars = pair(
+        stats,
+        ['followed_by_failure', 'analytics.chart.after_ppr'],
+        ['unit_base', 'analytics.chart.other_time'],
+        true,
+      );
+      return bars
+        ? {
+            title: t('analytics.chart.ppr'),
+            subtitle: t('analytics.chart.ppr_hint'),
+            format: asPercent,
+            bars,
+          }
+        : null;
+    }
+    case 'materials': {
+      const bars = pair(
+        stats,
+        ['avg_qty', 'analytics.chart.actual'],
+        ['reference_qty', 'analytics.chart.norm'],
+      );
+      const unit = typeof stats.unit === 'string' ? stats.unit : '';
+      return bars
+        ? {
+            title: t('analytics.chart.qty'),
+            subtitle: typeof stats.material === 'string' ? stats.material : '',
+            format: (v) => (unit ? `${ruNum(v)} ${unit}` : ruNum(v)),
+            bars,
+          }
+        : null;
+    }
+    case 'trend': {
+      const weekly = Array.isArray(stats.weekly) ? stats.weekly.map((v) => num(v)) : [];
+      if (weekly.length < 2 || weekly.some((v) => v == null)) return null;
+      return {
+        title: t('analytics.chart.weeks'),
+        subtitle: t('analytics.chart.weeks_hint'),
+        format: asCount,
+        bars: (weekly as number[]).map((value, i) => ({
+          label: t('analytics.chart.week_n', { n: i + 1 }),
+          value,
+        })),
+      };
+    }
+    default:
+      return null;
+  }
+}
+
+/** One series in the primary slot; every bar carries its value, so the chart reads without the tooltip. */
+function StatChart({ spec }: { spec: StatChartSpec }) {
+  const data = spec.bars.map((b) => ({ label: b.label, value: b.value }));
+  return (
+    <div className={styles.miniChart}>
+      <ChartCard title={spec.title} subtitle={spec.subtitle} height={150}>
+        <BarChart data={data} margin={{ top: 20, right: 8, bottom: 0, left: 0 }}>
+          <CartesianGrid {...gridProps} />
+          <XAxis {...xAxisProps} dataKey="label" interval={0} />
+          <YAxis {...yAxisProps} width={36} allowDecimals hide />
+          <Tooltip
+            {...tooltipProps}
+            content={(p) => <ChartTooltip {...p} format={(v) => spec.format(v)} />}
+          />
+          <Bar dataKey="value" name={t('analytics.chart.value')} {...barProps(0)}>
+            <LabelList
+              dataKey="value"
+              position="top"
+              fill={chartTokens.text}
+              fontSize={12}
+              fontFamily={chartTokens.fontMono}
+              formatter={(v: unknown) => spec.format(Number(v))}
+            />
+          </Bar>
+        </BarChart>
+      </ChartCard>
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------

@@ -38,6 +38,7 @@ import {
   insightCards,
   rating,
   requireStaffRole,
+  ruleInsightScope,
   shiftCounters,
   shiftReport,
 } from './reports';
@@ -705,6 +706,15 @@ export class MockApi implements RotaApi {
         .filter((r) => r.order_id === orderId)
         .sort((a, b) => b.attempt - a.attempt || b.id - a.id)[0];
       return latest ? clone(latest) : null;
+    },
+    ask: async (input) => {
+      const db = await this.enter('ai.ask');
+      this.requireSession();
+      const scope = ruleInsightScope(
+        input,
+        (id) => db.dirs.areas.find((a) => a.id === id)?.name ?? null,
+      );
+      return clone({ cards: insightCards(db, input), scope });
     },
     insights: async (input) => {
       const db = await this.enter('ai.insights');
