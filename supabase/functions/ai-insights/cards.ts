@@ -407,6 +407,9 @@ export function ungroundedNumbers(
 // the model's answer → cards
 // ---------------------------------------------------------------------------
 
+/** A dash between spaces: figure dash to horizontal bar (U+2012 to U+2015), minus sign, hyphen. ASCII source. */
+const SPACED_DASH = new RegExp('\\s+[\\u2012-\\u2015\\u2212-]+\\s+', 'g');
+
 /**
  * One line of plain text: spaced dashes become commas (UI copy has no dashes; «М-02» keeps its hyphen), decimals
  * get the Russian comma («254.7» → «254,7», dates untouched), and a short name rehydrated before a full stop
@@ -416,7 +419,7 @@ export function cleanText(s: unknown): string {
   if (typeof s !== 'string') return '';
   return s
     .replace(/[\u0000-\u001f\u007f]/g, ' ')
-    .replace(/\s+[‒-―−-]+\s+/g, ', ')
+    .replace(SPACED_DASH, ', ')
     .replace(/(?<![\d.])(\d+)\.(\d+)(?![\d.])/g, '$1,$2')
     .replace(/([^.])\.\.(?!\.)/g, '$1.')
     .replace(/\s+/g, ' ')
