@@ -1,0 +1,44 @@
+# Secrets: never commit
+.secrets/
+.secrets
+.env
+.env.*
+*.env
+!.env.example
+!**/.env.example
+google-services.json
+GoogleService-Info.plist
+*-adminsdk-*.json
+*.keystore
+*.jks
+*.p8
+*.p12
+
+# Dependencies and builds
+node_modules/
+dist/
+build/
+coverage/
+.expo/
+.expo-shared/
+apps/mobile/android/
+apps/mobile/ios/
+*.apk
+*.aab
+.vercel/
+.turbo/
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+supabase/functions/.env
+
+# OS and editors
+.DS_Store
+*.log
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Leftovers from earlier ideas (kept locally, never committed)
+_archive/
