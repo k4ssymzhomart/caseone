@@ -161,9 +161,22 @@ Database changes the apps need go to `docs/db-requests.md` for the architect. Ty
 
 ### Edge Functions
 
-`notify-dispatch` (Expo push and Telegram for every new notification) and `telegram-webhook` are deployed with
-`verify_jwt` off and check the secret key or the Telegram secret header in code. `ai-verify` (the AI completion check)
-follows the same pattern; see `supabase/functions/ai-verify/README.md`.
+Deployed on «rota»:
+
+| Function | What it does | Auth |
+| --- | --- | --- |
+| `notify-dispatch` | Expo push and Telegram (no names) for every new notification | secret key, `verify_jwt` off |
+| `telegram-webhook` | links a Telegram chat through `/start <token>` | Telegram secret header |
+| `ai-verify` | the AI completion check: SQL rules, one Sonnet 5.5 call with the photos, rules only fallback ([README](supabase/functions/ai-verify/README.md)) | user session or secret key |
+| `ai-shift-summary` | 5 to 8 sentences and 3 recommendations from `shift_report` (Sonnet 5.5) | staff session |
+| `ai-explain-rating` | three sentences on a worker's rating (Haiku 5.5) | the worker or staff |
+| `ai-insights` | ask box: Haiku reads the question, Sonnet writes cards from the detectors, every number checked; weekly digest | staff session or secret key |
+
+AI accuracy: the golden set of 10 cases scores 10 из 10 with Sonnet 5.5 ([results](docs/golden-results.md)).
+Acceptance of reports and analytics: [`docs/phase5-acceptance.md`](docs/phase5-acceptance.md),
+[`docs/phase6-acceptance.md`](docs/phase6-acceptance.md). Architecture: [`docs/architecture.md`](docs/architecture.md).
+
+Pending database changes for the owner to paste once: [`docs/db-fixes/2026-10-09_apply_all.sql`](docs/db-fixes/2026-10-09_apply_all.sql).
 
 After `npx supabase login`:
 
@@ -255,8 +268,10 @@ rebuilds the start state: 9 workers on shift, Ахметов the only free сл�
 ## Deliverables (case §12)
 
 - This repository with run instructions, env, seed, test accounts and the demo script
-- Android APK: `eas build -p android --profile preview` (internal APK) or `npx expo run:android --variant release`
+- Android APK: [download](https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk) (EAS preview
+  build of 2026-10-09; rebuild with `cd apps/mobile && npx eas-cli build -p android --profile preview`)
 - Web panel link and test accounts: мастер 1001/1111, исполнитель 2001/1234, руководитель 3001/3333
 - Test dataset: `supabase/seed/` and `tools/seed/PATTERNS.md`
+- Screenshots for the slides: [`docs/screenshots/presentation/`](docs/screenshots/presentation/README.md)
 - Presentation of at most 10 slides: problem, solution, architecture, AI modules, effect for the enterprise, rollout plan
 - Demo video of at most 3 minutes
