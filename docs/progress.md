@@ -14,7 +14,7 @@ As of 2026-10-08, 23:30.
 | P3 Notifications | in progress | `notify-dispatch` and `telegram-webhook` deployed (architect); channels, categories and sounds; push token registration; «Подключить Telegram» in the profile; `tools/gen-edge-env.ts` and `tools/telegram-setup.ts` | Edge secrets set and `setWebhook` run on the project; real push on Android (blocked as in P0); locked phone acceptance |
 | P4 AI control | in progress | `ai-verify` Edge Function with the shared input builder, retries, rules only fallback, auth; golden set of 10 cases (`npm run golden`); live golden run 7 of 10 (`docs/golden-results.md`) | Deploy `ai-verify`; `SupabaseApi.ai.verify` still calls `ai_check_rules` (swap to `functions.invoke('ai-verify')` with the rules as fallback); golden ≥ 9 of 10 (prompt fixes listed in `docs/golden-results.md`); escalation one tap reassign on real data |
 | P5 Reports and rating | not started | SQL `rating`, `shift_report`, `dashboard` (architect); web pages for them with the shared filter (lane B, mock checked) | `ai-shift-summary`, `ai-explain-rating` (both are fixed templates from the real numbers until then), PDF and Excel export, acceptance counts |
-| P6 Analytics | not started | Detectors, `analytics_bundle`, `insight_cards` (architect); `/analytics` shows the deterministic cards (7 cards for 92 days on the live project) | `ai-insights` with Haiku parsing and Sonnet cards (the ask box uses a keyword parser until then), weekly digest cron, dashboard tiles check against PATTERNS.md |
+| P6 Analytics | done on the mock provider (2026-10-09), model live from scripts | Detectors, `analytics_bundle`, `insight_cards` (architect); `ai-insights` deployed (v1): Haiku reads the question, Sonnet writes cards from the detector rows, every number checked against the cited rows, rules cards for dropped cards and left out findings, cache by scope, the digest path; `ai.ask` in both APIs; `/analytics` ask box with scope chips, model card tag, mini charts; P1 to P6 within ±20% and two live runs (0.086 USD) in `docs/phase6-acceptance.md`; dashboard tiles checked | Edge secrets `LLM_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` on the project; the Monday digest cron and the `d_post_ppr` order (`docs/db-requests.md`, 2026-10-09) |
 | P7 Demo hardening | not started | Landing spec `docs/LANDING.md` (lane C) | Release APK, the script three times on real phones, dataset export, architecture diagram, slides, video |
 
 ## Live project
@@ -37,6 +37,22 @@ Checked 2026-10-08, 23:25, project «rota» `wcjklkpkuhxgfdtbwbuk`.
   (`git merge-tree main p0-b`) has no conflicts.
 
 ## Log
+
+### 2026-10-09
+
+Phase 6 track (worktree branch `worktree-wf_cb013a97-1a7-3`).
+
+- 01:00 · `ai-insights` (`1d80fa0`): scope and keyword reader, compact detector rows with refs, number grounding,
+  rules fallback, cache, digest path; `_shared/auth.ts`; the insights schema now asks for `refs` instead of evidence;
+  tests on fixtures exported from the live project (`tools/insights-fixtures.ts`).
+- 01:20 · live runs with the local key (`54b4f5b`): 8 and 5 model cards, no invented number; prompt `i2` writes
+  decimal commas. 0.086 USD for both runs.
+- 01:30 · `ai.ask` in `RotaApi` (`99eae66`): SupabaseApi invokes `ai-insights` (40 s) and falls back to
+  `rpc('insight_cards')`; `/analytics` ask box, scope chips, mini charts.
+- 01:40 · one model call per scope in an isolate, rules cards for findings the model left out (`e3e5c41`).
+- 01:52 · `ai-insights` deployed, version 1, `verify_jwt = false`, files identical to the branch;
+  `tools/ai-insights-check.ts --deployed` passes; the web panel reads it as руководитель 3001.
+- 02:00 · `docs/phase6-acceptance.md`, two database requests (digest cron, `d_post_ppr` order).
 
 ### 2026-10-08
 

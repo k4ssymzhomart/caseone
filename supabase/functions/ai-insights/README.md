@@ -81,6 +81,8 @@ and `tsconfig.json` are not part of the deploy.
   with a fake fetch: requests, privacy, mixed cards, budget, cache; the digest).
 - `npx tsc --noEmit -p supabase/functions/ai-insights`.
 - `npx tsx tools/insights-fixtures.ts` refreshes `fixtures/` from the live project (read only).
-- Live: `npx tsx tools/ai-insights-check.ts` (see the file header): the deployed function as a signed-in master
-  and manager, 401 and 403, and with `--live` one run of this handler with the local key for 92 days and one for
-  «покажи проблемы участка дробления за месяц», every card checked against the bundle.
+- Live: `npx tsx tools/ai-insights-check.ts` (see the file header): `--patterns` compares the detectors with
+  `tools/seed/PATTERNS.md`; `--deployed` calls the deployed function with the secret key (cards, the question, the
+  cache, a fresh call, 401 without credentials); `--sessions` signs in with the seeded accounts (master and manager
+  200, worker 403, digest 403); `--live` runs this handler with the local key for 92 days and for «покажи проблемы
+  участка дробления за месяц» and checks every card against the bundle. Results: `docs/phase6-acceptance.md`.

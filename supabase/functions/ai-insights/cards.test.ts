@@ -19,6 +19,7 @@ import {
   ungroundedNumbers,
   type AnalyticsBundle,
   type Card,
+  type RefEntry,
 } from './cards.ts';
 import area2 from './fixtures/bundle-30d-area2.json';
 import history from './fixtures/bundle-92d.json';
@@ -46,6 +47,9 @@ const s92 = scopeOf(history);
 const s30 = scopeOf(area2, 'покажи проблемы участка дробления за месяц');
 const rules92 = (history.rules as unknown[]).map(normalizeRuleCard).filter((c): c is Card => !!c);
 const rules30 = (area2.rules as unknown[]).map(normalizeRuleCard).filter((c): c is Card => !!c);
+/** The planted P3 row, wherever the detector sorts it. */
+const kmd2 = (refs: ReadonlyMap<string, RefEntry>): RefEntry | undefined =>
+  [...refs.values()].find((e) => e.kind === 'post_ppr' && e.row.name === 'Дробилка КМД-1750 №2');
 
 const card = (over: Partial<InsightCardAnswer>): InsightCardAnswer => ({
   kind: 'top_equipment',
@@ -91,7 +95,7 @@ describe('the model input', () => {
     });
     expect(refs.has('top_areas.0')).toBe(true);
     expect(refs.has('repeat_faults.8')).toBe(false); // 8 rows at most
-    expect(refs.get('post_ppr.1')?.compact).toMatchObject({
+    expect(kmd2(refs)?.compact).toMatchObject({
       name: 'Дробилка КМД-1750 №2',
       planned: 13,
       followed_count: 8,
@@ -164,7 +168,7 @@ describe('the model answer', () => {
       'Дробилка КМД-1750 №2: после 8 из 13 ППР отказ в течение 5 дней (62%), в остальное время 17%.',
       'В 3,6 раза чаще. ППР делала бригада 3.',
     ].join(' ');
-    expect(ungroundedNumbers(text, [refs92.get('post_ppr.1')!], [])).toEqual([]);
+    expect(ungroundedNumbers(text, [kmd2(refs92)!], [])).toEqual([]);
     expect(
       ungroundedNumbers(
         'Простой 87 ч, в 3 раза больше медианы 7.',
