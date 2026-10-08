@@ -170,6 +170,13 @@ export function Screen({
       ) : (
         inner
       )}
+      {/* Scrolled content must not run under the clock and the island: a canvas strip behind the status bar. */}
+      {insetTop && scroll ? (
+        <View
+          pointerEvents="none"
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top, backgroundColor: theme.color.bgCanvas }}
+        />
+      ) : null}
     </View>
   );
 }

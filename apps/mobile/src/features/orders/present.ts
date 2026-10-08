@@ -61,9 +61,8 @@ export function orderBadge(o: OrderView): { text: string; tone: TagTone } | null
     case 'rework':
       return { text: t('order.badge.rework'), tone: 'critical' };
     case 'ai_review':
-      return o.ai_needs_master_review
-        ? { text: t('order.badge.waitsMaster'), tone: 'warning' }
-        : { text: t('order.badge.aiReview'), tone: 'info' };
+      // The pill already says «Проверка ИИ»; the badge only adds that the master must confirm.
+      return o.ai_needs_master_review || o.ai_verdict ? { text: t('order.badge.waitsMaster'), tone: 'warning' } : null;
     case 'closed':
       return o.final_verdict
         ? { text: `${VERDICT_LABEL[o.final_verdict]} · ${o.final_score ?? ''}`, tone: tagTone(verdictTone(o.final_verdict)) }

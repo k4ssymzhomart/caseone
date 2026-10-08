@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Image, StyleSheet, View, useWindowDimensions } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { t } from '@/lib/i18n';
 import { useTheme, useThemePreference, type ThemePreference } from '@/lib/theme';
@@ -21,7 +20,6 @@ import {
   Counter,
   EmptyState,
   Eyebrow,
-  HudProvider,
   HudToast,
   Keycap,
   Keypad,
@@ -75,14 +73,8 @@ const PIN_CLEAR_MS = 450;
 const LOADING_DEMO_MS = 1500;
 
 export default function KitScreen() {
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
-  // The kit has no tab bar, so it hosts its own HudProvider with toasts near the bottom edge; it shadows the root one.
-  return (
-    <HudProvider bottomOffset={insets.bottom + theme.space[4]}>
-      <KitContent />
-    </HudProvider>
-  );
+  // The root layout hosts the HudProvider (toasts at the top), so the kit uses it directly.
+  return <KitContent />;
 }
 
 function KitContent() {

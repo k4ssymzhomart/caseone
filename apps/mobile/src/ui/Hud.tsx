@@ -38,7 +38,6 @@ import { WindowOverlay } from './WindowOverlay';
 // PHASE_0 §6.9 HudToast: LogoMark 16, auto hide after 2.5 s, 12 above the tab bar.
 const MARK_SIZE = 16;
 const DEFAULT_DURATION_MS = 2500;
-const TAB_BAR_GAP = 12;
 /** When another toast waits, the current one stays at least this long before it yields. */
 const MIN_VISIBLE_MS = 1200;
 /** Waiting toasts beyond this are dropped (oldest first). */
@@ -206,7 +205,9 @@ const HudContext = createContext<HudApi | null>(null);
 export interface HudProviderProps {
   children: ReactNode;
   /** Distance from the bottom edge. Default: safe area bottom + `size.tabBar` + 12. */
-  bottomOffset?: number;
+  /** Distance from the top edge. Default: safe area top + 8. The HUD sits at the top so it never covers
+   *  the sticky footer buttons of pushed screens or the tab bar. */
+  topOffset?: number;
   /** Default time on screen for every toast, 2500 ms. */
   duration?: number;
 }
@@ -223,7 +224,7 @@ function clearTimer(timer: { current: ReturnType<typeof setTimeout> | null }) {
 }
 
 /** Renders the app plus the HUD toast host above the tab bar. Put it inside `ThemeProvider`. */
-export function HudProvider({ children, bottomOffset, duration = DEFAULT_DURATION_MS }: HudProviderProps) {
+export function HudProvider({ children, topOffset, duration = DEFAULT_DURATION_MS }: HudProviderProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
@@ -353,11 +354,11 @@ export function HudProvider({ children, bottomOffset, duration = DEFAULT_DURATIO
     const p = progress.get();
     return {
       opacity: Math.min(1, Math.max(0, p)),
-      transform: reduce ? [] : [{ translateY: (1 - p) * lift }, { scale: FROM_SCALE + (1 - FROM_SCALE) * p }],
+      transform: reduce ? [] : [{ translateY: -(1 - p) * lift }, { scale: FROM_SCALE + (1 - FROM_SCALE) * p }],
     };
   });
 
-  const bottom = bottomOffset ?? insets.bottom + theme.size.tabBar + TAB_BAR_GAP;
+  const top = topOffset ?? insets.top + theme.space[2];
 
   return (
     <HudContext.Provider value={api}>
@@ -373,7 +374,7 @@ export function HudProvider({ children, bottomOffset, duration = DEFAULT_DURATIO
                 position: 'absolute',
                 left: theme.size.gutter,
                 right: theme.size.gutter,
-                bottom: bottom - (theme.size.tapMin - theme.size.hud) / 2,
+                top: top - (theme.size.tapMin - theme.size.hud) / 2,
                 alignItems: 'center',
               }}
             >

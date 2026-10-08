@@ -65,7 +65,7 @@ export const authRu: Record<string, string> = {
   'profile.enable': 'Включить уведомления',
   'profile.openSettings': 'Открыть настройки телефона',
   'profile.telegram': 'Подключить Telegram',
-  'profile.telegramSoon': 'Появится в фазе 3',
+  'profile.telegramSoon': 'Скоро: уведомления в Telegram',
   'profile.theme': 'Тема',
   'profile.theme.dark': 'Тёмная',
   'profile.theme.light': 'Светлая',
