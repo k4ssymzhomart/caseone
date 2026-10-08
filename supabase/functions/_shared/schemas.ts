@@ -106,24 +106,22 @@ export type InsightKind = (typeof INSIGHT_KINDS)[number];
 export const SEVERITY_VALUES = ['info', 'warning', 'critical'] as const;
 export type InsightSeverity = (typeof SEVERITY_VALUES)[number];
 
-export interface InsightStat {
-  key: string;
-  value: number;
-  unit: string;
-}
-
-export interface InsightCard {
+/**
+ * One card as the model writes it. Numbers live in the text only; `refs` names the detector rows the card is built
+ * on («top_equipment.0», the `ref` of each row in the input), and ai-insights fills `evidence` (order ids and the
+ * row's numbers) from those rows, so evidence is never written by the model.
+ */
+export interface InsightCardAnswer {
   kind: InsightKind;
   severity: InsightSeverity;
   title: string;
   body: string;
   recommendation: string;
-  /** stats come as key/value pairs: structured outputs do not allow free-form objects. */
-  evidence: { order_ids: number[]; stats: InsightStat[] };
+  refs: string[];
 }
 
 export interface InsightsAnswer {
-  cards: InsightCard[];
+  cards: InsightCardAnswer[];
 }
 
 export const insightsSchema: JsonSchema = obj({
@@ -134,20 +132,10 @@ export const insightsSchema: JsonSchema = obj({
       title: str(),
       body: str(),
       recommendation: str(),
-      evidence: obj({
-        order_ids: arr(int(), 'id нарядов только из входных данных'),
-        stats: arr(obj({ key: str(), value: num(), unit: str() })),
-      }),
+      refs: arr(str(), 'ref строк детекторов из входных данных, на которых построена карточка'),
     }),
   ),
 });
-
-/** Converts the stats pairs of a card into the `evidence.stats` record that ai_insights stores. */
-export function statsToRecord(stats: readonly InsightStat[]): Record<string, number> {
-  const out: Record<string, number> = {};
-  for (const s of stats) out[s.key] = s.value;
-  return out;
-}
 
 // ---------------------------------------------------------------------------
 // shift summary, rating explanation, query parsing, smoke

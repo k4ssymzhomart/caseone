@@ -23,7 +23,7 @@
     "build:web": "npm run build --workspace apps/web --if-present",
     "tokens": "node packages/design/scripts/build-tokens.mjs",
     "assets": "tsx tools/gen-assets.ts",
-    "typecheck": "npm run typecheck --workspaces --if-present && tsc --noEmit -p tools && (test ! -f supabase/functions/_shared/tsconfig.json || tsc --noEmit -p supabase/functions/_shared) && (test ! -f supabase/functions/ai-verify/tsconfig.json || tsc --noEmit -p supabase/functions/ai-verify)",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc --noEmit -p tools && (test ! -f supabase/functions/_shared/tsconfig.json || tsc --noEmit -p supabase/functions/_shared) && (test ! -f supabase/functions/ai-verify/tsconfig.json || tsc --noEmit -p supabase/functions/ai-verify) && (test ! -f supabase/functions/ai-insights/tsconfig.json || tsc --noEmit -p supabase/functions/ai-insights)",
     "test": "vitest run",
     "check": "npm run tokens && test -z \"$(git status --porcelain -- packages/design/src/generated packages/design/web)\" && npm run typecheck && npm test && npm run build:web",
     "llm:smoke": "tsx tools/llm-smoke.ts",

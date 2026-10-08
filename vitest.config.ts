@@ -8,6 +8,7 @@ const projects = [
   'packages/design',
   'supabase/functions/_shared',
   'supabase/functions/ai-verify',
+  'supabase/functions/ai-insights',
   'apps/mobile',
 ].filter((dir) => existsSync(dir));
 
