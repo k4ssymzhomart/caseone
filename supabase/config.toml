@@ -433,3 +433,7 @@ verify_jwt = false
 # §14: called by the web panel for the shift report; shift_report runs with the caller's token (staff only).
 [functions.ai-shift-summary]
 verify_jwt = true
+
+# §13: the rating explanation for the worker (own rating) and staff; checks the caller with auth.getUser.
+[functions.ai-explain-rating]
+verify_jwt = true
