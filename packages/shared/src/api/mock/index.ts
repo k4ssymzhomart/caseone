@@ -1,1 +1,2 @@
-export { MockApi } from './MockApi';
+export { MockApi, type InjectErrorOptions } from './MockApi';
+export { MOCK_MODEL } from './ai';

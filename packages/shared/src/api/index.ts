@@ -4,7 +4,7 @@ import { createSupabaseApi } from './supabase';
 
 export * from './errors';
 export * from './RotaApi';
-export { MockApi } from './mock';
+export { MockApi, MOCK_MODEL, type InjectErrorOptions } from './mock';
 
 /** 'mock' → MockApi on this device; 'supabase' → SupabaseApi over the injected client. */
 export function createApi(options: CreateApiOptions): RotaApi {
