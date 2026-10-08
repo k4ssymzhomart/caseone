@@ -42,6 +42,14 @@ export const mobileRu = {
   'common.addPhoto': 'Добавить фото',
   'common.ai': 'ИИ',
 
+  'tabs.orders': 'Наряды',
+  'tabs.closed': 'Закрытые',
+  'tabs.profile': 'Профиль',
+  'tabs.shift': 'Смена',
+  'tabs.board': 'Доска',
+  'tabs.issue': 'Выдать',
+  'tabs.summary': 'Сводка',
+
   'notif.channel.orders': 'Наряды',
   'notif.channel.emergency': 'Аварийные наряды',
   'notif.channel.reminders': 'Напоминания и просрочки',
