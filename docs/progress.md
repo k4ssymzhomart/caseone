@@ -4,17 +4,17 @@ Phase briefs: `docs/PHASE_N.md`. Build order: CLAUDE.md §21. Times are Asia/Qos
 
 ## Status
 
-As of 2026-10-09, 02:00.
+As of 2026-10-09, 02:45.
 
 | Phase | Status | Done | Open |
 | --- | --- | --- | --- |
 | P0 Foundation | done | Monorepo, `@rota/design`, `@rota/shared` with `MockApi`, every mobile screen, the web panel, Supabase skeleton, LLM client and privacy gateway, `llm:smoke --vision`, README, decisions, screenshots | Real FCM push on Android needs Firebase (`google-services.json` + the FCM V1 key in EAS) |
 | P1 Data core | done | Database by the architect, seeds loaded (559 orders), `SupabaseApi`, types, parity tests, `tools/db-check.ts` passes | `RUN_SUPABASE=1` contract suite waits for the `demo_reset` fix; migration history repair only with the owner's yes |
-| P2 Live loop | done, walkthrough repeat open | Both apps in Supabase mode; live loop on two simulators against the real database (issue → red screen in under 3 s → accept, start, close with photo → AI check → master close); photo pipeline to Storage; web panel on real data | The §7 walkthrough twice with «Сбросить демо» between runs (needs `docs/db-fixes/demo_reset_where_true.sql`) |
-| P3 Notifications | partly done | `notify-dispatch`, `telegram-webhook` (architect); channels, categories, sounds, siren screen, in-app toasts with the body; simulated APNs push opens the red screen; «Подключить Telegram» in the profile; `tools/gen-edge-env.ts`, `tools/telegram-setup.ts` | Edge secrets on the project, then `setWebhook`; Firebase for Android push; locked phone acceptance on a real phone |
-| P4 AI control | done | `ai-verify` v4 deployed (rules in SQL, one Sonnet call, rules only fallback, auth, idempotent); golden set **10 из 10** live (`docs/golden-results.md`, 0.16 USD); `ai.verify` calls the function with the rules as fallback; escalation link opens the reassign sheet | Edge secrets switch the deployed function from mock to Sonnet |
-| P5 Reports and rating | done | `ai-shift-summary` (Sonnet) and `ai-explain-rating` (Haiku) deployed; PDF and Excel export; Сериков last on first time fix (64.7% vs team 91.3%, 92 days); `shift_report` equals the manual SQL count in five windows (`docs/phase5-acceptance.md`) | `shift_report` workload fix for paused orders (`docs/db-requests.md`) |
-| P6 Analytics | done | `ai-insights` deployed: Haiku reads the question, Sonnet writes cards, numbers checked against the data, rules fallback, cache, digest path; ask box, scope chips, mini charts; P1 to P6 within ±20% (`docs/phase6-acceptance.md`) | Monday digest cron and the `d_post_ppr` order (`docs/db-requests.md`) |
+| P2 Live loop | done, walkthrough repeat open | Both apps in Supabase mode; live loop on two simulators against the real database (issue → red screen in under 3 s → accept, start, close with photo → AI check → master close); photo pipeline to Storage; web panel on real data | The §7 walkthrough twice with «Сбросить демо» between runs (the reset now works: `RUN_SUPABASE=1` contract suite 7 of 7) |
+| P3 Notifications | done except Android push | `notify-dispatch`, `telegram-webhook` (architect); channels, categories, sounds, siren screen, in-app toasts with the body; simulated APNs push opens the red screen; «Подключить Telegram» in the profile; Edge secrets set; Telegram `setWebhook` to `telegram-webhook` (bot @rota_case1_bot, no errors) | Firebase for Android push (`google-services.json`, FCM V1 key in EAS); locked phone acceptance on a real phone |
+| P4 AI control | done, live on Sonnet 5.5 | `ai-verify` v4 deployed (rules in SQL, one Sonnet call, rules only fallback, auth, idempotent); golden set **10 из 10** live (`docs/golden-results.md`, 0.16 USD); `ai.verify` calls the function with the rules as fallback; escalation link opens the reassign sheet | none |
+| P5 Reports and rating | done | `ai-shift-summary` (Sonnet) and `ai-explain-rating` (Haiku) deployed; PDF and Excel export; Сериков last on first time fix (64.7% vs team 91.3%, 92 days); `shift_report` equals the manual SQL count in five windows (`docs/phase5-acceptance.md`) | none (workload fix applied 2026-10-09) |
+| P6 Analytics | done | `ai-insights` deployed: Haiku reads the question, Sonnet writes cards, numbers checked against the data, rules fallback, cache, digest path; ask box, scope chips, mini charts; P1 to P6 within ±20% (`docs/phase6-acceptance.md`) | none (digest cron and `d_post_ppr` order applied 2026-10-09) |
 | P7 Demo hardening | in progress | Landing at `/` (`docs/LANDING.md`); Android APK built on EAS (preview profile); presentation screenshots in `docs/screenshots/presentation/`; `docs/architecture.md` | The script three times on real phones, dataset export, slides, video, VM deploy (`docs/DEPLOY_VM.md`) |
 
 ## Live project
@@ -22,8 +22,10 @@ As of 2026-10-09, 02:00.
 Checked 2026-10-09, 01:50, project «rota» `wcjklkpkuhxgfdtbwbuk`.
 
 - `npx tsx tools/db-check.ts`: areas 4, equipment 25, employees 19, orders 559 plus test orders, 7 insight cards for 92 days.
-- Edge Functions: `notify-dispatch`, `telegram-webhook` (architect), `ai-verify` v4, `ai-shift-summary`, `ai-explain-rating`, `ai-insights`. No LLM secrets yet: every AI function answers with the mock provider or the rules.
-- Not applied yet (the owner pastes them in the SQL Editor): `docs/db-fixes/demo_reset_where_true.sql`, and the 2026-10-09 entries of `docs/db-requests.md`.
+- Edge Functions: `notify-dispatch`, `telegram-webhook` (architect), `ai-verify` v4, `ai-shift-summary`, `ai-explain-rating`, `ai-insights`. Edge secrets set 2026-10-09: the AI functions call Claude (`llm_audit` after the checks: claude-sonnet-5-5 verify and insights, claude-haiku-5-5 parse_query, no mock).
+- `docs/db-fixes/2026-10-09_apply_all.sql` applied by the owner (demo_reset, shift_report, d_post_ppr, weekly digest cron).
+- `RUN_SUPABASE=1` contract suite: 7 of 7 against the live project (each scenario starts with `demo.reset()`).
+- `npm run ai-verify:check`: Sonnet 5.5 judged the after photo, 200 in 9 s, idempotent, 401/403 as expected. `tools/ai-insights-check.ts --deployed`: 8 model cards for 92 days, the demo question parsed by Haiku as участок дробления, 30 days; the К-3 card has 7 stops, 5 of them М-02.
 - LLM ledger: about 0.42 USD of the 4 USD cap.
 - APK (EAS preview, 2026-10-09): https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk
 
@@ -97,3 +99,4 @@ screenshots (lane A); live sync wiring and the Phase 2 audit fixes, Telegram lin
 - Phase 4 finished: prompt p0.2 and code consistency cleanup, golden 10 из 10 live, `ai-verify` v4 deployed and checked.
 - Phase 5 and Phase 6 built in worktrees, deployed, accepted, merged. Landing merged.
 - EAS project linked (`de6b8e43-…`), preview APK built in the cloud.
+- 02:30. Owner applied the SQL bundle and set the Edge secrets. Telegram webhook set; live checks pass on the real models; contract suite 7 of 7.
