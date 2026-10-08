@@ -21,6 +21,8 @@
     "android": "npm run android --workspace apps/mobile",
     "dev:web": "npm run dev --workspace apps/web",
     "build:web": "npm run build --workspace apps/web --if-present",
+    "landing:assets": "node apps/web/scripts/landing-shots.mjs",
+    "landing:screens": "node apps/web/scripts/landing-screens.mjs",
     "tokens": "node packages/design/scripts/build-tokens.mjs",
     "assets": "tsx tools/gen-assets.ts",
     "typecheck": "npm run typecheck --workspaces --if-present && tsc --noEmit -p tools && (test ! -f supabase/functions/_shared/tsconfig.json || tsc --noEmit -p supabase/functions/_shared) && (test ! -f supabase/functions/ai-verify/tsconfig.json || tsc --noEmit -p supabase/functions/ai-verify)",
