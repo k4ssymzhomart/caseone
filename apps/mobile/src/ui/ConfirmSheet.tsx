@@ -1,6 +1,15 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { primitives, withAlpha } from '@rota/design';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { t } from '@/lib/i18n';
@@ -8,6 +17,7 @@ import { useTheme } from '@/lib/theme';
 
 import { Button } from './Button';
 import { T } from './T';
+import { WindowOverlay } from './WindowOverlay';
 
 export interface ConfirmOptions {
   title: string;
@@ -48,6 +58,74 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => confirm, [confirm]);
 
+  const scrim = { backgroundColor: withAlpha(primitives.black, SCRIM_ALPHA[theme.mode]) };
+  const backdrop = (
+    <Pressable
+      style={styles.backdrop}
+      onPress={() => finish(false)}
+      accessibilityRole="button"
+      accessibilityLabel={current?.cancelLabel ?? t('common.cancel')}
+    />
+  );
+  const sheetStyle = [
+    styles.sheet,
+    {
+      backgroundColor: theme.color.bgElevated,
+      borderTopLeftRadius: theme.radius.lg,
+      borderTopRightRadius: theme.radius.lg,
+      paddingHorizontal: theme.space[4],
+      paddingTop: theme.space[6],
+      paddingBottom: insets.bottom + theme.space[4],
+      gap: theme.space[2],
+    },
+  ];
+  const body = current ? (
+    <>
+      <T variant="title2">{current.title}</T>
+      {current.message ? (
+        <T variant="body" tone="secondary">
+          {current.message}
+        </T>
+      ) : null}
+      <View style={{ height: theme.space[4] }} />
+      <Button
+        label={current.confirmLabel}
+        variant={current.destructive ? 'danger' : 'primary'}
+        size="L"
+        full
+        onPress={() => finish(true)}
+      />
+      <Button
+        label={current.cancelLabel ?? t('common.cancel')}
+        variant="secondary"
+        size="L"
+        full
+        onPress={() => finish(false)}
+      />
+    </>
+  ) : null;
+
+  // iOS: a root Modal cannot present while a native modal or form sheet is up (create, emergency, reason,
+  // worker sheet), so the sheet draws into the window above every screen instead. Android keeps the Modal,
+  // which also handles the hardware back button.
+  if (Platform.OS === 'ios') {
+    return (
+      <ConfirmContext.Provider value={value}>
+        {children}
+        {current ? (
+          <WindowOverlay modal>
+            <Animated.View entering={FadeIn.duration(160)} style={[StyleSheet.absoluteFill, scrim]}>
+              {backdrop}
+            </Animated.View>
+            <Animated.View entering={SlideInDown.duration(260)} style={sheetStyle}>
+              {body}
+            </Animated.View>
+          </WindowOverlay>
+        ) : null}
+      </ConfirmContext.Provider>
+    );
+  }
+
   return (
     <ConfirmContext.Provider value={value}>
       {children}
@@ -59,52 +137,8 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
         navigationBarTranslucent
         onRequestClose={() => finish(false)}
       >
-        <Pressable
-          style={[styles.backdrop, { backgroundColor: withAlpha(primitives.black, SCRIM_ALPHA[theme.mode]) }]}
-          onPress={() => finish(false)}
-          accessibilityRole="button"
-          accessibilityLabel={current?.cancelLabel ?? t('common.cancel')}
-        />
-        <View
-          style={[
-            styles.sheet,
-            {
-              backgroundColor: theme.color.bgElevated,
-              borderTopLeftRadius: theme.radius.lg,
-              borderTopRightRadius: theme.radius.lg,
-              paddingHorizontal: theme.space[4],
-              paddingTop: theme.space[6],
-              paddingBottom: insets.bottom + theme.space[4],
-              gap: theme.space[2],
-            },
-          ]}
-        >
-          {current ? (
-            <>
-              <T variant="title2">{current.title}</T>
-              {current.message ? (
-                <T variant="body" tone="secondary">
-                  {current.message}
-                </T>
-              ) : null}
-              <View style={{ height: theme.space[4] }} />
-              <Button
-                label={current.confirmLabel}
-                variant={current.destructive ? 'danger' : 'primary'}
-                size="L"
-                full
-                onPress={() => finish(true)}
-              />
-              <Button
-                label={current.cancelLabel ?? t('common.cancel')}
-                variant="secondary"
-                size="L"
-                full
-                onPress={() => finish(false)}
-              />
-            </>
-          ) : null}
-        </View>
+        <View style={[styles.backdrop, scrim]}>{backdrop}</View>
+        <View style={sheetStyle}>{body}</View>
       </Modal>
     </ConfirmContext.Provider>
   );

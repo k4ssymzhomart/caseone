@@ -6,14 +6,19 @@ import { haptic } from './haptics';
 
 let player: AudioPlayer | null = null;
 let timer: ReturnType<typeof setInterval> | null = null;
+// Bumped by every start and stop: a start whose audio mode await outlives a later stop (or start) gives up,
+// so a stop that lands while the siren is still arming is never lost.
+let generation = 0;
 
 export async function startSiren(): Promise<void> {
   stopSiren();
+  const mine = generation;
   try {
     await setAudioModeAsync({ playsInSilentMode: true, interruptionMode: 'doNotMix' });
   } catch {
     // audio mode is best effort
   }
+  if (mine !== generation) return;
   try {
     player = createAudioPlayer(require('../../assets/sounds/siren.wav'));
     player.loop = true;
@@ -27,6 +32,7 @@ export async function startSiren(): Promise<void> {
 }
 
 export function stopSiren(): void {
+  generation += 1;
   if (timer) clearInterval(timer);
   timer = null;
   if (player) {

@@ -16,11 +16,18 @@ import { configureNotifications, orderIdOf, urlOf } from '@/lib/notifications';
 import { playDing } from '@/lib/siren';
 import { useHud } from '@/ui/Hud';
 
+import { emergencyIdOf, openEmergency } from './emergencyGate';
+
 const handledResponses = new Set<string>();
 
 export function openUrl(url: string | null | undefined): void {
   if (!url) return;
   // Notification URLs are mobile routes: /order/{id}, /order/{id}/review, /emergency/{id}, /order/{id}?reassign=…
+  const emergency = emergencyIdOf(url);
+  if (emergency) {
+    openEmergency(emergency);
+    return;
+  }
   router.push(url as Href);
 }
 
@@ -45,7 +52,7 @@ export function NotificationBridge() {
       if (n.recipient_id !== uid) return;
       if (n.kind === 'emergency' && n.order_id && role === 'worker') {
         lastEmergency.current = n.order_id;
-        router.push(`/emergency/${n.order_id}` as Href);
+        openEmergency(n.order_id);
         return;
       }
       playDing();
@@ -91,7 +98,7 @@ export function NotificationBridge() {
         const pending = list.find((o) => o.priority === 'emergency');
         if (pending && lastEmergency.current !== pending.id) {
           lastEmergency.current = pending.id;
-          router.push(`/emergency/${pending.id}` as Href);
+          openEmergency(pending.id);
         }
       } catch {
         // offline: the next foreground tries again

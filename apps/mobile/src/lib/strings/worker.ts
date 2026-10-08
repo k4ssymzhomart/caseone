@@ -1,2 +1,26 @@
 // Strings for the worker screens. Russian, sentence case, short, no hyphens or dashes (PHASE_0 §6.12).
-export const workerRu: Record<string, string> = {};
+export const workerRu: Record<string, string> = {
+  'worker.home.title': 'Мои наряды',
+  'worker.home.eyebrow': 'Смена · {shift} · с {from} до {to}',
+  'worker.shift.day': 'день',
+  'worker.shift.night': 'ночь',
+  'worker.home.onShift': 'На смене',
+  'worker.home.onShiftHud': 'Вы на смене',
+  'worker.home.offShiftHud': 'Вы не на смене',
+  'worker.home.section.emergency': 'Аварийные',
+  'worker.home.section.active': 'В работе',
+  'worker.home.section.queue': 'Очередь',
+  'worker.home.empty.title': 'Пока нарядов нет',
+  'worker.home.empty.body': 'Новый наряд придёт со звуком',
+  'worker.home.off.title': 'Вы не на смене',
+  'worker.home.off.body': 'Включите «На смене», чтобы получать наряды',
+  'worker.home.error': 'Не удалось загрузить наряды',
+
+  'worker.closed.title': 'Закрытые',
+  'worker.closed.eyebrow': 'За 30 дней',
+  'worker.closed.count': 'Закрыто',
+  'worker.closed.avg': 'Средняя оценка',
+  'worker.closed.empty.title': 'Закрытых нарядов пока нет',
+  'worker.closed.empty.body': 'Здесь появятся наряды с оценкой ИИ и мастера',
+  'worker.closed.error': 'Не удалось загрузить закрытые наряды',
+};

@@ -1,10 +1,8 @@
 // Mobile app chrome strings that are not part of the shared domain dictionary.
-// Domain strings (statuses, reasons, errors, templates) come from @rota/shared `ru.ts`.
+// Domain strings (statuses, reasons, errors, templates) and common.* basics come from @rota/shared `ru.ts`,
+// which t() checks first: never repeat a shared key here.
 // No hyphens or dashes in copy; sentence case; short (PHASE_0 §6.12).
 export const mobileRu = {
-  'app.name': 'Rota',
-  'app.slogan': 'Наряд выдан, ИИ на контроле',
-
   'kit.title': 'Кит',
   'kit.eyebrow': 'ROTA INDUSTRIAL',
   'kit.theme': 'Тема',
@@ -30,14 +28,8 @@ export const mobileRu = {
 
   'common.next': 'Далее',
   'common.erase': 'Стереть',
-  'common.cancel': 'Отмена',
-  'common.confirm': 'Подтвердить',
   'common.close': 'Закрыть',
-  'common.back': 'Назад',
-  'common.save': 'Сохранить',
   'common.later': 'Позже',
-  'common.loading': 'Загрузка',
-  'common.retry': 'Повторить',
   'common.takePhoto': 'Снять фото',
   'common.addPhoto': 'Добавить фото',
   'common.ai': 'ИИ',

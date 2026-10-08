@@ -33,6 +33,7 @@ import { useTheme } from '@/lib/theme';
 import { LogoMark } from './LogoMark';
 import { PressableScale } from './PressableScale';
 import { T } from './T';
+import { WindowOverlay } from './WindowOverlay';
 
 // PHASE_0 §6.9 HudToast: LogoMark 16, auto hide after 2.5 s, 12 above the tab bar.
 const MARK_SIZE = 16;
@@ -362,28 +363,36 @@ export function HudProvider({ children, bottomOffset, duration = DEFAULT_DURATIO
     <HudContext.Provider value={api}>
       <View style={{ flex: 1 }}>
         {children}
-        <View
-          pointerEvents="box-none"
-          style={{
-            position: 'absolute',
-            left: theme.size.gutter,
-            right: theme.size.gutter,
-            bottom: bottom - (theme.size.tapMin - theme.size.hud) / 2,
-            alignItems: 'center',
-          }}
-        >
-          {current ? (
-            <Animated.View key={current.key} style={[{ maxWidth: '100%' }, animated]} pointerEvents="box-none">
-              <HudToast
-                message={current.message}
-                monoPrefix={current.monoPrefix}
-                actionLabel={current.actionLabel}
-                tone={current.tone}
-                onAction={current.onAction ? () => machine.act(current) : undefined}
-              />
-            </Animated.View>
-          ) : null}
-        </View>
+        {/* Mounted per toast: on iOS the overlay joins the window when it mounts, so it lands above any
+            native modal or sheet presented since (WindowOverlay). */}
+        {current ? (
+          <WindowOverlay>
+            <View
+              pointerEvents="box-none"
+              style={{
+                position: 'absolute',
+                left: theme.size.gutter,
+                right: theme.size.gutter,
+                bottom: bottom - (theme.size.tapMin - theme.size.hud) / 2,
+                alignItems: 'center',
+              }}
+            >
+              <Animated.View
+                key={current.key}
+                style={[{ maxWidth: '100%' }, animated]}
+                pointerEvents="box-none"
+              >
+                <HudToast
+                  message={current.message}
+                  monoPrefix={current.monoPrefix}
+                  actionLabel={current.actionLabel}
+                  tone={current.tone}
+                  onAction={current.onAction ? () => machine.act(current) : undefined}
+                />
+              </Animated.View>
+            </View>
+          </WindowOverlay>
+        ) : null}
       </View>
     </HudContext.Provider>
   );
