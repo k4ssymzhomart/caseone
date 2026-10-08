@@ -1,18 +1,13 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { RouterProvider } from 'react-router/dom';
-import { AppProviders } from '@/components/AppProviders';
-import { router } from './router';
-import { installThemeVars } from './styles/themeVars';
+// Two entry points in one app. A signed out visitor at `/` gets the landing page alone (React and the page, no API
+// client, no router); everything else boots the panel, whose router also shows the landing at `/` when the stored
+// session turns out to be gone, and sends signed in staff to their home page.
 import './styles/global.css';
-import './lib/theme';
+import { isLandingVisit } from './lib/sessionHint';
 
-installThemeVars();
+const root = document.getElementById('root')!;
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <AppProviders>
-      <RouterProvider router={router} />
-    </AppProviders>
-  </StrictMode>,
-);
+if (isLandingVisit()) {
+  void import('./landing/mount').then((m) => m.mountLanding(root));
+} else {
+  void import('./panel').then((m) => m.mountPanel(root));
+}

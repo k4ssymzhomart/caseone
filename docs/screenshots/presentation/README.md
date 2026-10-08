@@ -38,6 +38,7 @@ Real data: Supabase project «rota» with 3 months of history (559 orders). Rele
 
 | File | What it shows |
 | --- | --- |
+| `w00-landing.png` | Лендинг на `/`, вся страница 1440 px (`npm run landing:screens`) |
 | `w01-login.png` | Вход в веб панель |
 | `w02-shift.png` | Смена: исполнители по статусу и живые наряды |
 | `w03-board.png` | Доска нарядов, шесть колонок |

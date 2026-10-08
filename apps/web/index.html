@@ -3,20 +3,47 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rota</title>
-    <meta name="description" content="Rota: наряды с контролем ИИ. Панель мастера, руководителя и администратора." />
+    <title>Наряд выдан, ИИ на контроле · Rota</title>
+    <meta
+      name="description"
+      content="Мобильное приложение и веб панель для выдачи и контроля нарядов: ИИ следит за сроками, проверяет работу по фото и находит проблемное оборудование. Кейс «НарядAI», Qostanai Industry Hackathon 2026."
+    />
     <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#000000" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:site_name" content="Rota" />
+    <meta property="og:title" content="Rota · наряд выдан, ИИ на контроле" />
+    <meta
+      property="og:description"
+      content="Выдача нарядов с телефона, контроль сроков, проверка работы по фото и аналитика оборудования. Кейс «НарядAI», Qostanai Industry Hackathon 2026."
+    />
+    <meta property="og:image" content="/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Rota: наряд выдан, ИИ на контроле" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Rota · наряд выдан, ИИ на контроле" />
+    <meta
+      name="twitter:description"
+      content="Выдача нарядов с телефона, контроль сроков, проверка работы по фото и аналитика оборудования."
+    />
+    <meta name="twitter:image" content="/og.jpg" />
     <script>
-      // Apply the saved theme before the first paint (dark by default). Storage may be blocked: ignore it then.
+      // Apply the saved panel theme before the first paint (dark by default). The landing at `/` is always dark.
+      // Storage may be blocked: ignore it then.
       try {
         var saved = window.localStorage.getItem('rota.web.theme');
-        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+        if (location.pathname !== '/' && (saved === 'light' || saved === 'dark')) {
+          document.documentElement.dataset.theme = saved;
+        }
       } catch (e) {}
     </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>Rota: наряд выдан, ИИ на контроле. Для работы страницы включите JavaScript.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

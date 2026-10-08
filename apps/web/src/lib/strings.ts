@@ -27,6 +27,7 @@ export const webRu = {
 
   // page titles (document title and page header)
   'page.login': 'Вход',
+  'page.landing': 'Наряд выдан, ИИ на контроле',
   'page.shift': 'Смена',
   'page.board': 'Доска нарядов',
   'page.order': 'Наряд №{number}',

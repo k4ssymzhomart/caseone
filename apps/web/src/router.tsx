@@ -3,7 +3,7 @@
 // lib/routes.ts if it belongs in the sidebar.
 import type { ComponentType } from 'react';
 import { createBrowserRouter, type RouteObject } from 'react-router';
-import { AppShell, HomeRedirect, RequireSession, RootLayout } from '@/components/layout';
+import { AppShell, HomeRoute, RequireSession, RootLayout } from '@/components/layout';
 import { Loading } from '@/components/ui';
 import type { RouteHandle } from '@/lib/filters';
 import { ADMIN, DEMO_ROLES, STAFF, type PanelRole } from '@/lib/routes';
@@ -49,7 +49,7 @@ const routes: RouteObject[] = [
         handle: { title: 'page.kit' } satisfies RouteHandle,
         lazy: async () => ({ Component: (await import('@/pages/Kit')).Kit }),
       },
-      { path: '/', element: <HomeRedirect /> },
+      { path: '/', handle: { title: 'page.landing' } satisfies RouteHandle, element: <HomeRoute /> },
       {
         element: (
           <RequireSession>

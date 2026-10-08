@@ -1,0 +1,187 @@
+.head {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 32px;
+}
+
+.head::before {
+  content: '';
+  position: absolute;
+  top: -120px;
+  right: -160px;
+  width: 640px;
+  height: 520px;
+  background: radial-gradient(closest-side, rgb(255 59 48 / 0.28), transparent);
+  pointer-events: none;
+}
+
+.mascot {
+  position: relative;
+}
+
+.caption {
+  margin: 20px 0 0;
+  color: var(--l-text-3);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 56px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  padding: 24px 24px 26px;
+}
+
+.value {
+  color: var(--l-eyebrow);
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.title {
+  margin: 22px 0 0;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.text {
+  margin: 8px 0 0;
+  color: var(--l-text-2);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.found {
+  margin-top: 16px;
+  padding: 24px 28px;
+  border-color: rgb(255 59 48 / 0.32);
+  background: linear-gradient(90deg, rgb(255 59 48 / 0.12), rgb(255 255 255 / 0.04));
+}
+
+.foundLabel {
+  margin: 0;
+  color: var(--l-eyebrow);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.foundText {
+  margin: 10px 0 0;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.rating {
+  margin-top: 16px;
+  padding: 22px 28px;
+}
+
+.ratingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 32px;
+  margin-top: 12px;
+}
+
+.weights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.weights li + li::before {
+  content: '·';
+  margin: 0 12px;
+  color: var(--l-text-3);
+}
+
+.ratingNote {
+  margin: 0;
+  color: var(--l-text-2);
+  font-size: 15px;
+}
+
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .head {
+    gap: 0;
+  }
+
+  .mascot {
+    order: -1;
+    justify-self: end;
+    width: 110px;
+    height: 110px;
+    margin-bottom: -12px;
+  }
+
+  .head::before {
+    right: -240px;
+  }
+
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .card {
+    min-height: 0;
+  }
+
+  .value {
+    font-size: 38px;
+  }
+
+  .found,
+  .rating {
+    padding: 20px;
+  }
+
+  .foundText {
+    font-size: 16px;
+  }
+
+  .weights {
+    display: grid;
+    gap: 6px;
+    font-size: 16px;
+  }
+
+  .weights li + li::before {
+    content: none;
+  }
+}

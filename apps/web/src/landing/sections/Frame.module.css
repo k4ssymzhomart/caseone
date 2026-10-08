@@ -1,0 +1,67 @@
+/* The framed stage of the Rota references (rota-04, rota-05): radius 32, red to black, a hairline border. Used by
+   chapters 05 and 06. */
+
+.frameWrap {
+  position: relative;
+}
+
+.frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 32px;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgb(255 59 48 / 0.5), rgb(143 10 5 / 0.32) 38%, transparent 72%),
+    linear-gradient(160deg, #1a0503, #050505 70%);
+  box-shadow: 0 40px 100px rgb(0 0 0 / 0.5);
+}
+
+/* 05 · two phones, cropped by the bottom edge, the mascot peeking over it */
+
+.phones {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  height: 540px;
+  padding-top: 48px;
+}
+
+.lower {
+  margin-top: 40px;
+}
+
+.peek {
+  position: absolute;
+  bottom: -54px;
+  left: 50%;
+  z-index: 3;
+  transform: translateX(-50%);
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .phones > figure {
+    --pw: 190px !important;
+  }
+
+  .phones {
+    height: 470px;
+  }
+}
+
+@media (max-width: 767px) {
+  .phones {
+    gap: 14px;
+    height: 380px;
+    padding-top: 32px;
+  }
+
+  .lower {
+    margin-top: 28px;
+  }
+
+  .peek {
+    bottom: -40px;
+    width: 130px;
+    height: 130px;
+  }
+}

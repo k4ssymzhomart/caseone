@@ -1,6 +1,6 @@
 // Route guard by role (CLAUDE.md §18). No session → /login?next=…; a worker → /login?blocked=worker, where the login
 // page signs them out with «Исполнители работают в мобильном приложении»; a role not allowed here → that role's home.
-import type { ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import { useSession, useSessionReady } from '@/lib/api';
 import { homeFor, paths, type PanelRole } from '@/lib/routes';
@@ -42,12 +42,25 @@ export function RequireSession({ roles, children }: Props) {
   return <>{children}</>;
 }
 
-/** `/`: the home page of the signed in role. */
-export function HomeRedirect() {
+const Landing = lazy(() => import('@/landing/Landing'));
+
+/** `/`: signed in staff go to their role's home page; everyone else (signed out, a worker) sees the landing. */
+export function HomeRoute() {
+  const ready = useSessionReady();
   const session = useSession();
+  if (!ready) {
+    return (
+      <div className={styles.splash}>
+        <Loading />
+      </div>
+    );
+  }
+  if (session && session.role !== 'worker') {
+    return <Navigate to={homeFor(session.role)} replace />;
+  }
   return (
-    <RequireSession>
-      <Navigate to={session ? homeFor(session.role) : paths.login} replace />
-    </RequireSession>
+    <Suspense fallback={<div className={styles.splash} />}>
+      <Landing />
+    </Suspense>
   );
 }
