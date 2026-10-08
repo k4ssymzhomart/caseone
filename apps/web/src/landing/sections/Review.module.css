@@ -252,8 +252,10 @@
   }
 
   .run {
+    flex: 1 1 100%;
     flex-wrap: wrap;
     justify-content: center;
+    min-width: 0;
     padding: 0;
   }
 
