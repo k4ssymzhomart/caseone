@@ -21,6 +21,12 @@ export interface ContractOptions {
   timeoutMs?: number;
   /** How long realtime may take to deliver an event (default 5000, the case's limit). */
   realtimeMs?: number;
+  /**
+   * Up to how long to wait after realtime.subscribe() for the channel to join (its refresh event without a row)
+   * before the change is made; default 0. postgres_changes are not replayed to a late joiner: the apps cover
+   * that gap with the resync on SUBSCRIBED, the scenario waits instead.
+   */
+  realtimeWarmupMs?: number;
 }
 
 /** The demo pump of the script (step 2) and the К-2 conveyor of step 7. */
@@ -78,6 +84,7 @@ export function runContract(
   const uuid = options.uuid;
   const timeout = options.timeoutMs ?? 30_000;
   const realtimeMs = options.realtimeMs ?? 5000;
+  const realtimeWarmupMs = options.realtimeWarmupMs ?? 0;
 
   const signInMaster = (api: RotaApi) => api.auth.signIn('1001', '1111');
   /** As master Жумабаев: «Сбросить демо», then the workers by tab number. */
@@ -404,11 +411,15 @@ export function runContract(
         const api = await makeApi();
         const workers = await start(api);
         const seen: number[] = [];
+        let joined = false;
         const off = api.realtime.subscribe('orders', (e) => {
           const row = e.row as { id?: number } | undefined;
           if (row?.id != null) seen.push(row.id);
+          // a refresh without a row: the channel (re)joined
+          else joined = true;
         });
         try {
+          if (realtimeWarmupMs > 0) await waitFor(() => joined, realtimeWarmupMs);
           const created = await api.orders.create(
             {
               type: 'planned',

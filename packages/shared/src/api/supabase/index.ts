@@ -1,9 +1,12 @@
-// SupabaseApi lands in Phase 1 (docs/PHASE_1.md §5): the same RotaApi over PostgREST RPCs, views,
-// Storage and Realtime, with the client injected by the app. Until then createApi('supabase') throws.
+// SupabaseApi (PHASE_1 §5): the same RotaApi over PostgREST views and RPCs, Storage and Realtime, with the client
+// created and owned by the app (PHASE_1 §4). createApi({ mode: 'supabase', client, storage, uuid }) builds it.
 
-import { RotaError } from '../errors';
 import type { CreateApiOptions, RotaApi } from '../RotaApi';
+import { SupabaseApi } from './SupabaseApi';
 
-export function createSupabaseApi(_options: CreateApiOptions): RotaApi {
-  throw new RotaError('UNKNOWN', { message: 'SupabaseApi not built yet' });
+export { SupabaseApi, downtimeMinutes, foldSettings, validateSettingsPatch } from './SupabaseApi';
+export { fromAuth, fromPostgrest, fromStorage, fromThrown } from './errors';
+
+export function createSupabaseApi(options: CreateApiOptions): RotaApi {
+  return new SupabaseApi(options);
 }

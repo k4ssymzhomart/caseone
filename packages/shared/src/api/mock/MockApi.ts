@@ -50,7 +50,7 @@ import {
   staticDirectories,
   type StaticDirectories,
 } from './store';
-import { cancelEvery, cancelLater, every, later, sleep, type TimerHandle } from './timers';
+import { cancelEvery, cancelLater, every, later, sleep, type TimerHandle } from '../../util/timers';
 import { watchdogTick } from './watchdog';
 
 const DEFAULT_LATENCY: readonly [number, number] = [150, 300];
