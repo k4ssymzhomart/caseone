@@ -1,0 +1,17 @@
+{
+  "name": "@rota/design",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./web/tokens.css": "./web/tokens.css",
+    "./assets/*": "./assets/*"
+  },
+  "scripts": {
+    "tokens": "node scripts/build-tokens.mjs",
+    "typecheck": "tsc --noEmit -p ."
+  }
+}

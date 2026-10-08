@@ -1,0 +1,90 @@
+#!/usr/bin/env node
+// Builds the Rota tokens for the hackathon apps. Adapted from Rota's scripts/build-tokens.mjs.
+// Source of truth: source/variables.json, the Figma export copied from the Rota repository (read only).
+// Outputs (relative to packages/design):
+//   source/tokens.dtcg.json   W3C design tokens (DTCG) format
+//   web/tokens.css            CSS custom properties, light and dark (same content as Rota's tokens.css)
+//   src/generated/tokens.ts   Same values for TypeScript (same content as Rota's tokens.ts)
+// Rota's Xcode color sets and Swift outputs are dropped: the hackathon has no Mac app.
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const src = JSON.parse(fs.readFileSync(path.join(root, 'source/variables.json'), 'utf8'));
+const write = (rel, text) => { const p = path.join(root, rel); fs.mkdirSync(path.dirname(p), {recursive: true}); fs.writeFileSync(p, text); console.log('wrote', rel); };
+
+const coll = name => src.collections.find(c => c.name === name);
+const prim = Object.fromEntries(coll('Primitives').vars.map(v => [v.name, v.values.Value]));
+const resolve = v => (typeof v === 'string' && v.startsWith('{') ? prim[v.slice(1, -1)] : v);
+const semantic = coll('Color').vars.map(v => ({name: v.name.replace(/^color\//, ''), light: resolve(v.values.Light), dark: resolve(v.values.Dark), lightRef: v.values.Light, darkRef: v.values.Dark}));
+const floats = c => coll(c).vars.map(v => ({name: v.name, value: v.values.Value}));
+const space = floats('Spacing'), shape = floats('Shape');
+
+const kebab = s => s.replace(/[\/\s]+/g, '-').replace(/\./g, '_').toLowerCase();
+const weight = {Regular: 400, Medium: 500, Semibold: 600, Bold: 700};
+
+// ---------- DTCG ----------
+const dtcg = {color: {primitive: {}, light: {}, dark: {}}, space: {}, radius: {}, size: {}, stroke: {}, typography: {}, shadow: {}};
+for (const [k, v] of Object.entries(prim)) dtcg.color.primitive[k.replace('/', '-')] = {$type: 'color', $value: v};
+for (const s of semantic) { dtcg.color.light[s.name.replace('/', '-')] = {$type: 'color', $value: s.lightRef.startsWith('{') ? `{color.primitive.${s.lightRef.slice(1, -1).replace('/', '-')}}` : s.light}; dtcg.color.dark[s.name.replace('/', '-')] = {$type: 'color', $value: s.darkRef.startsWith('{') ? `{color.primitive.${s.darkRef.slice(1, -1).replace('/', '-')}}` : s.dark}; }
+for (const s of space) dtcg.space[s.name.split('/')[1]] = {$type: 'dimension', $value: `${s.value}px`};
+for (const s of shape) { const [g, n] = s.name.split('/'); dtcg[g === 'radius' ? 'radius' : g === 'stroke' ? 'stroke' : 'size'][n] = {$type: 'dimension', $value: `${s.value}px`}; }
+for (const t of src.text) dtcg.typography[kebab(t.name)] = {$type: 'typography', $value: {fontFamily: t.family, fontWeight: weight[t.style], fontSize: `${t.size}px`, lineHeight: `${t.lineHeight}px`, letterSpacing: `${t.letterSpacingPct / 100}em`, ...(t.textCase === 'UPPER' ? {textTransform: 'uppercase'} : {})}};
+for (const e of src.effects) { const shadows = e.effects.filter(x => x.type === 'DROP_SHADOW'); if (shadows.length) dtcg.shadow[kebab(e.name)] = {$type: 'shadow', $value: shadows.map(x => ({color: x.color, offsetX: `${x.offset[0]}px`, offsetY: `${x.offset[1]}px`, blur: `${x.radius}px`, spread: `${x.spread}px`}))}; }
+write('source/tokens.dtcg.json', JSON.stringify(dtcg, null, 2) + '\n');
+
+// ---------- CSS ----------
+const hexToRgba = h => { const n = h.slice(1); const r = parseInt(n.slice(0, 2), 16), g = parseInt(n.slice(2, 4), 16), b = parseInt(n.slice(4, 6), 16); const a = n.length === 8 ? Math.round((parseInt(n.slice(6, 8), 16) / 255) * 1000) / 1000 : 1; return a === 1 ? h.slice(0, 7) : `rgb(${r} ${g} ${b} / ${a})`; };
+const cssPrim = Object.entries(prim).map(([k, v]) => `  --rota-${kebab(k)}: ${v};`).join('\n');
+const cssSem = mode => semantic.map(s => `  --color-${kebab(s.name)}: ${hexToRgba(mode === 'light' ? s.light : s.dark)};`).join('\n');
+const cssSpace = space.map(s => `  --space-${s.name.split('/')[1]}: ${s.value}px;`).join('\n');
+const cssShape = shape.map(s => `  --${kebab(s.name)}: ${s.value}px;`).join('\n');
+const shadowCss = e => e.effects.filter(x => x.type === 'DROP_SHADOW').map(x => `${x.offset[0]}px ${x.offset[1]}px ${x.radius}px ${x.spread}px ${hexToRgba(x.color)}`).join(', ');
+const cssShadow = src.effects.filter(e => e.effects.some(x => x.type === 'DROP_SHADOW')).map(e => `  --${kebab(e.name)}: ${shadowCss(e)};`).join('\n');
+const cssType = src.text.map(t => `.t-${kebab(t.name)} {\n  font-family: var(${t.family === 'Geist Mono' ? '--font-mono' : '--font-sans'});\n  font-weight: ${weight[t.style]};\n  font-size: ${t.size}px;\n  line-height: ${t.lineHeight}px;\n  letter-spacing: ${t.letterSpacingPct / 100}em;${t.textCase === 'UPPER' ? '\n  text-transform: uppercase;' : ''}\n}`).join('\n\n');
+write('web/tokens.css', `/* Generated by packages/design/scripts/build-tokens.mjs from the Rota variables.json. Do not edit by hand. */
+
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Inter", "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+${cssPrim}
+${cssSpace}
+${cssShape}
+${cssShadow}
+  --glass-blur: 40px;
+}
+
+/* Light (default) */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+${cssSem('light')}
+}
+
+/* Dark: explicit, or following the system unless light is forced */
+[data-theme="dark"] {
+  color-scheme: dark;
+${cssSem('dark')}
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+${cssSem('dark').replace(/^/gm, '  ')}
+  }
+}
+
+${cssType}
+`);
+write('src/generated/tokens.ts', `// Generated by packages/design/scripts/build-tokens.mjs from the Rota variables.json. Do not edit by hand.
+export const primitives = ${JSON.stringify(prim, null, 2)} as const;
+export const color = {
+  light: ${JSON.stringify(Object.fromEntries(semantic.map(s => [s.name, s.light])), null, 2).replace(/\n/g, '\n  ')},
+  dark: ${JSON.stringify(Object.fromEntries(semantic.map(s => [s.name, s.dark])), null, 2).replace(/\n/g, '\n  ')},
+} as const;
+export const space = ${JSON.stringify(Object.fromEntries(space.map(s => [s.name.split('/')[1], s.value])), null, 2)} as const;
+export const shape = ${JSON.stringify(Object.fromEntries(shape.map(s => [s.name, s.value])), null, 2)} as const;
+export const typography = ${JSON.stringify(Object.fromEntries(src.text.map(t => [t.name, {family: t.family, weight: weight[t.style], size: t.size, lineHeight: t.lineHeight, letterSpacingEm: t.letterSpacingPct / 100, upper: t.textCase === 'UPPER'}])), null, 2)} as const;
+`);
+
+console.log('tokens built:', semantic.length, 'semantic colors,', src.text.length, 'text styles');

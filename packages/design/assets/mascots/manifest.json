@@ -1,0 +1,272 @@
+[
+  {
+    "name": "carry",
+    "figma": "Pose=Carry",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "prop"
+    ]
+  },
+  {
+    "name": "check",
+    "figma": "Pose=Check",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "marks",
+      "prop",
+      "prop-detail"
+    ]
+  },
+  {
+    "name": "cheer",
+    "figma": "Pose=Cheer",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "marks"
+    ]
+  },
+  {
+    "name": "dizzy",
+    "figma": "Pose=Dizzy",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "marks"
+    ]
+  },
+  {
+    "name": "download",
+    "figma": "Pose=Download",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "prop",
+      "prop-detail"
+    ]
+  },
+  {
+    "name": "flip",
+    "figma": "Pose=Flip",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "marks"
+    ]
+  },
+  {
+    "name": "globe",
+    "figma": "Pose=Globe",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "prop",
+      "prop-detail"
+    ]
+  },
+  {
+    "name": "juggle",
+    "figma": "Pose=Juggle",
+    "layers": [
+      "body",
+      "shade",
+      "balls",
+      "eyes",
+      "ink",
+      "marks"
+    ]
+  },
+  {
+    "name": "key",
+    "figma": "Pose=Key",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "prop"
+    ]
+  },
+  {
+    "name": "mail",
+    "figma": "Pose=Mail",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "prop",
+      "prop-detail"
+    ]
+  },
+  {
+    "name": "oops",
+    "figma": "Pose=Oops",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "marks"
+    ]
+  },
+  {
+    "name": "peek",
+    "figma": "Pose=Peek",
+    "layers": [
+      "body",
+      "shade",
+      "props",
+      "eyes",
+      "ink",
+      "ledge"
+    ]
+  },
+  {
+    "name": "point",
+    "figma": "Pose=Point",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink"
+    ]
+  },
+  {
+    "name": "read",
+    "figma": "Pose=Read",
+    "layers": [
+      "body",
+      "shade",
+      "props",
+      "eyes",
+      "ink",
+      "prop"
+    ]
+  },
+  {
+    "name": "search",
+    "figma": "Pose=Search",
+    "layers": [
+      "body",
+      "shade",
+      "props",
+      "ink",
+      "prop",
+      "prop-detail"
+    ]
+  },
+  {
+    "name": "shh",
+    "figma": "Pose=Shh",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink"
+    ]
+  },
+  {
+    "name": "shield",
+    "figma": "Pose=Shield",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "marks",
+      "prop",
+      "prop-detail"
+    ]
+  },
+  {
+    "name": "sleep",
+    "figma": "Pose=Sleep",
+    "layers": [
+      "body",
+      "shade",
+      "ink",
+      "marks"
+    ]
+  },
+  {
+    "name": "swap",
+    "figma": "Pose=Swap",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "prop"
+    ]
+  },
+  {
+    "name": "tap",
+    "figma": "Pose=Tap",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "marks"
+    ]
+  },
+  {
+    "name": "tired",
+    "figma": "Pose=Tired",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink"
+    ]
+  },
+  {
+    "name": "typing",
+    "figma": "Pose=Typing",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink"
+    ]
+  },
+  {
+    "name": "wave",
+    "figma": "Pose=Wave",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "marks"
+    ]
+  },
+  {
+    "name": "wrench",
+    "figma": "Pose=Wrench",
+    "layers": [
+      "body",
+      "shade",
+      "eyes",
+      "ink",
+      "prop"
+    ]
+  }
+]
