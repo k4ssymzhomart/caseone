@@ -12,7 +12,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, Stack, type Href } from 'expo-router';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ActivityIndicator, BackHandler, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AssigneeCard } from '@/features/create/AssigneeCard';
@@ -486,13 +486,9 @@ function CreateScreen() {
         </Section>
 
         <Section title={t('create.section.equipment')}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            style={{ marginHorizontal: -theme.size.gutter, flexGrow: 0 }}
-            contentContainerStyle={{ paddingHorizontal: theme.size.gutter, gap: theme.space[2] }}
-          >
+          {/* All four areas stay visible (wrapped, never scrolled sideways): any unit is area then unit,
+              two taps and no scrolling, which keeps the required fields within the case's 5 to 6 taps. */}
+          <View style={chipRow}>
             <Chip label={t('create.area.all')} selected={areaId == null} onPress={() => chooseArea(null)} />
             {areas.map((a) => (
               <Chip
@@ -502,7 +498,7 @@ function CreateScreen() {
                 onPress={() => chooseArea(areaId === a.id ? null : a.id)}
               />
             ))}
-          </ScrollView>
+          </View>
           <View style={chipRow}>
             {visibleUnits.map((e) => {
               const open = openCounts.get(e.id) ?? 0;
