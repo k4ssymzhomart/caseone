@@ -1,5 +1,7 @@
 # Deploy · the jury opens one link, nothing runs on the laptop
 
+> **Status 2026-10-09:** no VM yet. Until it exists, the jury link is Vercel: `deploy/vercel/deploy.sh` ships the same layout (`/` landing and panel, `/app/` PWA) as static files from local builds. §3 (web env) and §4 (PWA) apply as written; §1, §2 and the Caddy parts wait for the VM. The APK stays on the EAS link (Vercel Hobby uploads stop at 100 MB).
+
 The team's VM serves Rota to the jury: the landing and web panel, the mobile app as a PWA in the browser, and the Android APK. The database, Realtime, Storage, Edge Functions and cron stay on the hosted Supabase project `wcjklkpkuhxgfdtbwbuk`. No Docker anywhere: not on the laptop, not on the VM.
 
 | | |
