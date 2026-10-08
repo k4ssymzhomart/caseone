@@ -1,0 +1,199 @@
+// Writes the directory fixtures of @rota/shared from the database export supabase/seed/directories.json,
+// so MockApi uses the same ids as the database (areas 1 to 4, equipment 1 to 25, materials 1 to 40,
+// brigades 1 to 3, problem templates 1 to 58). packages/shared/src/fixtures/fixtures.test.ts fails on drift.
+//
+// Run from the repo root after the JSON changes:
+//   npx tsx tools/gen-fixtures.ts
+//
+// Employees have no ids in the export (the database uses auth user ids); the mock gets deterministic ones
+// from the tab number: 00000000-0000-4000-8000-00000000{tab_no}. PINs come from CLAUDE.md §19.
+
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { format, resolveConfig } from 'prettier';
+import type {
+  Area,
+  Brigade,
+  Employee,
+  Equipment,
+  EquipmentTypeSpecialty,
+  FaultCode,
+  Material,
+  ProblemTemplate,
+  Settings,
+  WorkNorm,
+} from '../packages/shared/src/domain/types.ts';
+
+const root = resolve(import.meta.dirname, '..');
+const source = resolve(root, 'supabase/seed/directories.json');
+const outDir = resolve(root, 'packages/shared/src/fixtures');
+
+type Row = Record<string, unknown>;
+interface Export {
+  areas: Row[];
+  equipment: Row[];
+  brigades: Row[];
+  employees: Row[];
+  fault_codes: Row[];
+  materials: Row[];
+  work_norms: Row[];
+  equipment_type_specialty: Row[];
+  problem_templates: Row[];
+  settings: Row;
+}
+
+const data = JSON.parse(readFileSync(source, 'utf8')) as Export;
+
+/** Must match mockEmployeeId() in packages/shared/src/fixtures/ids.ts. */
+function mockEmployeeId(tabNo: string): string {
+  return `00000000-0000-4000-8000-${tabNo.padStart(12, '0')}`;
+}
+
+/** Fixed creation time for fixture employees, so the files are stable. */
+const CREATED_AT = '2026-10-01T00:00:00.000Z';
+
+const PINS: Record<string, string> = {
+  '1001': '1111',
+  '1002': '2222',
+  '3001': '3333',
+  '9001': '9999',
+};
+const WORKER_PIN = '1234';
+
+/** Picks keys in a fixed order; a missing key becomes null. */
+function pick<T>(row: Row, keys: readonly (keyof T & string)[], extra: Partial<T> = {}): T {
+  const out: Row = {};
+  for (const key of keys) out[key] = key in extra ? (extra as Row)[key] : (row[key] ?? null);
+  return out as T;
+}
+
+const byId = (a: Row, b: Row): number => Number(a.id) - Number(b.id);
+
+const areas = [...data.areas].sort(byId).map((r) => pick<Area>(r, ['id', 'code', 'name', 'sort']));
+
+const equipment = [...data.equipment]
+  .sort(byId)
+  .map((r) =>
+    pick<Equipment>(
+      r,
+      ['id', 'area_id', 'name', 'inventory_no', 'type', 'criticality', 'qr_token', 'is_stopped'],
+      { is_stopped: false },
+    ),
+  );
+
+const brigades = [...data.brigades].sort(byId).map((r) =>
+  pick<Brigade>(r, ['id', 'name', 'leader_id'], {
+    leader_id: typeof r.leader_tab_no === 'string' ? mockEmployeeId(r.leader_tab_no) : null,
+  }),
+);
+
+const employees = data.employees.map((r) =>
+  pick<Employee>(
+    r,
+    [
+      'id',
+      'tab_no',
+      'full_name',
+      'short_name',
+      'pseudonym',
+      'role',
+      'specialty',
+      'grade',
+      'brigade_id',
+      'shift',
+      'on_shift',
+      'telegram_chat_id',
+      'created_at',
+    ],
+    {
+      id: mockEmployeeId(String(r.tab_no)),
+      on_shift: false,
+      telegram_chat_id: null,
+      created_at: CREATED_AT,
+    },
+  ),
+);
+
+const faultCodes = data.fault_codes.map((r) =>
+  pick<FaultCode>(r, ['code', 'grp', 'name', 'specialty']),
+);
+
+const materials = [...data.materials]
+  .sort(byId)
+  .map((r) => pick<Material>(r, ['id', 'sku', 'name', 'unit', 'unit_cost_kzt']));
+
+const workNorms = data.work_norms.map((r) => ({
+  fault_code: String(r.fault_code),
+  norm_hours: Number(r.norm_hours),
+  typical: (r.typical as Row[]).map((m) => ({
+    material_id: Number(m.material_id),
+    qty: Number(m.qty),
+    qty_max: Number(m.qty_max),
+  })),
+})) satisfies WorkNorm[];
+
+const equipmentTypeSpecialty = data.equipment_type_specialty.map((r) =>
+  pick<EquipmentTypeSpecialty>(r, ['type', 'specialty', 'label_plural_dat']),
+);
+
+const problemTemplates = [...data.problem_templates]
+  .sort(byId)
+  .map((r) =>
+    pick<ProblemTemplate>(r, ['id', 'equipment_type', 'label', 'suggested_fault_code', 'sort']),
+  );
+
+const SETTING_KEYS = [
+  'remind_before_min',
+  'accept_timeout_min',
+  'accept_timeout_emergency_min',
+  'overdue_repeat_min',
+  'manager_overdue_min',
+  'demo_time_scale',
+  'demo_mode',
+  'ai_confidence_threshold',
+  'duplicate_hamming_max',
+] as const satisfies readonly (keyof Settings)[];
+const settings = pick<Settings>(data.settings, SETTING_KEYS);
+for (const key of SETTING_KEYS) {
+  if (settings[key] === null) throw new Error(`settings.${key} missing in ${source}`);
+}
+
+const pins: Record<string, string> = {};
+for (const e of employees) pins[e.tab_no] = PINS[e.tab_no] ?? WORKER_PIN;
+
+const HEADER =
+  '// Generated by tools/gen-fixtures.ts from supabase/seed/directories.json. Do not edit by hand.\n';
+
+const prettierConfig = (await resolveConfig(resolve(outDir, 'index.ts'))) ?? {};
+
+async function write(file: string, body: string): Promise<void> {
+  const path = resolve(outDir, file);
+  writeFileSync(path, await format(HEADER + body, { ...prettierConfig, filepath: path }));
+  console.log('wrote', `packages/shared/src/fixtures/${file}`);
+}
+
+function list(name: string, type: string, rows: unknown[]): string {
+  return `\nimport type { ${type} } from '../domain/types';\n\nexport const ${name}: readonly ${type}[] = ${JSON.stringify(rows, null, 2)};\n`;
+}
+
+mkdirSync(outDir, { recursive: true });
+await write('areas.ts', list('areas', 'Area', areas));
+await write('equipment.ts', list('equipment', 'Equipment', equipment));
+await write('brigades.ts', list('brigades', 'Brigade', brigades));
+await write('employees.ts', list('employees', 'Employee', employees));
+await write('faultCodes.ts', list('faultCodes', 'FaultCode', faultCodes));
+await write('materials.ts', list('materials', 'Material', materials));
+await write('workNorms.ts', list('workNorms', 'WorkNorm', workNorms));
+await write('problemTemplates.ts', list('problemTemplates', 'ProblemTemplate', problemTemplates));
+await write(
+  'equipmentTypeSpecialty.ts',
+  list('equipmentTypeSpecialty', 'EquipmentTypeSpecialty', equipmentTypeSpecialty),
+);
+await write(
+  'settings.ts',
+  `\nimport type { Settings } from '../domain/types';\n\nexport const settings: Readonly<Settings> = ${JSON.stringify(settings, null, 2)};\n`,
+);
+await write(
+  'pins.ts',
+  `\n/** Mock sign in: tab_no → 4 digit PIN (CLAUDE.md §19). The real accounts use password nr_{pin}_kz. */\nexport const PINS: Readonly<Record<string, string>> = ${JSON.stringify(pins, null, 2)};\n`,
+);
