@@ -151,6 +151,24 @@ export interface CreateApiOptions {
   client?: SupabaseClient;
   /** Clock override for tests. */
   now?: () => Date;
+  /** MockApi only: latency, AI delay, watchdog and error injection (ignored in 'supabase' mode). */
+  mock?: MockOptions;
+}
+
+/** Knobs of MockApi. Defaults suit the apps; tests pass latencyMs 0, aiDelayMs 0 and watchdog false. */
+export interface MockOptions {
+  /** Delay of every call in ms: a fixed value or a [min, max] range. Default [150, 300]. */
+  latencyMs?: number | readonly [number, number];
+  /** Delay between complete and the AI verdict. Default 2500; 0 runs the check inside the complete call. */
+  aiDelayMs?: number;
+  /** Run the watchdog every watchdogIntervalMs once the API is used. Default true; tests call MockApi.tick(). */
+  watchdog?: boolean;
+  /** Default 5000. */
+  watchdogIntervalMs?: number;
+  /** Share of calls (0..1) that fail with NETWORK, for trying error states by hand. Default 0. */
+  errorRate?: number;
+  /** Storage key prefix. Default 'rota.mock'. */
+  storageKey?: string;
 }
 
 /** In memory KeyValueStorage for tests and SSR. */
