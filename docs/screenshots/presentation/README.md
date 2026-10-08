@@ -33,6 +33,8 @@ Real data: Supabase project «rota» with 3 months of history (559 orders). Rele
 | `25-worker-rating-explained.png` | «Из чего сложился рейтинг» |
 | `26-worker-closed.png` | Закрытые наряды и средняя оценка |
 | `27-master-demo.png` | Демо режим, ускорение, сброс демо |
+| `28-master-ai-report-sonnet.png` | Отчёт ИИ от Claude Sonnet 5.5: вывод модели, 87 из 100, уверенность 80% |
+| `29-master-ai-checks-sonnet.png` | Проверки ИИ по пунктам: правила и оценка модели по фото |
 
 ## Web panel (`web/`)
 
