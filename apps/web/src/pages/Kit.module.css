@@ -318,3 +318,36 @@
 .headerRight {
   margin-left: auto;
 }
+
+.workers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.worker {
+  display: grid;
+  gap: 6px;
+}
+
+.workerName {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.workerState {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.workerRole {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.nowrap {
+  white-space: nowrap;
+}

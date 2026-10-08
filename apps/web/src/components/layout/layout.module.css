@@ -208,6 +208,48 @@
   }
 }
 
+/* Phone width: 16 px gutters; logo and user on the first line, live status and theme on the second,
+   so the top bar never widens the page. */
+@media (max-width: 600px) {
+  .topRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2) var(--space-3);
+    height: auto;
+    min-height: var(--topbar-height);
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .topRight {
+    display: contents;
+  }
+
+  .topRight > :first-child {
+    grid-area: 2 / 1;
+    justify-self: start;
+  }
+
+  .topRight > :nth-child(2) {
+    grid-area: 2 / 2;
+    justify-self: end;
+  }
+
+  .user {
+    grid-area: 1 / 2;
+    justify-self: end;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .filterRow {
+    padding: 0 var(--space-4) var(--space-3);
+  }
+
+  .sidebar {
+    padding: var(--space-2) var(--space-4);
+  }
+}
+
 /* Full screen states (session loading) */
 .splash {
   display: grid;

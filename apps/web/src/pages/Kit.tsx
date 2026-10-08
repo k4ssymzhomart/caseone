@@ -1,5 +1,6 @@
 // /kit: the Rota web kit as a page (copied from Rota's Kit and adapted): tokens, type, space and shape, kit
-// components, the industrial status pills and order cards, the chart style, HUD toasts, mascots and brand.
+// components, forms and tables, page states, the industrial status pills, worker rows and order cards, the chart
+// style, HUD toasts, mascots and brand.
 // Public: it shows no data.
 import { tokens } from '@rota/design';
 import appIcon from '@rota/design/assets/app-icon/app-icon-256.png';
@@ -14,6 +15,7 @@ import {
   VERDICTS,
   verdictTone,
   WORKER_STATE_LABEL,
+  workerStateText,
   workerStateTone,
   type WorkerState,
 } from '@rota/shared';
@@ -39,7 +41,23 @@ import {
   StatusPill,
   Switch,
 } from '@/components/rota';
-import { Grid, Kpi, Pill, Segmented, Tag } from '@/components/ui';
+import {
+  Card,
+  EmptyState,
+  Field,
+  FormError,
+  Grid,
+  Input,
+  Kpi,
+  Loading,
+  Pill,
+  Segmented,
+  Select,
+  StatusDot,
+  Table,
+  Tag,
+  type Column,
+} from '@/components/ui';
 import { gridProps, series, stackedBarProps, tooltipProps, xAxisProps, yAxisProps } from '@/lib/chart';
 import type { OrderCardOrder } from '@/lib/present';
 import styles from './Kit.module.css';
@@ -133,6 +151,43 @@ function sampleOrders(now: number): OrderCardOrder[] {
   ];
 }
 
+const WORKER_SAMPLE = [
+  { name: 'Ахметов Е.', role: 'Слесарь 5 разряда', status: 'free', current_order_number: null, queue_count: 0 },
+  { name: 'Иванов С.', role: 'Слесарь 4 разряда', status: 'working', current_order_number: 147, queue_count: 0 },
+  { name: 'Сериков Д.', role: 'Слесарь 4 разряда', status: 'queue', current_order_number: null, queue_count: 2 },
+  { name: 'Литвиненко О.', role: 'Сварщик 5 разряда', status: 'off', current_order_number: null, queue_count: 0 },
+] as const;
+
+interface MaterialSample {
+  name: string;
+  qty: string;
+  norm: string;
+  over: boolean;
+}
+
+const MATERIAL_SAMPLE: readonly MaterialSample[] = [
+  { name: 'Кольцо уплотнительное', qty: '2 шт', norm: '4 шт', over: false },
+  { name: 'Масло гидравлическое ВМГЗ', qty: '2 л', norm: '6 л', over: false },
+  { name: 'Подшипник 22320', qty: '6 шт', norm: '2 шт', over: true },
+];
+
+const MATERIAL_COLUMNS: readonly Column<MaterialSample>[] = [
+  { key: 'name', header: 'Материал' },
+  { key: 'qty', header: 'Факт', mono: true, align: 'right', render: (m) => <span className={styles.nowrap}>{m.qty}</span> },
+  {
+    key: 'norm',
+    header: 'Норма до',
+    mono: true,
+    align: 'right',
+    render: (m) => <span className={styles.nowrap}>{m.norm}</span>,
+  },
+  {
+    key: 'state',
+    header: 'Проверка',
+    render: (m) => (m.over ? <Pill tone="critical">Перерасход</Pill> : <Pill tone="success">В норме</Pill>),
+  },
+];
+
 const RATING_SAMPLE = [
   { name: 'Ахметов Е.', q: 31, t: 22, f: 18, v: 8, d: 10 },
   { name: 'Петренко В.', q: 30, t: 21, f: 17, v: 9, d: 9 },
@@ -153,6 +208,8 @@ export function Kit() {
   const [switchOn, setSwitchOn] = useState(true);
   const [checks, setChecks] = useState({ demo: true, scale: false });
   const [segment, setSegment] = useState<'shift' | 'week' | 'month'>('week');
+  const [tabNo, setTabNo] = useState('1001');
+  const [area, setArea] = useState('');
   const [now] = useState(() => Date.now());
   const orders = sampleOrders(now);
 
@@ -258,11 +315,11 @@ export function Kit() {
             <div className={styles.tile}>
               <span className={styles.tileLabel}>Клавиши</span>
               <div className={styles.inline}>
-                <Keycap label="⇧" name="Shift" />
-                <Keycap label="⇧" name="Shift" pressed />
-                <Keycap label="Esc" />
-                <Keycap label="⌘" name="Command" />
-                <Keycap label="⇧" size="l" name="Shift" />
+                <Keycap label="1" />
+                <Keycap label="2" pressed />
+                <Keycap label="0" />
+                <Keycap label="Esc" name="Escape" />
+                <Keycap label="5" size="l" />
               </div>
             </div>
             <div className={styles.tile}>
@@ -299,6 +356,51 @@ export function Kit() {
                 </SettingsRow>
               </SettingsGroup>
             </div>
+          </div>
+        </Section>
+
+        <Section id="forms" title="Формы и таблицы">
+          <div className={styles.grid}>
+            <div className={styles.tile}>
+              <span className={styles.tileLabel}>Поля</span>
+              <Field label="Табельный номер">
+                {(id) => (
+                  <Input id={id} size="l" inputMode="numeric" value={tabNo} onChange={(e) => setTabNo(e.target.value)} />
+                )}
+              </Field>
+              <Field label="Участок">
+                {(id) => (
+                  <Select
+                    id={id}
+                    value={area}
+                    onChange={(e) => setArea(e.target.value)}
+                    placeholder="Все участки"
+                    options={[
+                      { value: '1', label: 'Карьер' },
+                      { value: '2', label: 'Участок дробления' },
+                      { value: '3', label: 'Участок обогащения' },
+                      { value: '4', label: 'Участок отгрузки' },
+                    ]}
+                  />
+                )}
+              </Field>
+              <FormError>Неверный табельный номер или ПИН</FormError>
+            </div>
+            <div className={styles.tile}>
+              <span className={styles.tileLabel}>Таблица</span>
+              <Table columns={MATERIAL_COLUMNS} rows={MATERIAL_SAMPLE} rowKey={(m) => m.name} />
+            </div>
+          </div>
+        </Section>
+
+        <Section id="states" title="Состояния страницы">
+          <div className={styles.grid}>
+            <Card>
+              <EmptyState mascot="peek" mascotSize={96} title="Пока нарядов нет" text="Новые наряды появятся здесь сами." />
+            </Card>
+            <Card>
+              <Loading />
+            </Card>
           </div>
         </Section>
 
@@ -350,6 +452,20 @@ export function Kit() {
         </Section>
 
         <Section id="cards" title="Карточки">
+          <div className={styles.workers}>
+            {WORKER_SAMPLE.map((w) => (
+              <Card key={w.name}>
+                <div className={styles.worker}>
+                  <span className={styles.workerName}>{w.name}</span>
+                  <span className={styles.workerState}>
+                    <StatusDot tone={workerStateTone(w.status)} />
+                    {workerStateText(w)}
+                  </span>
+                  <span className={styles.workerRole}>{w.role}</span>
+                </div>
+              </Card>
+            ))}
+          </div>
           <div className={styles.cards}>
             {orders.map((o) => (
               <OrderCard key={o.id} order={o} now={new Date(now)} />

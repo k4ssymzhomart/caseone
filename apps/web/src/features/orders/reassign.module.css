@@ -1,0 +1,128 @@
+/* Reassign and priority pickers: 56 px selectable rows in a list group. */
+.group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.groupTitle {
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rows {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.rows:empty {
+  display: none;
+}
+
+.note {
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.row + .row {
+  border-top: 1px solid var(--color-border-default);
+}
+
+.row:hover:not(:disabled) {
+  background: var(--color-bg-muted);
+}
+
+.row:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.row[aria-checked='true'] {
+  background: var(--color-bg-muted);
+  box-shadow: inset 3px 0 0 var(--color-text-primary);
+}
+
+.row[aria-checked='true'] .chevron {
+  color: var(--color-text-primary);
+}
+
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-bg-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rowText {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rowName {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.rowSub {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.chevron {
+  color: var(--color-text-secondary);
+  font-size: 18px;
+}
+
+.ask {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--status-warning);
+  border-radius: var(--radius-md);
+  background: var(--status-warning-soft);
+}
+
+.askText {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.askButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
