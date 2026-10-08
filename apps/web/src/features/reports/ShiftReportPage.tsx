@@ -1,7 +1,8 @@
 // /reports/shift (master, manager): the shift report of CLAUDE.md §14 on rpc shift_report with the shared FilterBar
-// (top bar): KPI tiles, the AI summary block (placeholder with the mascot «read» until Phase 5), tables for workload,
-// downtime, overdue orders and rejections with reasons, AI verdicts and the most frequent faults.
-// «Скачать PDF» and «Скачать Excel» stay disabled until Phase 5.
+// (top bar): KPI tiles, the AI summary (ai-shift-summary through api.ai.shiftSummary, the rules text from the same
+// numbers when the model is off; «Обновить» asks again), tables for workload, downtime, overdue orders and
+// rejections with reasons, AI verdicts and the most frequent faults. «Скачать PDF» and «Скачать Excel» export what
+// the page shows (pdfmake and exceljs load on the first click).
 // Overdue rows come from v_orders with the same rule as the report's overdue count: finished late inside the period,
 // or still active with the deadline passed.
 import {
@@ -21,8 +22,10 @@ import {
   type OrderView,
   type ReportFilters,
   type ShiftReport,
+  type ShiftSummary,
 } from '@rota/shared';
-import { useMemo } from 'react';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Button, Mascot } from '@/components/rota';
 import {
@@ -40,10 +43,19 @@ import {
 } from '@/components/ui';
 import { useReportFilter } from '@/lib/filters';
 import { t } from '@/lib/i18n';
-import { useDirectories, useOrders, useShiftReport } from '@/lib/queries';
+import { useDirectories, useOrders, useShiftReport, useShiftSummary } from '@/lib/queries';
 import { paths } from '@/lib/routes';
 import { useNow } from '@/lib/useNow';
-import { hoursText, minutesText, num, periodEyebrow, shareText } from './format';
+import { downloadPdf, downloadXlsx, fileStamp } from './export/files';
+import {
+  shiftReportPdf,
+  shiftReportSheets,
+  summaryMeta,
+  type OverdueExportRow,
+  type ShiftExportInput,
+} from './export/shiftExport';
+import { useExport } from './export/useExport';
+import { filterText, hoursText, minutesText, num, periodEyebrow, shareText } from './format';
 import { Meter, NoData, Stale } from './kit';
 import s from './reports.module.css';
 
@@ -51,19 +63,59 @@ const DAY_MS = 86_400_000;
 
 export function ShiftReportPage() {
   const { preset, period, filters, fromDay, toDay } = useReportFilter();
-  const report = useShiftReport({ ...period, filters });
+  const input = { ...period, filters };
+  const report = useShiftReport(input);
+  const dirs = useDirectories();
+  const overdue = useOverdueRows(period.from, period.to, filters);
+  const eyebrow = periodEyebrow(preset, period, fromDay, toDay);
+
+  // the summary follows the preset and the filter, not the rolling minute; «Обновить» counts per scope
+  const scopeKey = JSON.stringify([
+    preset,
+    preset === 'custom' ? [fromDay, toDay] : preset === 'shift' ? period.from : null,
+    filters,
+  ]);
+  const [refresh, setRefresh] = useState<{ key: string; n: number }>({ key: scopeKey, n: 0 });
+  const nonce = refresh.key === scopeKey ? refresh.n : 0;
+  const summary = useShiftSummary(input, scopeKey, nonce);
+
+  const exp = useExport();
+  const exportInput = (r: ShiftReport): ShiftExportInput => ({
+    report: r,
+    overdue: overdue.rows.map(toExportRow),
+    summary: summary.data ?? null,
+    periodText: eyebrow,
+    filterText: filterText(filters, dirs.data),
+    generatedAt: new Date(),
+  });
+  const fileName = (ext: string) => `rota-shift-${fileStamp(period.from)}.${ext}`;
+  const ready = !!report.data && !overdue.pending && exp.busy == null;
 
   return (
     <Page
       title={t('page.reports_shift')}
-      eyebrow={periodEyebrow(preset, period, fromDay, toDay)}
+      eyebrow={eyebrow}
       actions={
         <>
-          <Button variant="secondary" disabled title={t('report.export_soon')}>
-            {t('report.export_pdf')}
+          <Button
+            variant="secondary"
+            disabled={!ready}
+            onClick={() => {
+              const r = report.data;
+              if (r) void exp.run('pdf', () => downloadPdf(shiftReportPdf(exportInput(r)), fileName('pdf')));
+            }}
+          >
+            {exp.busy === 'pdf' ? t('export.busy') : t('report.export_pdf')}
           </Button>
-          <Button variant="secondary" disabled title={t('report.export_soon')}>
-            {t('report.export_excel')}
+          <Button
+            variant="secondary"
+            disabled={!ready}
+            onClick={() => {
+              const r = report.data;
+              if (r) void exp.run('xlsx', () => downloadXlsx(shiftReportSheets(exportInput(r)), fileName('xlsx')));
+            }}
+          >
+            {exp.busy === 'xlsx' ? t('export.busy') : t('report.export_excel')}
           </Button>
         </>
       }
@@ -73,12 +125,12 @@ export function ShiftReportPage() {
           <Stale stale={report.isPlaceholderData}>
             <Counts r={r} />
             <Timing r={r} />
-            <SummaryPlaceholder />
+            <Summary query={summary} onRefresh={() => setRefresh({ key: scopeKey, n: nonce + 1 })} />
             <div className={s.split}>
               <Workload r={r} />
               <Downtime r={r} />
             </div>
-            <Overdue from={period.from} to={period.to} filters={filters} />
+            <Overdue rows={overdue.rows} pending={overdue.pending} />
             <div className={s.split}>
               <Rejections r={r} />
               <Verdicts r={r} />
@@ -149,18 +201,42 @@ function Timing({ r }: { r: ShiftReport }) {
   );
 }
 
-/** Phase 5 fills it from ai-shift-summary; until then it says what will be here. */
-function SummaryPlaceholder() {
+/** The AI summary: the mascot reads while the model works, then the text, three recommendations and the source. */
+function Summary({ query, onRefresh }: { query: UseQueryResult<ShiftSummary>; onRefresh: () => void }) {
+  const busy = query.isFetching;
+  const data = query.data;
   return (
-    <Section title={t('report.summary.title')}>
+    <Section
+      title={t('report.summary.title')}
+      aside={
+        <Button variant="quiet" onClick={onRefresh} disabled={busy}>
+          {busy && data ? t('report.summary.refreshing') : t('report.summary.refresh')}
+        </Button>
+      }
+    >
       <Card pad="l">
-        <div className={s.summary}>
-          <Mascot name="read" size={96} />
-          <div className={s.summaryText}>
-            <span className={s.summaryTitle}>{t('report.summary.heading')}</span>
-            <p className={s.note}>{t('report.summary.text')}</p>
+        {data ? (
+          <div className={s.summaryBody} aria-busy={busy || undefined} aria-live="polite">
+            <p className={s.summaryLead}>{data.summary}</p>
+            <span className={s.eyebrow}>{t('report.summary.recs')}</span>
+            <ol className={s.recs}>
+              {data.recommendations.map((rec, i) => (
+                <li key={`${i}:${rec}`}>{rec}</li>
+              ))}
+            </ol>
+            <p className={s.note}>{summaryMeta(data)}</p>
           </div>
-        </div>
+        ) : busy || query.isPending ? (
+          <div className={s.summary} aria-busy="true">
+            <Mascot name="read" size={96} />
+            <div className={s.summaryText}>
+              <span className={s.summaryTitle}>{t('report.summary.loading')}</span>
+              <p className={s.note}>{t('report.summary.loading_text')}</p>
+            </div>
+          </div>
+        ) : (
+          <p className={s.note}>{t('report.summary.error')}</p>
+        )}
       </Card>
     </Section>
   );
@@ -262,12 +338,31 @@ type OverdueOrder = Pick<
   | 'created_at'
 >;
 
+function assigneeText(o: OverdueOrder): string {
+  return o.brigade_name ? `${o.assignee_short_name} · ${o.brigade_name}` : o.assignee_short_name;
+}
+
+function toExportRow({ order: o, lateMin }: OverdueRow): OverdueExportRow {
+  return {
+    number: o.number,
+    equipment: o.equipment_name,
+    area: o.area_name,
+    assignee: assigneeText(o),
+    status: STATUS_LABEL[o.status],
+    due: formatDateTime(o.due_at),
+    lateMin,
+  };
+}
+
 /**
  * The report's overdue rule on v_orders: done inside the period after the deadline, or active with the deadline
  * passed (before the period end). Brigade follows the SQL: the order's brigade, else the assignee's.
  */
-function Overdue({ from, to, filters }: { from: string; to: string; filters: ReportFilters }) {
-  const navigate = useNavigate();
+function useOverdueRows(
+  from: string,
+  to: string,
+  filters: ReportFilters,
+): { rows: OverdueRow[]; pending: boolean } {
   const now = useNow();
   const dirs = useDirectories();
   const base: OrderFilter = {};
@@ -305,6 +400,11 @@ function Overdue({ from, to, filters }: { from: string; to: string; filters: Rep
     return [...picked.values()].sort((a, b) => b.lateMin - a.lateMin);
   }, [active.data, recent.data, dirs.data, filters.brigade_id, from, to, now]);
 
+  return { rows, pending: active.isPending || recent.isPending };
+}
+
+function Overdue({ rows, pending }: { rows: OverdueRow[]; pending: boolean }) {
+  const navigate = useNavigate();
   const columns: Column<OverdueRow>[] = [
     {
       key: 'number',
@@ -329,8 +429,7 @@ function Overdue({ from, to, filters }: { from: string; to: string; filters: Rep
     {
       key: 'assignee',
       header: t('report.overdue.assignee'),
-      render: ({ order: o }) =>
-        o.brigade_name ? `${o.assignee_short_name} · ${o.brigade_name}` : o.assignee_short_name,
+      render: ({ order: o }) => assigneeText(o),
     },
     {
       key: 'status',
@@ -352,7 +451,6 @@ function Overdue({ from, to, filters }: { from: string; to: string; filters: Rep
     },
   ];
 
-  const pending = active.isPending || recent.isPending;
   return (
     <Section
       title={t('report.overdue.title')}

@@ -126,6 +126,24 @@ export function useShiftReport(input: ShiftReportInput) {
   });
 }
 
+/**
+ * The AI summary of the shift report (ai-shift-summary, rules text as fallback). Keyed by `scopeKey` (the preset and
+ * filter, not the rolling minute), so an open page never asks the model again on its own; `nonce` > 0 is
+ * «Обновить», which asks the function to skip a stored summary older than a minute.
+ */
+export function useShiftSummary(input: ShiftReportInput, scopeKey: string, nonce: number) {
+  const api = useApi();
+  return useQuery({
+    queryKey: ['ai-shift-summary', scopeKey, nonce],
+    queryFn: () => api.ai.shiftSummary(input, nonce > 0 ? { refresh: true } : undefined),
+    staleTime: Infinity,
+    gcTime: 30 * 60_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
+  });
+}
+
 /** rpc rating: worker and brigade rows. */
 export function useRating(period: Period, filters: ReportFilters = {}) {
   const api = useApi();

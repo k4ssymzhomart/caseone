@@ -8,7 +8,9 @@ import {
   shiftHours,
   shiftOf,
   SHIFT_LABEL,
+  type Directories,
   type Period,
+  type ReportFilters,
 } from '@rota/shared';
 import type { FilterPreset } from '@/lib/filters';
 import { t } from '@/lib/i18n';
@@ -74,4 +76,26 @@ export function periodEyebrow(
     from: formatDateTime(period.from),
     to: formatDateTime(period.to),
   });
+}
+
+/** «Фильтр: участок «Участок дробления», Бригада 1» for exports, or the no filter line. */
+export function filterText(filters: ReportFilters, dirs: Directories | undefined): string {
+  const parts: string[] = [];
+  if (filters.area_id != null) {
+    const name = dirs?.areas.find((a) => a.id === filters.area_id)?.name ?? `№${filters.area_id}`;
+    parts.push(t('export.filter.area', { name }));
+  }
+  if (filters.equipment_id != null) {
+    const name = dirs?.equipment.find((e) => e.id === filters.equipment_id)?.name ?? `№${filters.equipment_id}`;
+    parts.push(t('export.filter.equipment', { name }));
+  }
+  if (filters.brigade_id != null) {
+    const name = dirs?.brigades.find((b) => b.id === filters.brigade_id)?.name ?? `№${filters.brigade_id}`;
+    parts.push(t('export.filter.brigade', { name }));
+  }
+  if (filters.assignee_id != null) {
+    const name = dirs?.employees.find((e) => e.id === filters.assignee_id)?.short_name ?? '';
+    if (name) parts.push(t('export.filter.assignee', { name }));
+  }
+  return parts.length > 0 ? t('export.filter', { parts: parts.join(', ') }) : t('export.filter_all');
 }

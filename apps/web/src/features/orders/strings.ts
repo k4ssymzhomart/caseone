@@ -166,6 +166,17 @@ export const orderRu = {
   'order.escalation.title': 'Наряд не принят вовремя',
   'order.escalation.text': 'ИИ предлагает передать его исполнителю {name}.',
 
+  // the PDF of the master report
+  'order.pdf.status': 'Статус',
+  'order.pdf.downtime': 'Простой по наряду',
+  'order.pdf.deadline': 'Срок',
+  'order.pdf.final': 'Итог мастера',
+  'order.pdf.points': 'Баллы',
+  'order.pdf.time': 'Время',
+  'order.pdf.event': 'Событие',
+  'order.pdf.actor': 'Кто',
+  'order.pdf.photo_failed': 'Фото не попали в файл: нет доступа к хранилищу',
+
   // timeline
   'order.actor.ai': 'ИИ',
   'order.ev.assignee': 'Исполнитель {name}',
