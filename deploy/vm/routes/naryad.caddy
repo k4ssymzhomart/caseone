@@ -1,0 +1,43 @@
+# C:\srv\caddy\routes\naryad.caddy — Rota (Кейс 1 «НарядAI»). Served at the root of the domain.
+#   /                 apps/web build: landing + web panel (SPA)
+#   /app/             apps/mobile web export: the PWA
+#   /download/*.apk   Android APK
+# A second project on this VM takes its own prefix (for example /uki/) in its own routes file.
+
+# Explicit types: Go on Windows can read wrong MIME types from the registry.
+@js path *.js *.mjs
+header @js Content-Type "text/javascript; charset=utf-8"
+@css path *.css
+header @css Content-Type "text/css; charset=utf-8"
+@manifest path *.webmanifest /app/manifest.json
+header @manifest Content-Type "application/manifest+json"
+@apk path /download/*.apk
+header @apk {
+	Content-Type "application/vnd.android.package-archive"
+	Content-Disposition "attachment"
+}
+
+# Hashed assets cache forever, entry points never
+@immutable path /assets/* /app/_expo/static/* /app/assets/*
+header @immutable Cache-Control "public, max-age=31536000, immutable"
+@entry path / /index.html /app/ /app/index.html /app/sw.js /app/manifest.json
+header @entry Cache-Control "no-cache"
+
+redir /app /app/ 308
+
+handle_path /download/* {
+	root * C:/srv/naryad/downloads
+	file_server
+}
+
+handle /app/* {
+	root * C:/srv/naryad
+	try_files {path} /app/index.html
+	file_server
+}
+
+handle {
+	root * C:/srv/naryad/web
+	try_files {path} /index.html
+	file_server
+}
