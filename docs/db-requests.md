@@ -3,6 +3,19 @@
 Changes the apps need from the architect's database. Newest first. Apply in the Supabase SQL Editor, then mirror
 them into `supabase/migrations/` and `supabase/manual/`.
 
+## 2026-10-08 · order numbers collide after a failed `demo_reset()` (blocker, same fix file)
+
+**Symptom.** `create_order` returns 409 (unique violation on `orders.number`); the app shows «Проверьте поля наряда».
+
+**Cause.** `demo_reset()` starts with `setval(order_number_seq, max(number) of the history)`. When the call then fails
+(the pg-safeupdate bug above), the transaction rolls back but the sequence change does not: sequences are never
+transactional. The sequence sat at 641 while demo orders hold 641 to 659. The six failing resets came from the
+`RUN_SUPABASE=1` contract suite run on 2026-10-08.
+
+**Fix.** In `docs/db-fixes/demo_reset_where_true.sql`: `demo_reset()` sets the sequence again after the demo inserts,
+and the file ends with a one time `setval` to `max(number)`. Mirror the extra `setval` into migration 07 and
+`supabase/manual/rota_remaining.sql`.
+
 ## 2026-10-08 · `demo_reset()` fails from the apps: «UPDATE requires a WHERE clause» (blocker for Demo Day)
 
 **Symptom.** `rpc('demo_reset')` from either app (and the `RUN_SUPABASE=1` contract suite) fails with

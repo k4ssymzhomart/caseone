@@ -1,6 +1,8 @@
--- Fix for docs/db-requests.md (2026-10-08): demo_reset() failed from the apps because pg-safeupdate rejects
--- UPDATE without WHERE in API sessions. Same function as supabase/manual/rota_remaining.sql, plus two 'where true'.
--- Paste into Supabase Dashboard → SQL Editor → Run. Safe to run again.
+-- Fixes for docs/db-requests.md (2026-10-08). Paste into Supabase Dashboard → SQL Editor → Run. Safe to run again.
+-- 1. demo_reset() failed from the apps: pg-safeupdate rejects UPDATE without WHERE in API sessions → two 'where true'.
+-- 2. Each failed call had already run setval(order_number_seq, history max) and a sequence change survives the
+--    rollback, so new orders now collide with the demo numbers (409 on create_order). The function now also sets the
+--    sequence after the demo inserts, and the last line repairs the live sequence once.
 
 create or replace function internal.demo_reset()
 returns jsonb
@@ -126,8 +128,13 @@ begin
                                  and o.status in ('issued','accepted','queued','rejected','in_progress','paused','rework'))
    where true;
 
+  perform setval('public.order_number_seq', (select coalesce(max(number), 100) from public.orders));
+
   return jsonb_build_object(
     'active', (select count(*) from public.orders where is_demo and status not in ('closed','cancelled')),
     'closed_today', (select count(*) from public.orders where is_demo and status = 'closed'),
     'on_shift', (select count(*) from public.employees where role = 'worker' and on_shift));
 end $$;
+
+-- one time repair of the live sequence
+select setval('public.order_number_seq', (select coalesce(max(number), 100) from public.orders));
