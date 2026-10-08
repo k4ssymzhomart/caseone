@@ -1,0 +1,87 @@
+/* Always dark, like the system HUDs it sits next to. */
+.hud {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgb(28 28 30 / 0.92);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.hud > svg,
+.key {
+  flex: none;
+}
+
+.hud strong {
+  font-weight: 600;
+}
+
+.muted {
+  color: rgb(255 255 255 / 0.62);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.divider {
+  width: 1px;
+  height: 14px;
+  background: rgb(255 255 255 / 0.18);
+}
+
+.key {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 5px;
+  border: 1px solid rgb(255 255 255 / 0.26);
+  background: rgb(255 255 255 / 0.08);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.action {
+  color: var(--rota-red-400);
+  font-weight: 600;
+}
+
+/* App additions: long messages ellipsize, the action is a real button, critical tone. */
+.message {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 56ch;
+}
+
+button.action {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hud[data-tone='critical'] {
+  border-color: color-mix(in srgb, var(--rota-red-500) 70%, transparent);
+}
+
+.hud[data-tone='critical'] .mono {
+  color: var(--rota-red-400);
+}

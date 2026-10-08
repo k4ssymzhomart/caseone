@@ -1,0 +1,33 @@
+.mascot {
+  flex: none;
+  overflow: visible;
+}
+
+.body {
+  fill: var(--rota-red-500);
+}
+
+.shade {
+  fill: var(--rota-red-600);
+}
+
+.eyes,
+.props {
+  fill: var(--rota-white);
+}
+
+.ink,
+.ledge {
+  fill: var(--rota-ink-900);
+}
+
+/* Adaptive layers: ink on light backgrounds, white on dark ones. */
+.marks,
+.balls,
+.prop {
+  fill: var(--color-text-primary);
+}
+
+.propDetail {
+  fill: var(--color-bg-canvas);
+}

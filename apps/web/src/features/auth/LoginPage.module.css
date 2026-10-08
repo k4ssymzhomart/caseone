@@ -1,0 +1,123 @@
+.screen {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--space-6) var(--space-4);
+  background-color: var(--rota-black);
+  background-position: center;
+  background-size: cover;
+}
+
+/* Keeps the card readable over the wallpaper in both themes. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-bg-canvas) 35%, transparent);
+}
+
+.card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  width: min(420px, 100%);
+  padding: var(--space-8) var(--space-8) var(--space-6);
+  border: 1px solid var(--color-glass-stroke);
+  border-radius: var(--radius-lg);
+  background: var(--color-glass-fill-strong);
+  box-shadow: var(--glass-liquid-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+}
+
+.mascot {
+  margin: var(--space-1) 0 calc(-1 * var(--space-2));
+}
+
+.titles {
+  display: grid;
+  gap: var(--space-1);
+  text-align: center;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: -0.015em;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.form {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.submit {
+  width: 100%;
+  margin-top: var(--space-1);
+}
+
+.demo {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.demoLabel {
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.chip {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.chip:hover {
+  background: var(--color-bg-muted);
+}
+
+.chip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.note {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.slogan {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}

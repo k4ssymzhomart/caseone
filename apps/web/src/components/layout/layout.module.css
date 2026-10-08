@@ -1,0 +1,216 @@
+.shell {
+  display: grid;
+  grid-template-areas:
+    'top top'
+    'side main';
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+
+/* Top bar */
+.topbar {
+  grid-area: top;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--color-border-default);
+  background: color-mix(in srgb, var(--color-bg-canvas) 84%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: var(--topbar-height);
+  padding: 0 var(--space-6);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  margin-right: auto;
+  text-decoration: none;
+}
+
+.topRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.filterRow {
+  padding: 0 var(--space-6) var(--space-3) calc(var(--sidebar-width) + var(--space-8));
+}
+
+/* User chip */
+.user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-border-default);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-bg-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.userText {
+  display: grid;
+  line-height: 16px;
+}
+
+.userName {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.userRole {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+/* Sidebar (Rota Settings window) */
+.sidebar {
+  grid-area: side;
+  position: sticky;
+  top: var(--header-height, var(--topbar-height));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  height: calc(100vh - var(--header-height, var(--topbar-height)));
+  padding: var(--space-4) var(--space-3);
+  border-right: 1px solid var(--color-border-default);
+  background: var(--color-bg-subtle);
+  overflow-y: auto;
+}
+
+.navGroups {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.navGroup {
+  display: grid;
+  gap: 2px;
+}
+
+.navGroupLabel {
+  padding: 0 var(--space-3) var(--space-1);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+
+.navItem:hover {
+  background: var(--color-bg-muted);
+}
+
+.navItem[aria-current='page'],
+.navItem:global(.active) {
+  background: var(--color-bg-selection);
+  font-weight: 600;
+}
+
+.sidebarFoot {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+
+.version {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+/* Page area */
+.main {
+  grid-area: main;
+  min-width: 0;
+}
+
+/* Narrow windows: the sidebar becomes a scrolling strip under the top bar. */
+@media (max-width: 900px) {
+  .shell {
+    grid-template-areas:
+      'top'
+      'side'
+      'main';
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    flex-direction: row;
+    height: auto;
+    padding: var(--space-2) var(--space-4);
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border-default);
+    overflow-x: auto;
+  }
+
+  .navGroups,
+  .navGroup {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  .navGroupLabel,
+  .version {
+    display: none;
+  }
+
+  .navItem {
+    white-space: nowrap;
+  }
+
+  .sidebarFoot {
+    display: flex;
+    margin-top: 0;
+  }
+
+  .filterRow {
+    padding-left: var(--space-6);
+  }
+
+  .userText {
+    display: none;
+  }
+}
+
+/* Full screen states (session loading) */
+.splash {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
