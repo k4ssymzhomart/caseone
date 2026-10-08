@@ -33,7 +33,8 @@ current attempt was reviewed before, or `rules_only: true` when the model gave n
    after a rework (409). When the database refuses the answer itself (twice), the review is rules-only
    (`error_code: SUBMIT`); a failure while collecting the input ends rules-only as well (`error_code: INPUT`),
    so an order in `ai_review` always gets its review. Strings in the answer lose NUL and lone surrogates,
-   which jsonb cannot store.
+   which jsonb cannot store. `code_consistent` becomes true when `suggested_code` is the order's own fault code
+   (`normalizeVerifyAnswer(answer, ctx.order)`; `npm run golden` cleans its answers the same way).
 5. ai_submit applies `ai_result` and sends the notifications.
 
 Two calls for the same attempt in one isolate (the app's retry button, the watchdog) share one check, so the

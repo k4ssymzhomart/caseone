@@ -134,15 +134,39 @@ const strList = (v: unknown): string[] =>
 const oneOf = <T extends string>(v: unknown, values: readonly T[]): T | null =>
   typeof v === 'string' && (values as readonly string[]).includes(v) ? (v as T) : null;
 
+const LATIN_LOOKALIKE: Readonly<Record<string, string>> = { M: 'М', C: 'С' };
+
+/**
+ * A fault code in one spelling: «М-02», «м 02», a Latin M or C, any dash and a trailing name («М-02 Подшипник»)
+ * all give «М-02»: up to 3 characters that are neither letters nor digits may stand between the group and the number.
+ * Null when the text does not start with a code.
+ */
+export function canonicalFaultCode(value: string | null | undefined): string | null {
+  const m = /^\s*([МЭГПСMC])[^\p{L}\d]{0,3}(\d{1,2})(?!\d)/u.exec((value ?? '').toUpperCase());
+  if (!m) return null;
+  const group = LATIN_LOOKALIKE[m[1] as string] ?? (m[1] as string);
+  return `${group}-${(m[2] as string).padStart(2, '0')}`;
+}
+
+/** The order facts the answer cleanup needs: the fault code the worker chose. */
+export interface VerifyAnswerOrder {
+  fault_code?: string | null;
+}
+
 /**
  * Checks the answer against the verify schema and returns it in the shape ai_submit reads.
  * Structured outputs already guarantee the shape with Anthropic; this guards the mock and on-prem providers.
  * Values pass through unchanged, except: score_1_5 becomes an integer 0..5 (ai_submit casts it to int),
- * confidence is held to 0..1 (the threshold decision is the same either way) and strings lose the characters
- * jsonb cannot store (NUL, lone surrogates).
+ * confidence is held to 0..1 (the threshold decision is the same either way), strings lose the characters
+ * jsonb cannot store (NUL, lone surrogates), and code_consistent becomes true when suggested_code is the
+ * order's own fault code (a self contradictory answer would otherwise cost the worker 8 points in L1).
  * A missing verdict field throws BAD_RESPONSE, which the retry policy treats as retryable.
+ * tools/golden.ts runs every answer through this function too, so the golden set scores what production stores.
  */
-export function normalizeVerifyAnswer(value: unknown): VerifyAnswer {
+export function normalizeVerifyAnswer(
+  value: unknown,
+  order: VerifyAnswerOrder | null = null,
+): VerifyAnswer {
   const bad = (what: string): never => {
     throw new LlmError('BAD_RESPONSE', `BAD_RESPONSE: verify answer without ${what}`);
   };
@@ -156,11 +180,14 @@ export function normalizeVerifyAnswer(value: unknown): VerifyAnswer {
   if (typeof value.confidence !== 'number' || !Number.isFinite(conf)) bad('confidence');
   const rawScore = Number(photo.score_1_5);
   const score = Number.isFinite(rawScore) ? Math.min(5, Math.max(0, Math.round(rawScore))) : 0;
+  const suggested = str(value.suggested_code);
+  const ownCode = canonicalFaultCode(order?.fault_code);
+  const sameCode = ownCode !== null && canonicalFaultCode(suggested) === ownCode;
 
   return {
     work_match: { verdict: workVerdict, explanation: str(wm.explanation) },
-    code_consistent: value.code_consistent !== false,
-    suggested_code: str(value.suggested_code),
+    code_consistent: value.code_consistent !== false || sameCode,
+    suggested_code: suggested,
     materials_logic: {
       verdict: oneOf(ml?.verdict, ['ok', 'suspicious'] as const) ?? 'ok',
       explanation: str(ml?.explanation),

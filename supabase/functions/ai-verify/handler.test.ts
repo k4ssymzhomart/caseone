@@ -325,6 +325,16 @@ describe('the check', () => {
     ]);
   });
 
+  it("submits code_consistent true when the model suggests the order's own fault code", async () => {
+    const { fetchFn } = anthropicFetch([
+      [200, sonnetReply({ ...GOOD, code_consistent: false, suggested_code: 'Г-01' })],
+    ]);
+    const { db, submitted } = fakeDb();
+    const { res } = run(post({ order_id: 9001 }), db, anthropicConfig(fetchFn));
+    expect((await res).status).toBe(200);
+    expect(submitted[0]?.llm).toMatchObject({ code_consistent: true, suggested_code: 'Г-01' });
+  });
+
   it('after 3 failed calls writes a rules-only review with a Russian reason', async () => {
     const err: [number, unknown] = [
       500,

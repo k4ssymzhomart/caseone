@@ -8,7 +8,9 @@
 //   --reference  no LLM call: scores each case's reference answer (must be 10 из 10)
 //   --live       Claude (anthropic) with .secrets/anthropic.env; every cost goes to .secrets/llm-ledger.json and
 //                the budget guard stops the run at --cap USD (default 0.30). Golden runs cost money: run sparingly.
-// A failed LLM call is scored like production scores it: a rules only review (ai_submit with p_llm = null).
+// Every answer, the reference ones included, goes through normalizeVerifyAnswer as in ai-verify, so the golden
+// set scores exactly what production hands to ai_submit. A failed LLM call (or an answer the normalizer refuses)
+// is scored like production scores it: a rules only review (ai_submit with p_llm = null).
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
@@ -24,6 +26,7 @@ import {
 import { buildDirectory, type DirectoryEmployee } from '../supabase/functions/_shared/privacy.ts';
 import { PROMPT_VERSION } from '../supabase/functions/_shared/prompts.ts';
 import { buildVerifyMessages } from '../supabase/functions/_shared/verifyInput.ts';
+import { normalizeVerifyAnswer } from '../supabase/functions/ai-verify/input.ts';
 import { readSecrets } from './lib/env.ts';
 import {
   goldenContext,
@@ -151,14 +154,18 @@ async function main(): Promise<number> {
     let answer: LlmAnswerInput | null = null;
     let note = '';
     if (reference) {
-      answer = c.reference_llm;
+      answer = normalizeVerifyAnswer(c.reference_llm, ctx.order);
     } else if (llm) {
       const t0 = Date.now();
       try {
         const r = await llm.call({ purpose: 'verify', ...buildVerifyMessages(ctx, photos) });
-        answer = r.data;
         cost += r.costUsd;
         note = `${r.model}, ${r.usage.input_tokens} in / ${r.usage.output_tokens} out, ${r.costUsd.toFixed(4)} USD, ${((Date.now() - t0) / 1000).toFixed(1)} s`;
+        const raw = r.data;
+        answer = normalizeVerifyAnswer(raw, ctx.order);
+        if (raw.code_consistent === false && answer.code_consistent) {
+          note += `; шифр ${raw.suggested_code} совпадает с шифром наряда: code_consistent исправлен на true`;
+        }
       } catch (e) {
         note = `LLM error ${isLlmError(e) ? e.code : 'UNKNOWN'}: ${e instanceof Error ? e.message : String(e)}; rules only`;
         if (isLlmError(e, 'BUDGET_EXCEEDED')) {

@@ -268,7 +268,7 @@ async function runCheck(
         requestedModel = llm.modelFor('verify');
         const r = await llm.call({ purpose: 'verify', ...input.request });
         costUsd += r.costUsd;
-        return { answer: normalizeVerifyAnswer(r.data), model: r.model };
+        return { answer: normalizeVerifyAnswer(r.data, ctx.order), model: r.model };
       },
       deps.policy ?? DEFAULT_RETRY_POLICY,
       deps.clock ?? realClock,

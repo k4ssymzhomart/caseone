@@ -7,6 +7,7 @@ import type { VerifyAnswer } from '../_shared/schemas.ts';
 import { buildVerifyMessages, pickVerifyPhotos, type VerifyPhoto } from '../_shared/verifyInput.ts';
 import {
   buildVerifyRequest,
+  canonicalFaultCode,
   MAX_IMAGE_BYTES,
   normalizeVerifyAnswer,
   photoFromBytes,
@@ -170,6 +171,39 @@ describe('answer normalization', () => {
     const n = normalizeVerifyAnswer(odd);
     expect(n.summary_master).toBe('итог ок');
     expect(n.feedback_worker).toEqual({ good: ['ab'], improve: ['x \u{20000}'] });
+  });
+
+  it('reads a fault code in any spelling', () => {
+    expect(canonicalFaultCode('Г-01')).toBe('Г-01');
+    expect(canonicalFaultCode(' м 02 Подшипник: перегрев')).toBe('М-02');
+    expect(canonicalFaultCode('M\u201102')).toBe('М-02');
+    expect(canonicalFaultCode('C-1')).toBe('С-01');
+    expect(canonicalFaultCode('М12')).toBe('М-12');
+    expect(canonicalFaultCode('Э \u2212 05')).toBe('Э-05');
+    expect(canonicalFaultCode('Э-031')).toBeNull();
+    expect(canonicalFaultCode('подшипник')).toBeNull();
+    expect(canonicalFaultCode('')).toBeNull();
+    expect(canonicalFaultCode(null)).toBeNull();
+  });
+
+  it("treats the code as consistent when the model suggests the order's own code", () => {
+    const contradictory = { ...good, code_consistent: false, suggested_code: 'Г-01' };
+    expect(normalizeVerifyAnswer(contradictory, { fault_code: 'Г-01' }).code_consistent).toBe(true);
+    // another spelling of the same code
+    const latin = { ...good, code_consistent: false, suggested_code: 'г 01 Течь масла' };
+    expect(normalizeVerifyAnswer(latin, { fault_code: 'Г-01' }).code_consistent).toBe(true);
+    // a different code stays a remark, and so does any answer without the order's code
+    const other = { ...good, code_consistent: false, suggested_code: 'М-02' };
+    expect(normalizeVerifyAnswer(other, { fault_code: 'Э-03' })).toMatchObject({
+      code_consistent: false,
+      suggested_code: 'М-02',
+    });
+    expect(normalizeVerifyAnswer(contradictory).code_consistent).toBe(false);
+    expect(normalizeVerifyAnswer(contradictory, { fault_code: null }).code_consistent).toBe(false);
+    const empty = { ...good, code_consistent: false, suggested_code: '' };
+    expect(normalizeVerifyAnswer(empty, { fault_code: 'Г-01' }).code_consistent).toBe(false);
+    // a consistent answer is never turned into a remark
+    expect(normalizeVerifyAnswer(good, { fault_code: 'Э-03' }).code_consistent).toBe(true);
   });
 
   it('throws a retryable BAD_RESPONSE when the verdict fields are missing', () => {

@@ -9,6 +9,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { verifySchema } from '../../../../supabase/functions/_shared/schemas.ts';
 import { buildVerifyMessages } from '../../../../supabase/functions/_shared/verifyInput.ts';
+import { normalizeVerifyAnswer } from '../../../../supabase/functions/ai-verify/input.ts';
 import {
   goldenContext,
   goldenMatches,
@@ -63,6 +64,15 @@ describe('ai-verify golden set', () => {
       ).toBe(true);
     },
   );
+
+  it('reference answers pass the ai-verify answer cleanup unchanged', () => {
+    for (const c of cases) {
+      const order = { fault_code: c.order.fault_code };
+      expect(normalizeVerifyAnswer(structuredClone(c.reference_llm), order), c.case).toEqual(
+        c.reference_llm,
+      );
+    }
+  });
 
   it('reference answers are valid structured outputs', () => {
     const validate = new Ajv({ strict: false }).compile(verifySchema);
