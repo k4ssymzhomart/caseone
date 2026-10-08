@@ -15,6 +15,7 @@
     "react-dom": "19.2.3"
   },
   "scripts": {
+    "postinstall": "node tools/patch-native.mjs",
     "dev:mobile": "npm run start --workspace apps/mobile",
     "ios": "npm run ios --workspace apps/mobile",
     "android": "npm run android --workspace apps/mobile",

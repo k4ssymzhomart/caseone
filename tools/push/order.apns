@@ -1,0 +1,14 @@
+{
+  "Simulator Target Bundle": "kz.rota.app",
+  "aps": {
+    "alert": {
+      "title": "Новый наряд №147",
+      "body": "Новый наряд №147. Конвейер К-1, Участок дробления. Срок до 14:30. Приоритет: высокий."
+    },
+    "sound": "ding.wav",
+    "category": "order_actions"
+  },
+  "url": "/order/demo",
+  "kind": "new_order",
+  "body": { "url": "/order/demo", "kind": "new_order" }
+}

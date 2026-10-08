@@ -1,0 +1,15 @@
+{
+  "Simulator Target Bundle": "kz.rota.app",
+  "aps": {
+    "alert": {
+      "title": "Аварийный наряд №148",
+      "body": "АВАРИЙНЫЙ наряд №148. Насос НШ-32 маслостанции, Участок обогащения. Требует ответа."
+    },
+    "sound": "siren.wav",
+    "category": "order_actions",
+    "interruption-level": "time-sensitive"
+  },
+  "url": "/emergency/demo",
+  "kind": "emergency",
+  "body": { "url": "/emergency/demo", "kind": "emergency" }
+}
