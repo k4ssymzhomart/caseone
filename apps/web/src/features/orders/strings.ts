@@ -169,7 +169,7 @@ export const orderRu = {
   // the PDF of the master report
   'order.pdf.status': 'Статус',
   'order.pdf.downtime': 'Простой по наряду',
-  'order.pdf.deadline': 'Срок',
+  'order.pdf.deadline': 'Соблюдение срока',
   'order.pdf.final': 'Итог мастера',
   'order.pdf.points': 'Баллы',
   'order.pdf.time': 'Время',
