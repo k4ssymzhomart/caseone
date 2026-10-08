@@ -531,6 +531,8 @@ Built now so Phase 2 only adds the upload. Use the SDK 57 APIs; the older calls 
 
 Run `git merge main` first: you need `@rota/design`.
 
+> Landing: `/` is the public landing page (`docs/LANDING.md`, lane C). If `apps/web` already exists when you get here, skip `npm create vite` and the setup bullets it already covers, add the panel layout and routes next to the landing, and leave `src/landing/` alone.
+
 - `npm create vite@latest apps/web -- --template react-ts`, package name `@rota/web`. Then set `react` and `react-dom` in `apps/web/package.json` to exactly `19.2.3` (create-vite writes a caret range; two Reacts in one repo break at runtime) and TypeScript to `~6.0.3`. Check with `npm ls react`: one version only.
 - The web build runs `tsc -b` over the shared sources too, so they must pass `verbatimModuleSyntax`, `erasableSyntaxOnly` and the unused checks.
 - Copy the Rota web components (section 4) into `src/components/rota/`, keep their CSS modules, and import the logo and mascot data from `@rota/design`.
