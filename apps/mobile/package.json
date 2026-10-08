@@ -15,6 +15,7 @@
     "@expo-google-fonts/inter": "^0.4.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@rota/design": "*",
+    "@rota/shared": "*",
     "@supabase/supabase-js": "^2.117.3",
     "@tanstack/react-query": "^5.104.1",
     "expo": "~57.0.27",
