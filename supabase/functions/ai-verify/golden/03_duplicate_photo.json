@@ -1,0 +1,121 @@
+{
+  "case": "03_duplicate_photo",
+  "spec": "duplicate photo → rework",
+  "sql_case": "G4",
+  "title": "Фото после повторяет фото наряда №9001",
+  "expected": {
+    "verdict": "rework",
+    "needs_master_review": false
+  },
+  "why": "R2 fail: dHash фото после отличается от фото наряда №9001 на 1 бит (порог 6).",
+  "order": {
+    "number": 9003,
+    "type": "unplanned",
+    "priority": "high",
+    "equipment_id": 20,
+    "assignee_tab_no": "2001",
+    "description": "Подтекает масло по крышке насоса",
+    "comment": null,
+    "suggested_fault_code": "Г-01",
+    "norm_hours": 1.5,
+    "equipment_stopped": true,
+    "works_done": "Заменил уплотнительное кольцо крышки, подтянул болты",
+    "fault_code": "Г-01",
+    "closing_comment": "Течи нет",
+    "created_at": "2026-10-08T03:30:00Z",
+    "started_at": "2026-10-08T03:35:00Z",
+    "done_at": "2026-10-08T04:55:00Z",
+    "due_at": "2026-10-08T05:00:00Z",
+    "paused_total_sec": 0,
+    "is_demo": false
+  },
+  "materials": [
+    {
+      "material_id": 21,
+      "qty": 2
+    }
+  ],
+  "photos": [
+    {
+      "kind": "after",
+      "file": "photos/pump_clean_a.png",
+      "source": "camera",
+      "captured_at": "2026-10-08T04:53:00Z",
+      "dhash": "0f0f0f0f0f0f0f0e",
+      "sha256": null
+    }
+  ],
+  "other_photos": [
+    {
+      "order_number": 9001,
+      "kind": "after",
+      "dhash": "0f0f0f0f0f0f0f0f",
+      "captured_at": "2026-10-07T05:23:00Z"
+    }
+  ],
+  "timeline": [
+    {
+      "at": "2026-10-08T03:30:00Z",
+      "action": "create",
+      "actor": "M01",
+      "to": "issued"
+    },
+    {
+      "at": "2026-10-08T03:33:00Z",
+      "action": "accept",
+      "actor": "E01",
+      "from": "issued",
+      "to": "accepted"
+    },
+    {
+      "at": "2026-10-08T03:35:00Z",
+      "action": "start",
+      "actor": "E01",
+      "from": "accepted",
+      "to": "in_progress"
+    },
+    {
+      "at": "2026-10-08T04:55:00Z",
+      "action": "complete",
+      "actor": "E01",
+      "from": "in_progress",
+      "to": "done",
+      "comment": "Течи нет"
+    },
+    {
+      "at": "2026-10-08T04:55:00Z",
+      "action": "review_started",
+      "actor": "SYSTEM",
+      "from": "done",
+      "to": "ai_review"
+    }
+  ],
+  "reference_llm": {
+    "work_match": {
+      "verdict": "full",
+      "explanation": "Течь устранена заменой кольца"
+    },
+    "code_consistent": true,
+    "suggested_code": "Г-01",
+    "materials_logic": {
+      "verdict": "ok",
+      "explanation": "по норме"
+    },
+    "photo": {
+      "after_present": true,
+      "same_equipment": "yes",
+      "problem_resolved": "yes",
+      "quality_issues": [],
+      "score_1_5": 5,
+      "explanation": "масла нет, крышка чистая"
+    },
+    "confidence": 0.9,
+    "feedback_worker": {
+      "good": [
+        "Течь устранена"
+      ],
+      "improve": []
+    },
+    "summary_master": "Течь устранена, замечаний нет"
+  }
+}

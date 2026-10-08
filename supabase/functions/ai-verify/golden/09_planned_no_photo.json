@@ -1,0 +1,105 @@
+{
+  "case": "09_planned_no_photo",
+  "spec": "planned order without photo → accepted_with_remarks",
+  "sql_case": "G11",
+  "title": "Плановая смазка конвейера К-1 без фото",
+  "expected": {
+    "verdict": "accepted_with_remarks",
+    "needs_master_review": false
+  },
+  "why": "R1 и R2 warn: для плановых работ фото после желательно, но не обязательно (55 из 65); L2 0 без фото.",
+  "order": {
+    "number": 9009,
+    "type": "planned",
+    "priority": "planned",
+    "equipment_id": 11,
+    "assignee_tab_no": "2005",
+    "description": "Смазка узлов конвейера по карте смазки",
+    "comment": null,
+    "suggested_fault_code": "С-01",
+    "norm_hours": 0.5,
+    "equipment_stopped": false,
+    "works_done": "Смазал узлы конвейера по карте смазки",
+    "fault_code": "С-01",
+    "closing_comment": null,
+    "created_at": "2026-10-07T03:10:00Z",
+    "started_at": "2026-10-07T03:20:00Z",
+    "done_at": "2026-10-07T03:50:00Z",
+    "due_at": "2026-10-07T15:00:00Z",
+    "paused_total_sec": 0,
+    "is_demo": false
+  },
+  "materials": [
+    {
+      "material_id": 18,
+      "qty": 0.8
+    }
+  ],
+  "photos": [],
+  "timeline": [
+    {
+      "at": "2026-10-07T03:10:00Z",
+      "action": "create",
+      "actor": "M01",
+      "to": "issued"
+    },
+    {
+      "at": "2026-10-07T03:15:00Z",
+      "action": "accept",
+      "actor": "E05",
+      "from": "issued",
+      "to": "accepted"
+    },
+    {
+      "at": "2026-10-07T03:20:00Z",
+      "action": "start",
+      "actor": "E05",
+      "from": "accepted",
+      "to": "in_progress"
+    },
+    {
+      "at": "2026-10-07T03:50:00Z",
+      "action": "complete",
+      "actor": "E05",
+      "from": "in_progress",
+      "to": "done"
+    },
+    {
+      "at": "2026-10-07T03:50:00Z",
+      "action": "review_started",
+      "actor": "SYSTEM",
+      "from": "done",
+      "to": "ai_review"
+    }
+  ],
+  "reference_llm": {
+    "work_match": {
+      "verdict": "full",
+      "explanation": "смазка выполнена"
+    },
+    "code_consistent": true,
+    "suggested_code": "С-01",
+    "materials_logic": {
+      "verdict": "ok",
+      "explanation": ""
+    },
+    "photo": {
+      "after_present": false,
+      "same_equipment": "unsure",
+      "problem_resolved": "not_applicable",
+      "quality_issues": [],
+      "score_1_5": 0,
+      "explanation": "фото нет"
+    },
+    "confidence": 0.8,
+    "feedback_worker": {
+      "good": [
+        "Смазка по карте"
+      ],
+      "improve": [
+        "Прикладывайте фото после"
+      ]
+    },
+    "summary_master": "Плановая смазка без фото"
+  }
+}

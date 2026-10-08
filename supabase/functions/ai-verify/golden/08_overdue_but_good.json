@@ -1,0 +1,137 @@
+{
+  "case": "08_overdue_but_good",
+  "spec": "overdue but good → accepted",
+  "sql_case": "G10",
+  "title": "Хороший ремонт после ожидания кольца со склада, срок нарушен на 35 минут",
+  "expected": {
+    "verdict": "accepted",
+    "needs_master_review": false
+  },
+  "why": "R4: время 1 ч 20 мин при нормативе 1 ч 30 мин, срок нарушен на 35 мин (15 из 20); остальное в норме.",
+  "order": {
+    "number": 9008,
+    "type": "unplanned",
+    "priority": "high",
+    "equipment_id": 20,
+    "assignee_tab_no": "2001",
+    "description": "Течь масла из под крышки насоса",
+    "comment": null,
+    "suggested_fault_code": "Г-01",
+    "norm_hours": 1.5,
+    "equipment_stopped": true,
+    "works_done": "Заменил уплотнительное кольцо крышки, подтянул болты",
+    "fault_code": "Г-01",
+    "closing_comment": "Течи нет",
+    "created_at": "2026-10-06T06:00:00Z",
+    "started_at": "2026-10-06T06:05:00Z",
+    "done_at": "2026-10-06T08:05:00Z",
+    "due_at": "2026-10-06T07:30:00Z",
+    "paused_total_sec": 2400,
+    "is_demo": false
+  },
+  "materials": [
+    {
+      "material_id": 21,
+      "qty": 2
+    }
+  ],
+  "photos": [
+    {
+      "kind": "before",
+      "file": "photos/pump_leak_d.png",
+      "source": "camera",
+      "captured_at": "2026-10-06T05:58:00Z",
+      "dhash": "3c3c3c3c3c3c3c3c",
+      "sha256": null
+    },
+    {
+      "kind": "after",
+      "file": "photos/pump_clean_d.png",
+      "source": "camera",
+      "captured_at": "2026-10-06T08:03:00Z",
+      "dhash": "f5f5f5f5f5f5f5f5",
+      "sha256": null
+    }
+  ],
+  "timeline": [
+    {
+      "at": "2026-10-06T06:00:00Z",
+      "action": "create",
+      "actor": "M01",
+      "to": "issued"
+    },
+    {
+      "at": "2026-10-06T06:02:00Z",
+      "action": "accept",
+      "actor": "E01",
+      "from": "issued",
+      "to": "accepted"
+    },
+    {
+      "at": "2026-10-06T06:05:00Z",
+      "action": "start",
+      "actor": "E01",
+      "from": "accepted",
+      "to": "in_progress"
+    },
+    {
+      "at": "2026-10-06T06:20:00Z",
+      "action": "pause",
+      "actor": "E01",
+      "from": "in_progress",
+      "to": "paused",
+      "reason": "waiting_parts",
+      "comment": "Нет кольца нужного размера, жду со склада"
+    },
+    {
+      "at": "2026-10-06T07:00:00Z",
+      "action": "resume",
+      "actor": "E01",
+      "from": "paused",
+      "to": "in_progress"
+    },
+    {
+      "at": "2026-10-06T08:05:00Z",
+      "action": "complete",
+      "actor": "E01",
+      "from": "in_progress",
+      "to": "done",
+      "comment": "Течи нет"
+    },
+    {
+      "at": "2026-10-06T08:05:00Z",
+      "action": "review_started",
+      "actor": "SYSTEM",
+      "from": "done",
+      "to": "ai_review"
+    }
+  ],
+  "reference_llm": {
+    "work_match": {
+      "verdict": "full",
+      "explanation": "Течь устранена заменой кольца"
+    },
+    "code_consistent": true,
+    "suggested_code": "Г-01",
+    "materials_logic": {
+      "verdict": "ok",
+      "explanation": "по норме"
+    },
+    "photo": {
+      "after_present": true,
+      "same_equipment": "yes",
+      "problem_resolved": "yes",
+      "quality_issues": [],
+      "score_1_5": 5,
+      "explanation": "масла нет, крышка чистая"
+    },
+    "confidence": 0.9,
+    "feedback_worker": {
+      "good": [
+        "Течь устранена"
+      ],
+      "improve": []
+    },
+    "summary_master": "Течь устранена, замечаний нет"
+  }
+}

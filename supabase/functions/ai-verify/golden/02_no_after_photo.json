@@ -1,0 +1,110 @@
+{
+  "case": "02_no_after_photo",
+  "spec": "no after photo → rework",
+  "sql_case": "G2",
+  "title": "Внеплановый ремонт подшипника конвейера К-2 закрыт без фото после",
+  "expected": {
+    "verdict": "rework",
+    "needs_master_review": false
+  },
+  "why": "R1 fail: фото после обязательно для внеплановых работ; ответ ИИ на вердикт не влияет.",
+  "order": {
+    "number": 9002,
+    "type": "unplanned",
+    "priority": "high",
+    "equipment_id": 12,
+    "assignee_tab_no": "2002",
+    "description": "Шум подшипника приводного барабана",
+    "comment": null,
+    "suggested_fault_code": "М-02",
+    "norm_hours": 3,
+    "equipment_stopped": true,
+    "works_done": "Заменил подшипник, смазал узел",
+    "fault_code": "М-02",
+    "closing_comment": "Шум пропал",
+    "created_at": "2026-10-07T06:00:00Z",
+    "started_at": "2026-10-07T06:10:00Z",
+    "done_at": "2026-10-07T08:10:00Z",
+    "due_at": "2026-10-07T09:00:00Z",
+    "paused_total_sec": 0,
+    "is_demo": false
+  },
+  "materials": [
+    {
+      "material_id": 2,
+      "qty": 1
+    },
+    {
+      "material_id": 18,
+      "qty": 0.5
+    }
+  ],
+  "photos": [],
+  "timeline": [
+    {
+      "at": "2026-10-07T06:00:00Z",
+      "action": "create",
+      "actor": "M01",
+      "to": "issued"
+    },
+    {
+      "at": "2026-10-07T06:04:00Z",
+      "action": "accept",
+      "actor": "E02",
+      "from": "issued",
+      "to": "accepted"
+    },
+    {
+      "at": "2026-10-07T06:10:00Z",
+      "action": "start",
+      "actor": "E02",
+      "from": "accepted",
+      "to": "in_progress"
+    },
+    {
+      "at": "2026-10-07T08:10:00Z",
+      "action": "complete",
+      "actor": "E02",
+      "from": "in_progress",
+      "to": "done",
+      "comment": "Шум пропал"
+    },
+    {
+      "at": "2026-10-07T08:10:00Z",
+      "action": "review_started",
+      "actor": "SYSTEM",
+      "from": "done",
+      "to": "ai_review"
+    }
+  ],
+  "reference_llm": {
+    "work_match": {
+      "verdict": "full",
+      "explanation": "Замена подшипника устраняет шум"
+    },
+    "code_consistent": true,
+    "suggested_code": "М-02",
+    "materials_logic": {
+      "verdict": "ok",
+      "explanation": "подшипник и смазка по норме"
+    },
+    "photo": {
+      "after_present": false,
+      "same_equipment": "unsure",
+      "problem_resolved": "not_applicable",
+      "quality_issues": [],
+      "score_1_5": 1,
+      "explanation": "Фото после работ нет."
+    },
+    "confidence": 0.7,
+    "feedback_worker": {
+      "good": [
+        "Подшипник заменён"
+      ],
+      "improve": [
+        "Прикладывайте фото после работ"
+      ]
+    },
+    "summary_master": "Работы по описанию верные, фото после нет."
+  }
+}

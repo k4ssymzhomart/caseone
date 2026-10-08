@@ -1,0 +1,115 @@
+{
+  "case": "04_excess_materials",
+  "spec": "excess materials → rework",
+  "sql_case": "G3",
+  "title": "Шесть подшипников на один узел конвейера К-2",
+  "expected": {
+    "verdict": "rework",
+    "needs_master_review": false
+  },
+  "why": "R3 fail: перерасход: подшипник 3626 6 шт при норме до 2. Фото после есть, чтобы проверялся только перерасход.",
+  "order": {
+    "number": 9004,
+    "type": "unplanned",
+    "priority": "high",
+    "equipment_id": 12,
+    "assignee_tab_no": "2002",
+    "description": "Шум подшипника приводного барабана",
+    "comment": null,
+    "suggested_fault_code": "М-02",
+    "norm_hours": 3,
+    "equipment_stopped": true,
+    "works_done": "Заменил подшипники приводного барабана, смазал узел",
+    "fault_code": "М-02",
+    "closing_comment": "Шум пропал",
+    "created_at": "2026-10-07T08:00:00Z",
+    "started_at": "2026-10-07T08:05:00Z",
+    "done_at": "2026-10-07T10:35:00Z",
+    "due_at": "2026-10-07T11:00:00Z",
+    "paused_total_sec": 0,
+    "is_demo": false
+  },
+  "materials": [
+    {
+      "material_id": 2,
+      "qty": 6
+    }
+  ],
+  "photos": [
+    {
+      "kind": "after",
+      "file": "photos/conveyor_k2_bearing_new.png",
+      "source": "camera",
+      "captured_at": "2026-10-07T10:33:00Z",
+      "dhash": "5a5a5a5a5a5a5a5a",
+      "sha256": null
+    }
+  ],
+  "timeline": [
+    {
+      "at": "2026-10-07T08:00:00Z",
+      "action": "create",
+      "actor": "M01",
+      "to": "issued"
+    },
+    {
+      "at": "2026-10-07T08:03:00Z",
+      "action": "accept",
+      "actor": "E02",
+      "from": "issued",
+      "to": "accepted"
+    },
+    {
+      "at": "2026-10-07T08:05:00Z",
+      "action": "start",
+      "actor": "E02",
+      "from": "accepted",
+      "to": "in_progress"
+    },
+    {
+      "at": "2026-10-07T10:35:00Z",
+      "action": "complete",
+      "actor": "E02",
+      "from": "in_progress",
+      "to": "done",
+      "comment": "Шум пропал"
+    },
+    {
+      "at": "2026-10-07T10:35:00Z",
+      "action": "review_started",
+      "actor": "SYSTEM",
+      "from": "done",
+      "to": "ai_review"
+    }
+  ],
+  "reference_llm": {
+    "work_match": {
+      "verdict": "full",
+      "explanation": "Замена подшипника соответствует шуму"
+    },
+    "code_consistent": true,
+    "suggested_code": "М-02",
+    "materials_logic": {
+      "verdict": "suspicious",
+      "explanation": "шесть подшипников на один узел много"
+    },
+    "photo": {
+      "after_present": true,
+      "same_equipment": "unsure",
+      "problem_resolved": "not_applicable",
+      "quality_issues": [],
+      "score_1_5": 4,
+      "explanation": "Корпус подшипника новый, узел чистый"
+    },
+    "confidence": 0.75,
+    "feedback_worker": {
+      "good": [
+        "Узел собран аккуратно"
+      ],
+      "improve": [
+        "Списывайте фактическое количество подшипников"
+      ]
+    },
+    "summary_master": "Перерасход подшипников, проверьте списание."
+  }
+}

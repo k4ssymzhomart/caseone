@@ -1,0 +1,121 @@
+{
+  "case": "07_suspiciously_fast",
+  "spec": "suspiciously fast → accepted_with_remarks",
+  "sql_case": "G12",
+  "title": "Течь закрыта за 5 минут подтяжкой болтов",
+  "expected": {
+    "verdict": "accepted_with_remarks",
+    "needs_master_review": false
+  },
+  "why": "R4: 5 мин при нормативе 1 ч 30 мин (10 из 20). Подтяжка болтов без замены уплотнения устраняет течь лишь частично.",
+  "order": {
+    "number": 9007,
+    "type": "unplanned",
+    "priority": "high",
+    "equipment_id": 20,
+    "assignee_tab_no": "2001",
+    "description": "Подтекает масло по крышке насоса",
+    "comment": null,
+    "suggested_fault_code": "Г-01",
+    "norm_hours": 1.5,
+    "equipment_stopped": true,
+    "works_done": "Подтянул болты крышки, протёр подтёки",
+    "fault_code": "Г-01",
+    "closing_comment": "Течи не видно",
+    "created_at": "2026-10-07T11:00:00Z",
+    "started_at": "2026-10-07T11:03:00Z",
+    "done_at": "2026-10-07T11:08:00Z",
+    "due_at": "2026-10-07T12:30:00Z",
+    "paused_total_sec": 0,
+    "is_demo": false
+  },
+  "materials": [
+    {
+      "material_id": 39,
+      "qty": 1
+    }
+  ],
+  "photos": [
+    {
+      "kind": "before",
+      "file": "photos/pump_leak_c.png",
+      "source": "camera",
+      "captured_at": "2026-10-07T10:58:00Z",
+      "dhash": "7c7c7c7c7c7c7c7c",
+      "sha256": null
+    },
+    {
+      "kind": "after",
+      "file": "photos/pump_clean_c.png",
+      "source": "camera",
+      "captured_at": "2026-10-07T11:07:00Z",
+      "dhash": "a6a6a6a6a6a6a6a6",
+      "sha256": null
+    }
+  ],
+  "timeline": [
+    {
+      "at": "2026-10-07T11:00:00Z",
+      "action": "create",
+      "actor": "M01",
+      "to": "issued"
+    },
+    {
+      "at": "2026-10-07T11:01:00Z",
+      "action": "accept",
+      "actor": "E01",
+      "from": "issued",
+      "to": "accepted"
+    },
+    {
+      "at": "2026-10-07T11:03:00Z",
+      "action": "start",
+      "actor": "E01",
+      "from": "accepted",
+      "to": "in_progress"
+    },
+    {
+      "at": "2026-10-07T11:08:00Z",
+      "action": "complete",
+      "actor": "E01",
+      "from": "in_progress",
+      "to": "done",
+      "comment": "Течи не видно"
+    },
+    {
+      "at": "2026-10-07T11:08:00Z",
+      "action": "review_started",
+      "actor": "SYSTEM",
+      "from": "done",
+      "to": "ai_review"
+    }
+  ],
+  "reference_llm": {
+    "work_match": {
+      "verdict": "partial",
+      "explanation": "уплотнение не менялось, мало деталей"
+    },
+    "code_consistent": true,
+    "suggested_code": "Г-01",
+    "materials_logic": {
+      "verdict": "ok",
+      "explanation": "ветошь по норме"
+    },
+    "photo": {
+      "after_present": true,
+      "same_equipment": "yes",
+      "problem_resolved": "yes",
+      "quality_issues": [],
+      "score_1_5": 4,
+      "explanation": "течи не видно"
+    },
+    "confidence": 0.8,
+    "feedback_worker": {
+      "good": [],
+      "improve": [
+        "Опишите ремонт подробнее"
+      ]
+    },
+    "summary_master": "Подозрительно быстро, уплотнение не заменено."
+  }
+}

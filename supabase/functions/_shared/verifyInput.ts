@@ -296,7 +296,7 @@ export function buildVerifyText(ctx: VerifyContext, photos: readonly VerifyPhoto
   );
   if (missing.length > 0) {
     lines.push(
-      `Типовые для шифра, не списаны: ${missing.map((t) => `${t.material} ${num(t.qty)} ${t.unit}`).join(', ')}`,
+      `Ещё в типовом наборе шифра (по необходимости, не обязательно): ${missing.map((t) => `${t.material} ${num(t.qty)} ${t.unit}`).join(', ')}`,
     );
   }
 

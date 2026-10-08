@@ -1,0 +1,123 @@
+{
+  "case": "06_unrelated_works",
+  "spec": "unrelated works text → rework",
+  "sql_case": "G5",
+  "title": "Вместо устранения течи покрашено ограждение",
+  "expected": {
+    "verdict": "rework",
+    "needs_master_review": false
+  },
+  "why": "Правила пройдены, но работы не связаны с течью (L1 none), на фото после масло на месте.",
+  "order": {
+    "number": 9006,
+    "type": "unplanned",
+    "priority": "emergency",
+    "equipment_id": 20,
+    "assignee_tab_no": "2001",
+    "description": "Течь масла из под крышки насоса",
+    "comment": null,
+    "suggested_fault_code": "Г-01",
+    "norm_hours": 1.5,
+    "equipment_stopped": true,
+    "works_done": "Покрасил ограждение и убрал мусор вокруг",
+    "fault_code": "Г-01",
+    "closing_comment": "Готово",
+    "created_at": "2026-10-07T10:00:00Z",
+    "started_at": "2026-10-07T10:05:00Z",
+    "done_at": "2026-10-07T11:25:00Z",
+    "due_at": "2026-10-07T11:30:00Z",
+    "paused_total_sec": 0,
+    "is_demo": false
+  },
+  "materials": [
+    {
+      "material_id": 21,
+      "qty": 2
+    }
+  ],
+  "photos": [
+    {
+      "kind": "before",
+      "file": "photos/pump_leak_b.png",
+      "source": "camera",
+      "captured_at": "2026-10-07T09:58:00Z",
+      "dhash": "9e9e9e9e9e9e9e9e",
+      "sha256": null
+    },
+    {
+      "kind": "after",
+      "file": "photos/pump_painted_leak.png",
+      "source": "camera",
+      "captured_at": "2026-10-07T11:23:00Z",
+      "dhash": "a0a0a0a0a0a0a0a0",
+      "sha256": null
+    }
+  ],
+  "timeline": [
+    {
+      "at": "2026-10-07T10:00:00Z",
+      "action": "create",
+      "actor": "M01",
+      "to": "issued"
+    },
+    {
+      "at": "2026-10-07T10:02:00Z",
+      "action": "accept",
+      "actor": "E01",
+      "from": "issued",
+      "to": "accepted"
+    },
+    {
+      "at": "2026-10-07T10:05:00Z",
+      "action": "start",
+      "actor": "E01",
+      "from": "accepted",
+      "to": "in_progress"
+    },
+    {
+      "at": "2026-10-07T11:25:00Z",
+      "action": "complete",
+      "actor": "E01",
+      "from": "in_progress",
+      "to": "done",
+      "comment": "Готово"
+    },
+    {
+      "at": "2026-10-07T11:25:00Z",
+      "action": "review_started",
+      "actor": "SYSTEM",
+      "from": "done",
+      "to": "ai_review"
+    }
+  ],
+  "reference_llm": {
+    "work_match": {
+      "verdict": "none",
+      "explanation": "работы не связаны с течью"
+    },
+    "code_consistent": true,
+    "suggested_code": "Г-01",
+    "materials_logic": {
+      "verdict": "suspicious",
+      "explanation": "кольца списаны, замены нет"
+    },
+    "photo": {
+      "after_present": true,
+      "same_equipment": "yes",
+      "problem_resolved": "no",
+      "quality_issues": [
+        "масло под насосом"
+      ],
+      "score_1_5": 2,
+      "explanation": "Ограждение покрашено, лужа масла на месте"
+    },
+    "confidence": 0.85,
+    "feedback_worker": {
+      "good": [],
+      "improve": [
+        "Устраните течь и опишите ремонт"
+      ]
+    },
+    "summary_master": "Работы не устраняют течь."
+  }
+}
