@@ -85,7 +85,7 @@ function ProfileContent({ session, variant }: { session: Session; variant: Profi
         <ConnectionGroup density={density} />
         {worker ? <RatingSection employeeId={session.user_id} from={from} /> : null}
         <NotificationsGroup density={density} testUrl={HOME[variant]} />
-        <TelegramGroup density={density} />
+        <TelegramGroup density={density} session={session} />
         <ThemeGroup />
         {worker ? null : (
           <ListGroup header={t('profile.tools')}>

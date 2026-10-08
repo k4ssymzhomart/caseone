@@ -23,6 +23,7 @@ import { Switch } from '@/ui/Switch';
 import { T } from '@/ui/T';
 
 import { shortToken, usePushStatus, type PushStatus } from './push';
+import { openTelegramLink, telegramAvailable } from './telegram';
 import { useSignOut } from './signOut';
 
 const capitalize = (s: string) => (s ? s[0]!.toUpperCase() + s.slice(1) : s);
@@ -193,11 +194,35 @@ export function NotificationsGroup({ density, testUrl }: { density: ListRowDensi
   );
 }
 
-/** Telegram arrives in Phase 3: the row is visible and disabled. */
-export function TelegramGroup({ density }: { density: ListRowDensity }) {
+/** «Подключить Telegram»: one tap opens the bot with a 15 minute link token; the row shows when it is linked. */
+export function TelegramGroup({ density, session }: { density: ListRowDensity; session: Session }) {
+  const hud = useHud();
+  const dirs = useDirectories();
+  const [busy, setBusy] = useState(false);
+  const me = dirs.data?.employees.find((e) => e.id === session.user_id);
+  const linked = me?.telegram_chat_id != null;
+  if (!telegramAvailable) {
+    return (
+      <ListGroup footer={t('profile.telegramSoon')}>
+        <ListRow density={density} title={t('profile.telegram')} disabled />
+      </ListGroup>
+    );
+  }
   return (
-    <ListGroup footer={t('profile.telegramSoon')}>
-      <ListRow density={density} title={t('profile.telegram')} disabled />
+    <ListGroup footer={t(linked ? 'profile.telegramLinkedNote' : 'profile.telegramNote')}>
+      <ListRow
+        density={density}
+        title={t(linked ? 'profile.telegramRelink' : 'profile.telegram')}
+        right={linked ? <Pill tone="success" label={t('profile.telegramLinked')} /> : undefined}
+        showChevron
+        disabled={busy}
+        onPress={() => {
+          setBusy(true);
+          openTelegramLink()
+            .catch((e: unknown) => hud.show({ message: errorText(e), tone: 'critical' }))
+            .finally(() => setBusy(false));
+        }}
+      />
     </ListGroup>
   );
 }
