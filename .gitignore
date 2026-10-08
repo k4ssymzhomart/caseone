@@ -42,3 +42,6 @@ supabase/functions/.env
 
 # Leftovers from earlier ideas (kept locally, never committed)
 _archive/
+
+# Claude Code workflow worktrees (local only)
+.claude/worktrees/

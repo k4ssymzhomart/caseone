@@ -83,7 +83,7 @@ export function Hero() {
           />
           <PhoneShot shot="masterShift" alt={c.shotMaster} width={300} mobileWidth={196} priority className={h.front} />
           <HudLoop />
-          <p className={s.visuallyHidden}>{c.hud.map((x) => x.text).join('. ')}.</p>
+          <p className={s.visuallyHidden}>{c.hud.map((x) => x.text.replace(/[.\s]+$/, '')).join('. ')}.</p>
         </div>
       </div>
 

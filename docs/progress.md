@@ -4,37 +4,32 @@ Phase briefs: `docs/PHASE_N.md`. Build order: CLAUDE.md §21. Times are Asia/Qos
 
 ## Status
 
-As of 2026-10-08, 23:30.
+As of 2026-10-09, 02:00.
 
 | Phase | Status | Done | Open |
 | --- | --- | --- | --- |
-| P0 Foundation | done, Android push blocked | Monorepo, `@rota/design`, `@rota/shared` with `MockApi`, every mobile screen on the iOS Simulator, the web panel, Supabase skeleton, LLM client and privacy gateway, `llm:smoke --vision` (0.0010 USD), README, decisions, screenshots in `docs/screenshots/` | Real FCM push on Android: EAS `projectId` is empty in `apps/mobile/app.config.ts` and `google-services.json` is missing (PHASE_0 §9 Needs you 2 and 3) |
-| P1 Data core | done, live contract run open | Database built and applied by the architect; `rota_remaining.sql` and both seeds loaded; `tools/db-check.ts` passes; `SupabaseApi`, generated types, parity tests (fixtures, transitions, texts, AI rules) | `RUN_SUPABASE=1` contract suite: every scenario starts with `demo_reset()`, which fails through the API under pg-safeupdate (fix in `docs/db-requests.md`, not applied yet); migration history repair (PHASE_1 §2) only with the owner's yes |
-| P2 Live loop | in progress | `createLiveSync` and the data hooks surface (lane B); live sync wired on mobile, two device loop exercised on the live project (lane A); web panel pages on `RotaApi` (lane B, branch `p0-b`, built and checked in mock mode) | Merge `p0-b` into `main`; web panel against the live project; the §7 walkthrough twice with «Сбросить демо» between runs (needs the `demo_reset` fix); Vercel deploy (Needs you 4) |
-| P3 Notifications | in progress | `notify-dispatch` and `telegram-webhook` deployed (architect); channels, categories and sounds; push token registration; «Подключить Telegram» in the profile; `tools/gen-edge-env.ts` and `tools/telegram-setup.ts` | Edge secrets set and `setWebhook` run on the project; real push on Android (blocked as in P0); locked phone acceptance |
-| P4 AI control | in progress | `ai-verify` Edge Function with the shared input builder, retries, rules only fallback, auth; golden set of 10 cases (`npm run golden`); live golden run 7 of 10 (`docs/golden-results.md`) | Deploy `ai-verify`; `SupabaseApi.ai.verify` still calls `ai_check_rules` (swap to `functions.invoke('ai-verify')` with the rules as fallback); golden ≥ 9 of 10 (prompt fixes listed in `docs/golden-results.md`); escalation one tap reassign on real data |
-| P5 Reports and rating | not started | SQL `rating`, `shift_report`, `dashboard` (architect); web pages for them with the shared filter (lane B, mock checked) | `ai-shift-summary`, `ai-explain-rating` (both are fixed templates from the real numbers until then), PDF and Excel export, acceptance counts |
-| P6 Analytics | done on the mock provider (2026-10-09), model live from scripts | Detectors, `analytics_bundle`, `insight_cards` (architect); `ai-insights` deployed (v1): Haiku reads the question, Sonnet writes cards from the detector rows, every number checked against the cited rows, rules cards for dropped cards and left out findings, cache by scope, the digest path; `ai.ask` in both APIs; `/analytics` ask box with scope chips, model card tag, mini charts; P1 to P6 within ±20% and two live runs (0.086 USD) in `docs/phase6-acceptance.md`; dashboard tiles checked | Edge secrets `LLM_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` on the project; the Monday digest cron and the `d_post_ppr` order (`docs/db-requests.md`, 2026-10-09) |
-| P7 Demo hardening | not started | Landing spec `docs/LANDING.md` (lane C) | Release APK, the script three times on real phones, dataset export, architecture diagram, slides, video |
+| P0 Foundation | done | Monorepo, `@rota/design`, `@rota/shared` with `MockApi`, every mobile screen, the web panel, Supabase skeleton, LLM client and privacy gateway, `llm:smoke --vision`, README, decisions, screenshots | Real FCM push on Android needs Firebase (`google-services.json` + the FCM V1 key in EAS) |
+| P1 Data core | done | Database by the architect, seeds loaded (559 orders), `SupabaseApi`, types, parity tests, `tools/db-check.ts` passes | `RUN_SUPABASE=1` contract suite waits for the `demo_reset` fix; migration history repair only with the owner's yes |
+| P2 Live loop | done, walkthrough repeat open | Both apps in Supabase mode; live loop on two simulators against the real database (issue → red screen in under 3 s → accept, start, close with photo → AI check → master close); photo pipeline to Storage; web panel on real data | The §7 walkthrough twice with «Сбросить демо» between runs (needs `docs/db-fixes/demo_reset_where_true.sql`) |
+| P3 Notifications | partly done | `notify-dispatch`, `telegram-webhook` (architect); channels, categories, sounds, siren screen, in-app toasts with the body; simulated APNs push opens the red screen; «Подключить Telegram» in the profile; `tools/gen-edge-env.ts`, `tools/telegram-setup.ts` | Edge secrets on the project, then `setWebhook`; Firebase for Android push; locked phone acceptance on a real phone |
+| P4 AI control | done | `ai-verify` v4 deployed (rules in SQL, one Sonnet call, rules only fallback, auth, idempotent); golden set **10 из 10** live (`docs/golden-results.md`, 0.16 USD); `ai.verify` calls the function with the rules as fallback; escalation link opens the reassign sheet | Edge secrets switch the deployed function from mock to Sonnet |
+| P5 Reports and rating | done | `ai-shift-summary` (Sonnet) and `ai-explain-rating` (Haiku) deployed; PDF and Excel export; Сериков last on first time fix (64.7% vs team 91.3%, 92 days); `shift_report` equals the manual SQL count in five windows (`docs/phase5-acceptance.md`) | `shift_report` workload fix for paused orders (`docs/db-requests.md`) |
+| P6 Analytics | done | `ai-insights` deployed: Haiku reads the question, Sonnet writes cards, numbers checked against the data, rules fallback, cache, digest path; ask box, scope chips, mini charts; P1 to P6 within ±20% (`docs/phase6-acceptance.md`) | Monday digest cron and the `d_post_ppr` order (`docs/db-requests.md`) |
+| P7 Demo hardening | in progress | Landing at `/` (`docs/LANDING.md`); Android APK built on EAS (preview profile); presentation screenshots in `docs/screenshots/presentation/`; `docs/architecture.md` | The script three times on real phones, dataset export, slides, video, VM deploy (`docs/DEPLOY_VM.md`) |
 
 ## Live project
 
-Checked 2026-10-08, 23:25, project «rota» `wcjklkpkuhxgfdtbwbuk`.
+Checked 2026-10-09, 01:50, project «rota» `wcjklkpkuhxgfdtbwbuk`.
 
-- `npx tsx tools/db-check.ts` (publishable key, signed in as 1001): areas 4, equipment 25, employees 19, orders 559,
-  7 insight cards for 92 days, the first «Конвейер К-3 ломается чаще всех». Exit 0.
-- `internal.apply_action`, `internal.generate_history`, `internal.demo_reset` and `public.telegram_link_token`
-  exist. `internal.demo_reset()` still has the table wide `update public.employees set on_shift = …` without a
-  WHERE clause, so «Сбросить демо» from the apps fails until `docs/db-fixes/demo_reset_where_true.sql` runs.
-- Edge Functions: `notify-dispatch` and `telegram-webhook` active (version 1, `verify_jwt` off). `ai-verify` is not
-  deployed.
-- LLM ledger: 0.1603 USD spent of the 4 USD cap (smoke 0.0010, golden live run 0.1583).
+- `npx tsx tools/db-check.ts`: areas 4, equipment 25, employees 19, orders 559 plus test orders, 7 insight cards for 92 days.
+- Edge Functions: `notify-dispatch`, `telegram-webhook` (architect), `ai-verify` v4, `ai-shift-summary`, `ai-explain-rating`, `ai-insights`. No LLM secrets yet: every AI function answers with the mock provider or the rules.
+- Not applied yet (the owner pastes them in the SQL Editor): `docs/db-fixes/demo_reset_where_true.sql`, and the 2026-10-09 entries of `docs/db-requests.md`.
+- LLM ledger: about 0.42 USD of the 4 USD cap.
+- APK (EAS preview, 2026-10-09): https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk
 
 ## Branches
 
-- `main` (lane A, `~/Downloads/caseone`) holds lane B up to `b258404` and is 10 commits ahead of `p0-b`.
-- `p0-b` (lane B, `~/Downloads/caseone-b`) adds the web panel (`18019f0`, `ccd3a26`) and these docs. A trial merge
-  (`git merge-tree main p0-b`) has no conflicts.
+- `main` holds every lane: `p0-b` (lane B), the P5, P6 and landing worktree branches, all merged 2026-10-09.
 
 ## Log
 
@@ -95,3 +90,10 @@ date, typecheck of every workspace, tests, web build) exit 0.
 Other lanes the same day, for context (on `main`): monorepo, design tokens, Expo app, mobile kit and every screen,
 screenshots (lane A); live sync wiring and the Phase 2 audit fixes, Telegram link, `ai-verify` and the golden set
 (Phases 2 to 4); database, seeds and Edge Functions for dispatch and Telegram (architect); landing spec (lane C).
+
+### 2026-10-09
+
+- 00:00 to 02:00. Release build retakes of every presentation screen on real data (`docs/screenshots/presentation/`, indexed). Live loop on two simulators against the real database, including demo step 7 (no photo, 6 bearings → rework with both reasons).
+- Phase 4 finished: prompt p0.2 and code consistency cleanup, golden 10 из 10 live, `ai-verify` v4 deployed and checked.
+- Phase 5 and Phase 6 built in worktrees, deployed, accepted, merged. Landing merged.
+- EAS project linked (`de6b8e43-…`), preview APK built in the cloud.
