@@ -45,3 +45,6 @@ _archive/
 
 # Claude Code workflow worktrees (local only)
 .claude/worktrees/
+
+# VM bootstrap with the deploy public key (generated)
+deploy/vm/*.generated.ps1
