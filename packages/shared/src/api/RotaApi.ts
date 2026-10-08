@@ -101,7 +101,8 @@ export interface RotaApi {
     /** Latest review of the order, or null. */
     review(orderId: number): Promise<AiReview | null>;
     insights(input: InsightsInput): Promise<Insight[]>;
-    shiftSummary(input: ShiftReportInput): Promise<ShiftSummary>;
+    /** 5 to 8 sentences and 3 recommendations; `refresh` («Обновить») skips a stored summary older than a minute. */
+    shiftSummary(input: ShiftReportInput, options?: { refresh?: boolean }): Promise<ShiftSummary>;
     /** Three sentences: what helped, what hurt, one action. */
     explainRating(employeeId: string, period: Period): Promise<string>;
   };

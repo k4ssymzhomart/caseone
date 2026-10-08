@@ -4,12 +4,14 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { RealtimeEvent } from '../../domain/types';
+import type { RatingRow, RealtimeEvent, ShiftReport } from '../../domain/types';
+import { mockExplainRating, mockShiftSummary } from '../mock/ai';
 import { isRotaError, parseAnotherInProgress, RotaError } from '../errors';
 import { createApi } from '../index';
 import { memoryStorage } from '../RotaApi';
 import { fromAuth, fromPostgrest, fromStorage, fromThrown } from './errors';
 import {
+  AI_REPORT_TIMEOUT_MS,
   AI_VERIFY_TIMEOUT_MS,
   downtimeMinutes,
   foldSettings,
@@ -877,5 +879,138 @@ describe('SupabaseApi', () => {
     offReviews();
     expect(channels).toHaveLength(0);
     api.dispose();
+  });
+
+  describe('ai.shiftSummary and ai.explainRating through the report Edge Functions', () => {
+    const REPORT: ShiftReport = {
+      period: { from: '2026-10-08T03:00:00Z', to: '2026-10-08T10:01:00Z' },
+      counts: {
+        issued: 4,
+        accepted: 3,
+        done: 2,
+        closed: 5,
+        overdue: 1,
+        rejected: 0,
+        rework: 0,
+        cancelled: 0,
+        active_now: 6,
+      },
+      rejected_reasons: [],
+      workload: [],
+      downtime: [],
+      downtime_hours: 0,
+      reaction_avg_min: 3.5,
+      execution_avg_min: 80,
+      on_time_share: 0.9,
+      verdicts: { accepted: 2 },
+      master_overrides: 0,
+      top_issues: [],
+      top_equipment: [],
+    };
+    const ROW: RatingRow = {
+      kind: 'worker',
+      id: WORKER_ID,
+      name: 'Ахметов Е.',
+      brigade_id: 1,
+      closed: 12,
+      q: 0.86,
+      t: 0.92,
+      f: 0.9,
+      v: 0.7,
+      d: 1,
+      score: 88.1,
+      rank: 2,
+      note: null,
+    };
+    const numbers: Responder = (call) => {
+      if (call.target === 'rpc:shift_report') return { data: REPORT };
+      if (call.target === 'rpc:rating') return { data: [ROW] };
+      return undefined;
+    };
+    const input = { from: '2026-10-08T03:00:00Z', to: '2026-10-08T10:01:00Z', filters: { area_id: 2 } };
+    const LLM = {
+      summary: 'За смену выдано 4 наряда, исполнено 2. Просрочен 1 наряд.',
+      recommendations: ['Разобрать просрочку.', 'Проверить К-3.', 'Закрыть наряды.'],
+      source: 'llm',
+      model: 'claude-sonnet-5-5',
+      cached: false,
+      generated_at: '2026-10-08T10:00:30Z',
+    };
+
+    it('returns the summary of ai-shift-summary and passes the scope and refresh', async () => {
+      const invocations: [string, unknown][] = [];
+      const { api, rpcCalls } = makeApi(numbers, async (name, options) => {
+        invocations.push([name, options]);
+        return { data: LLM, error: null };
+      });
+      expect(await api.ai.shiftSummary(input)).toEqual(LLM);
+      await api.ai.shiftSummary(input, { refresh: true });
+      expect(invocations).toEqual([
+        [
+          'ai-shift-summary',
+          { body: { from: input.from, to: input.to, filters: { area_id: 2 } }, timeout: AI_REPORT_TIMEOUT_MS },
+        ],
+        [
+          'ai-shift-summary',
+          {
+            body: { from: input.from, to: input.to, filters: { area_id: 2 }, refresh: true },
+            timeout: AI_REPORT_TIMEOUT_MS,
+          },
+        ],
+      ]);
+      // the function reads the report itself
+      expect(rpcCalls('shift_report')).toHaveLength(0);
+    });
+
+    it.each([
+      ['no functions client', undefined],
+      ['an HTTP error', async () => ({ data: null, error: { name: 'FunctionsHttpError', context: { status: 500 } } })],
+      ['a thrown error', async () => Promise.reject(new Error('offline'))],
+      ['an answer without recommendations', async () => ({ data: { summary: 'x', recommendations: [] }, error: null })],
+    ] as [string, FakeInvoke | undefined][])('falls back to the rules summary on %s', async (_, invoke) => {
+      const { api, rpcCalls } = makeApi(numbers, invoke);
+      const s = await api.ai.shiftSummary(input);
+      expect(s).toEqual({
+        ...mockShiftSummary(REPORT),
+        source: 'rules',
+        model: 'rules',
+        generated_at: clock.toISOString(),
+      });
+      expect(rpcCalls('shift_report')[0]?.args).toEqual({
+        p_from: input.from,
+        p_to: input.to,
+        p_filters: { area_id: 2 },
+      });
+    });
+
+    it('falls back to the rules summary after AI_REPORT_TIMEOUT_MS', async () => {
+      vi.useFakeTimers();
+      const { api } = makeApi(numbers, () => new Promise(() => undefined));
+      const pending = api.ai.shiftSummary(input);
+      await vi.advanceTimersByTimeAsync(AI_REPORT_TIMEOUT_MS);
+      expect((await pending).source).toBe('rules');
+    });
+
+    it('explains the rating through ai-explain-rating, else with the rules text', async () => {
+      const invocations: [string, unknown][] = [];
+      const period = { from: '2026-09-08T10:00:00Z', to: '2026-10-08T10:00:00Z' };
+      const ok = makeApi(numbers, async (name, options) => {
+        invocations.push([name, options]);
+        return { data: JSON.stringify({ text: 'Три предложения от модели.', source: 'llm' }), error: null };
+      });
+      await ok.api.auth.signIn('2001', '1234');
+      expect(await ok.api.ai.explainRating(WORKER_ID, period)).toBe('Три предложения от модели.');
+      expect(invocations).toEqual([
+        ['ai-explain-rating', { body: { employee_id: WORKER_ID, ...period }, timeout: AI_REPORT_TIMEOUT_MS }],
+      ]);
+      expect(ok.rpcCalls('rating')).toHaveLength(0);
+      // a worker never asks about someone else, not even through the function
+      expect((await failure(ok.api.ai.explainRating(MASTER_ID, period))).code).toBe('FORBIDDEN');
+      expect(invocations).toHaveLength(1);
+
+      const down = makeApi(numbers, async () => ({ data: null, error: { name: 'FunctionsFetchError' } }));
+      await down.api.auth.signIn('2001', '1234');
+      expect(await down.api.ai.explainRating(WORKER_ID, period)).toBe(mockExplainRating(ROW));
+    });
   });
 });
