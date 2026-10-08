@@ -53,7 +53,7 @@ export interface RotaApi {
   orders: {
     /** v_orders rows, emergency first, then by due_at. A worker only ever sees own orders (RLS). */
     list(filter?: OrderFilter): Promise<OrderView[]>;
-    /** Board rows: active, done, ai_review, plus closed today (local); group by board_column on the client. */
+    /** Board rows: active, rejected, done, ai_review, closed today (local); group by board_column. */
     forBoard(filters?: ReportFilters): Promise<OrderView[]>;
     get(id: number): Promise<OrderDetail>;
     /** rpc create_order. Errors: BAD_INPUT, NOT_ON_SHIFT (retry with allow_off_shift), FORBIDDEN. */
