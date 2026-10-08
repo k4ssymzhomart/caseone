@@ -1,0 +1,23 @@
+{
+  "comment": "The order state machine as implemented in public.order_action / internal.apply_action. packages/shared transitions.ts must agree (test in Phase 1).",
+  "master_roles": ["master", "admin"],
+  "active": ["issued", "accepted", "queued", "in_progress", "paused", "rework"],
+  "actions": {
+    "accept":        { "actor": "assignee", "from": ["issued", "queued"], "to": "accepted" },
+    "queue":         { "actor": "assignee", "from": ["issued"], "to": "queued" },
+    "reject":        { "actor": "assignee", "from": ["issued", "queued", "accepted"], "to": "rejected", "requires": ["reason"], "comment_required_when_reason": "other" },
+    "start":         { "actor": "assignee", "from": ["accepted", "queued"], "to": "in_progress", "single_in_progress": true },
+    "pause":         { "actor": "assignee", "from": ["in_progress"], "to": "paused", "requires": ["reason"] },
+    "resume":        { "actor": "assignee", "from": ["paused"], "to": "in_progress", "single_in_progress": true },
+    "complete":      { "actor": "assignee", "from": ["in_progress"], "to": "ai_review", "via": "done" },
+    "ai_result":     { "actor": "system", "from": ["ai_review"], "to": ["rework", "ai_review"] },
+    "close":         { "actor": "master", "from": ["ai_review", "rework"], "to": "closed" },
+    "return":        { "actor": "master", "from": ["ai_review"], "to": "rework", "requires": ["comment"] },
+    "resume_rework": { "actor": "assignee", "from": ["rework"], "to": "in_progress", "single_in_progress": true },
+    "reassign":      { "actor": "master", "from": ["issued", "queued", "accepted", "rejected", "paused", "in_progress", "rework"], "to": "issued" },
+    "cancel":        { "actor": "master", "from": ["issued", "accepted", "queued", "rejected", "in_progress", "paused", "done", "ai_review", "rework"], "to": "cancelled", "requires": ["reason"] },
+    "set_priority":  { "actor": "master", "from": ["issued", "accepted", "queued", "in_progress", "paused", "rework"], "to": "same" },
+    "mark_reject_justified": { "actor": "master", "from": "any order with a reject event", "to": "same" }
+  },
+  "errors": ["FORBIDDEN", "BAD_TRANSITION", "MISSING_REASON", "ANOTHER_IN_PROGRESS", "NOT_ON_SHIFT", "BAD_INPUT"]
+}
