@@ -10,8 +10,9 @@
 //
 // Known differences from MockApi: ai.verify calls the ai-verify Edge Function (rules + LLM, CLAUDE.md §11) and
 // falls back to the rules only check (ai_check_rules, model 'rules', needs_master_review unless a rule fails)
-// when the function is missing, fails or takes over 60 s; shiftSummary and explainRating build their text from the
-// real report numbers with the deterministic writers of the mock until the Phase 5 Edge Functions exist.
+// when the function is missing, fails or takes over 60 s; shiftSummary and explainRating call ai-shift-summary and
+// ai-explain-rating (CLAUDE.md §13, §14) and fall back to the deterministic writers of the mock over the real report
+// numbers when the function is missing, fails or takes over 20 s.
 
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { ACTIVE_STATUSES, ROLES, type OrderAction, type Role } from '../../domain/enums';
@@ -47,6 +48,7 @@ import type {
   ShiftCounters,
   ShiftReport,
   ShiftReportInput,
+  ShiftSummary,
   Unsubscribe,
   WorkerStatusView,
 } from '../../domain/types';
@@ -116,6 +118,49 @@ export function functionErrorStatus(error: unknown): number {
   if (e?.name === 'FunctionsRelayError') return 0;
   const status = e?.context?.status;
   return typeof status === 'number' ? status : 0;
+}
+
+/**
+ * How long ai.shiftSummary and ai.explainRating wait for their Edge Functions before the rules text from the report
+ * numbers takes over. A Sonnet summary takes about 7 s, a Haiku explanation about 4 s.
+ */
+export const AI_REPORT_TIMEOUT_MS = 20_000;
+
+/** A JSON body of functions.invoke: an object, or a JSON text that parses to one; null otherwise. */
+function jsonBody(data: unknown): Record<string, unknown> | null {
+  let body = data;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body) as unknown;
+    } catch {
+      return null;
+    }
+  }
+  return body !== null && typeof body === 'object' && !Array.isArray(body)
+    ? (body as Record<string, unknown>)
+    : null;
+}
+
+/** The summary in an ai-shift-summary answer, or null when the shape is off. */
+export function shiftSummaryOf(data: unknown): ShiftSummary | null {
+  const b = jsonBody(data);
+  if (!b || typeof b.summary !== 'string' || !b.summary.trim()) return null;
+  const recs = Array.isArray(b.recommendations)
+    ? b.recommendations.filter((r): r is string => typeof r === 'string' && r.trim().length > 0)
+    : [];
+  if (recs.length === 0) return null;
+  const out: ShiftSummary = { summary: b.summary, recommendations: recs.slice(0, 3) };
+  if (b.source === 'llm' || b.source === 'rules') out.source = b.source;
+  if (typeof b.model === 'string') out.model = b.model;
+  if (typeof b.generated_at === 'string') out.generated_at = b.generated_at;
+  if (typeof b.cached === 'boolean') out.cached = b.cached;
+  return out;
+}
+
+/** The text of an ai-explain-rating answer, or null when the shape is off. */
+export function explanationOf(data: unknown): string | null {
+  const b = jsonBody(data);
+  return b && typeof b.text === 'string' && b.text.trim() ? b.text : null;
 }
 
 /** The review in an ai-verify answer ({review, already_reviewed?, rules_only?}), or null when the shape is off. */
@@ -913,6 +958,33 @@ export class SupabaseApi implements RotaApi {
     return null;
   }
 
+  /**
+   * One call of a report Edge Function (ai-shift-summary, ai-explain-rating) with AI_REPORT_TIMEOUT_MS: the answer
+   * body, or null on anything else (no functions client, network, timeout, any HTTP error). The callers then write
+   * the rules text from the numbers they may read themselves, so a refusal still surfaces from the report RPC.
+   */
+  private async invokeReport(name: string, body: Record<string, unknown>): Promise<unknown> {
+    const functions = (this.client as { functions?: { invoke?: FunctionsInvoke } }).functions;
+    const invoke = functions?.invoke;
+    if (typeof invoke !== 'function') return null;
+    let timer: TimerHandle | undefined;
+    const timedOut = new Promise<'timeout'>((resolve) => {
+      timer = later(() => resolve('timeout'), AI_REPORT_TIMEOUT_MS);
+    });
+    try {
+      const res = await Promise.race([
+        invoke.call(functions, name, { body, timeout: AI_REPORT_TIMEOUT_MS }),
+        timedOut,
+      ]);
+      if (res === 'timeout' || res.error) return null;
+      return res.data;
+    } catch {
+      return null;
+    } finally {
+      if (timer !== undefined) cancelLater(timer);
+    }
+  }
+
   /** public.ai_check_rules: the rules only review a signed-in assignee or master may start. */
   private async verifyByRules(orderId: number): Promise<AiReview> {
     try {
@@ -964,14 +1036,33 @@ export class SupabaseApi implements RotaApi {
       }) as Promise<Insight[] | null>);
       return cards ?? [];
     },
-    shiftSummary: async (input: ShiftReportInput) =>
-      // Phase 5: the ai-shift-summary Edge Function; until then the deterministic summary of the real numbers
-      mockShiftSummary(await this.reports.shift(input)),
+    shiftSummary: async (input: ShiftReportInput, options?: { refresh?: boolean }) => {
+      const answer = shiftSummaryOf(
+        await this.invokeReport('ai-shift-summary', {
+          from: input.from,
+          to: input.to,
+          filters: input.filters ?? {},
+          ...(options?.refresh ? { refresh: true } : {}),
+        }),
+      );
+      if (answer) return answer;
+      // the function is missing, failed or slow: the deterministic summary of the real numbers
+      const rules: ShiftSummary = mockShiftSummary(await this.reports.shift(input));
+      return { ...rules, source: 'rules', model: 'rules', generated_at: this.clock().toISOString() };
+    },
     explainRating: async (employeeId, period) => {
       const s = await this.requireSession();
       if (s.role === 'worker' && employeeId !== s.user_id) {
         throw new RotaError('FORBIDDEN', { details: 'own rating only' });
       }
+      const text = explanationOf(
+        await this.invokeReport('ai-explain-rating', {
+          employee_id: employeeId,
+          from: period.from,
+          to: period.to,
+        }),
+      );
+      if (text) return text;
       const rows = await this.reports.rating(period, { assignee_id: employeeId });
       return mockExplainRating(rows.find((r) => r.kind === 'worker' && r.id === employeeId));
     },

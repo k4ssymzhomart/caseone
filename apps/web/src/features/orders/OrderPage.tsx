@@ -4,6 +4,7 @@
 // suggest_assignees and the brigades tab, priority, cancel), the timeline with «Признать обоснованным» on refusals.
 // `?reassign={employee_id}` comes from an escalation notification: a one tap «Переназначить на …» on top.
 // Managers see the same page without actions. Live sync refreshes it through ['order', id].
+// «Скачать PDF» prints the same report with the before and after photos (pdfmake loads on the first click).
 import {
   allowedActions,
   formatDateTime,
@@ -33,13 +34,16 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/components/layout';
 import { Button } from '@/components/rota';
 import { Card, EmptyState, ErrorState, Loading, Page, Pill, Section, Table, Tag, type Column } from '@/components/ui';
-import { newActionId, useRequiredSession } from '@/lib/api';
+import { newActionId, useApi, useRequiredSession } from '@/lib/api';
 import { useRouteId } from '@/lib/params';
 import { orderBadge, orderEyebrow } from '@/lib/present';
 import { useDirectories, useOrder, useWorkerStatuses } from '@/lib/queries';
 import { paths } from '@/lib/routes';
 import { useNow } from '@/lib/useNow';
+import { downloadPdf, imageDataUrl } from '../reports/export/files';
+import { useExport } from '../reports/export/useExport';
 import { CancelDialog, OverrideDialog, PriorityDialog, ReturnDialog } from './ActionDialogs';
+import { orderReportPdf, pdfPhotos } from './orderExport';
 import { PhotoCompare } from './PhotoCompare';
 import { ReassignDialog } from './ReassignDialog';
 import {
@@ -144,7 +148,12 @@ function OrderReport({ detail, now }: { detail: OrderDetail; now: Date }) {
     <Page
       eyebrow={eyebrow}
       title={o.equipment_name}
-      actions={<StatusPills detail={detail} now={now} />}
+      actions={
+        <>
+          <StatusPills detail={detail} now={now} />
+          <OrderPdfButton detail={detail} />
+        </>
+      }
     >
       {can('reassign') ? <EscalationBanner detail={detail} /> : null}
 
@@ -275,6 +284,34 @@ function OrderReport({ detail, now }: { detail: OrderDetail; now: Date }) {
 }
 
 // ---------------------------------------------------------------------------- header and status
+
+/** The master report as a PDF with the first «до» and the last «после» photo. */
+function OrderPdfButton({ detail }: { detail: OrderDetail }) {
+  const api = useApi();
+  const dirs = useDirectories();
+  const exp = useExport();
+  const download = () =>
+    exp.run('pdf', async () => {
+      const pick = pdfPhotos(detail.photos);
+      const paths = [pick.before, pick.after].flatMap((p) => (p ? [p.storage_path] : []));
+      const urls = paths.length > 0 ? await api.photos.urls(paths).catch(() => ({}) as Record<string, string>) : {};
+      const [before, after] = await Promise.all([
+        imageDataUrl(pick.before ? urls[pick.before.storage_path] : null),
+        imageDataUrl(pick.after ? urls[pick.after.storage_path] : null),
+      ]);
+      await downloadPdf(
+        orderReportPdf({ detail, dirs: dirs.data, photos: { before, after }, generatedAt: new Date() }),
+        `rota-order-${detail.order.number}.pdf`,
+      );
+      const lost = (pick.before && !before) || (pick.after && !after);
+      return lost ? t('order.pdf.photo_failed') : undefined;
+    });
+  return (
+    <Button variant="secondary" onClick={() => void download()} disabled={exp.busy != null}>
+      {exp.busy ? t('export.busy') : t('report.export_pdf')}
+    </Button>
+  );
+}
 
 function StatusPills({ detail, now }: { detail: OrderDetail; now: Date }) {
   const o = detail.order;

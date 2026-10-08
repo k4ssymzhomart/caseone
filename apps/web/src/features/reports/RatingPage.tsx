@@ -1,7 +1,7 @@
 // /reports/rating (master, manager): rpc rating (CLAUDE.md §13) for the FilterBar period (demo step 8 uses «Месяц»),
 // with workers and brigades tabs (?kind=brigade), a stacked bar chart of what each component adds to the score, and
 // the table with Q T F V D, closed orders and the score. Workers without closed orders stay in the table with
-// «нет закрытых нарядов» and no score.
+// «нет закрытых нарядов» and no score. «Скачать PDF» and «Скачать Excel» export both tabs.
 import {
   formatInt,
   formatNumber,
@@ -13,6 +13,7 @@ import {
 } from '@rota/shared';
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router';
+import { Button } from '@/components/rota';
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 import { ChartCard, ChartTooltip } from '@/components/chart';
 import {
@@ -35,7 +36,10 @@ import {
 import { useReportFilter } from '@/lib/filters';
 import { t } from '@/lib/i18n';
 import { useDirectories, useRating } from '@/lib/queries';
-import { num, periodEyebrow, scoreText, shareText } from './format';
+import { downloadPdf, downloadXlsx, fileStamp } from './export/files';
+import { ratingPdf, ratingSheets, type RatingExportInput } from './export/ratingExport';
+import { useExport } from './export/useExport';
+import { filterText, num, periodEyebrow, scoreText, shareText } from './format';
 import { Stale } from './kit';
 import s from './reports.module.css';
 
@@ -45,6 +49,18 @@ const ROW_HEIGHT = 30;
 export function RatingPage() {
   const { preset, period, filters, fromDay, toDay } = useReportFilter();
   const rating = useRating(period, filters);
+  const dirs = useDirectories();
+  const eyebrow = periodEyebrow(preset, period, fromDay, toDay);
+  const exp = useExport();
+  const exportInput = (rows: RatingRow[]): RatingExportInput => ({
+    rows,
+    brigadeNames: new Map((dirs.data?.brigades ?? []).map((b) => [b.id, b.name])),
+    periodText: eyebrow,
+    filterText: filterText(filters, dirs.data),
+    generatedAt: new Date(),
+  });
+  const fileName = (ext: string) => `rota-rating-${fileStamp(period.to)}.${ext}`;
+  const ready = !!rating.data && exp.busy == null;
   const [params, setParams] = useSearchParams();
   const kind: Kind = params.get('kind') === 'brigade' ? 'brigade' : 'worker';
   const setKind = (next: Kind) =>
@@ -61,17 +77,39 @@ export function RatingPage() {
   return (
     <Page
       title={t('page.reports_rating')}
-      eyebrow={periodEyebrow(preset, period, fromDay, toDay)}
+      eyebrow={eyebrow}
       actions={
-        <Segmented<Kind>
-          label={t('rating.tabs')}
-          value={kind}
-          onChange={setKind}
-          options={[
-            { value: 'worker', label: t('rating.tab.workers') },
-            { value: 'brigade', label: t('rating.tab.brigades') },
-          ]}
-        />
+        <>
+          <Segmented<Kind>
+            label={t('rating.tabs')}
+            value={kind}
+            onChange={setKind}
+            options={[
+              { value: 'worker', label: t('rating.tab.workers') },
+              { value: 'brigade', label: t('rating.tab.brigades') },
+            ]}
+          />
+          <Button
+            variant="secondary"
+            disabled={!ready}
+            onClick={() => {
+              const rows = rating.data;
+              if (rows) void exp.run('pdf', () => downloadPdf(ratingPdf(exportInput(rows)), fileName('pdf')));
+            }}
+          >
+            {exp.busy === 'pdf' ? t('export.busy') : t('report.export_pdf')}
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!ready}
+            onClick={() => {
+              const rows = rating.data;
+              if (rows) void exp.run('xlsx', () => downloadXlsx(ratingSheets(exportInput(rows)), fileName('xlsx')));
+            }}
+          >
+            {exp.busy === 'xlsx' ? t('export.busy') : t('report.export_excel')}
+          </Button>
+        </>
       }
     >
       <QueryState query={rating}>

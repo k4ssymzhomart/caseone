@@ -1,0 +1,16 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    // Web standard globals plus deno-standin.d.ts; the npm: specifier resolves to the workspace copy of
+    // supabase-js (same version as the import in index.ts) for type checking only.
+    "lib": ["es2023", "dom"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "types": [],
+    "paths": {
+      "npm:@supabase/supabase-js@2.117.3": ["../../../node_modules/@supabase/supabase-js/dist/index.d.mts"]
+    }
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}

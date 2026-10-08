@@ -3,6 +3,41 @@
 Changes the apps need from the architect's database. Newest first. Apply in the Supabase SQL Editor, then mirror
 them into `supabase/migrations/` and `supabase/manual/`.
 
+## 2026-10-09 · `shift_report` workload above 100% (paused orders count as work)
+
+**Symptom.** The night shift of 08.10 (20:00 to 01:00) showed «Абенов Т. 7 ч 1 мин, 126%» in «Загрузка
+исполнителей», and the AI summary called it an overload. Nobody can be busy longer than the window.
+
+**Cause.** In the `busy` CTE of `public.shift_report` an order still in `paused` counts as work until `now()`:
+`paused_total_sec` only grows on `resume`, so the open pause (`paused_since` to now) is never subtracted. Order №647
+(demo state, «ждём подшипник со склада») has been paused since 16:54 UTC. The demo reset also starts №656 and №647 for
+the same worker at overlapping times, so the per worker sum can pass the window even without the pause.
+
+**Fix.** End a paused order's busy interval at `paused_since`, cap each worker at the window length, and in the
+final `workload` object write `'share', least(1, round(...))`:
+
+```sql
+busy as (
+  select b.assignee_id, b.assignee_name, least(sum(b.minutes), (select minutes from span)) as minutes
+    from (
+      select o.assignee_id, o.assignee_name,
+             greatest(0, extract(epoch from (
+               least(coalesce(o.done_at, o.cancelled_at, case when o.status = 'paused' then o.paused_since end, now()), p_to)
+               - greatest(o.started_at, p_from))) / 60)
+             * (1 - least(1, o.paused_total_sec / greatest(extract(epoch from (
+                 coalesce(o.done_at, o.cancelled_at, case when o.status = 'paused' then o.paused_since end, now())
+                 - o.started_at)), 1))) as minutes
+        from o
+       where o.started_at is not null and o.started_at < p_to and coalesce(o.done_at, o.cancelled_at, now()) > p_from
+    ) b
+   group by b.assignee_id, b.assignee_name
+)
+```
+
+**Check.** `select x ->> 'short_name', x ->> 'share' from jsonb_array_elements(public.shift_report(now() - interval
+'5 hours', now(), '{}') -> 'workload') x;` never shows a share above 1. The web table, the PDF and the AI summary then
+read the corrected numbers without an app change.
+
 ## 2026-10-08 · order numbers collide after a failed `demo_reset()` (blocker, same fix file)
 
 **Symptom.** `create_order` returns 409 (unique violation on `orders.number`); the app shows «Проверьте поля наряда».

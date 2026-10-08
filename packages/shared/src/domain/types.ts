@@ -544,6 +544,14 @@ export interface Insight {
 export interface ShiftSummary {
   summary: string;
   recommendations: string[];
+  /** 'llm' from the model (ai-shift-summary), 'rules' written from the numbers; absent in mock mode. */
+  source?: 'llm' | 'rules';
+  /** The model id, or 'rules'. */
+  model?: string;
+  /** When the text was written (a cached summary keeps its own time). */
+  generated_at?: string;
+  /** true when ai-shift-summary returned a summary stored within the last 10 minutes. */
+  cached?: boolean;
 }
 
 // ---------------------------------------------------------------------------

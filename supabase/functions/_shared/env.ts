@@ -16,3 +16,20 @@ export function readSecretKey(get: EnvGetter): string {
   }
   return get('SUPABASE_SERVICE_ROLE_KEY') ?? get('SUPABASE_SECRET_KEY') ?? '';
 }
+
+/**
+ * The key that goes with a user's access token (apikey header) when a function calls the API as that user:
+ * SUPABASE_PUBLISHABLE_KEYS (JSON, key `default`), SUPABASE_PUBLISHABLE_KEY, else the legacy SUPABASE_ANON_KEY.
+ */
+export function readPublishableKey(get: EnvGetter): string {
+  const keys = get('SUPABASE_PUBLISHABLE_KEYS');
+  if (keys) {
+    try {
+      const parsed = JSON.parse(keys) as Record<string, unknown>;
+      if (typeof parsed.default === 'string' && parsed.default) return parsed.default;
+    } catch {
+      // fall through to the single keys
+    }
+  }
+  return get('SUPABASE_PUBLISHABLE_KEY') ?? get('SUPABASE_ANON_KEY') ?? '';
+}
