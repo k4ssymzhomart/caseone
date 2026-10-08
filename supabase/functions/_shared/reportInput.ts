@@ -195,7 +195,7 @@ export function filterLine(filters: ReportFiltersData, names: FilterNames): stri
     : 'Фильтр: все участки, всё оборудование и все исполнители.';
 }
 
-/** The pseudonyms the workload needs; null when one of them is missing (no call goes out then). */
+/** True when every worker of the workload has a pseudonym (otherwise no call goes out). */
 export function workloadCovered(
   report: Pick<ShiftReportData, 'workload'>,
   pseudonyms: ReadonlyMap<string, string>,
