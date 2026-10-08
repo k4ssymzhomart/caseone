@@ -1,11 +1,13 @@
-// npx tsx tools/ai-insights-check.ts [--patterns] [--deployed] [--live]
+// npx tsx tools/ai-insights-check.ts [--patterns] [--deployed] [--sessions] [--live]
 // Live checks of ai-insights (CLAUDE.md §15, §21 P6). Never prints keys or tokens.
 //
 //   --patterns  (read only, free) public.analytics_bundle and public.insight_cards for the 92 day history and for
 //               «участок дробления за 30 дней», compared with the answer key tools/seed/PATTERNS.md (±20%).
-//   --deployed  (free while the project runs the mock provider) the deployed function the way the apps call it:
-//               master 1001 and manager 3001 with the publishable key, with and without a question; no session
-//               401; worker 2001 403; a manager asking for the digest 403.
+//   --deployed  (free while the project runs the mock provider) the deployed function with the secret key (the
+//               caller the cron uses): 92 days, the demo question, the cache on a second call; no credentials and
+//               the publishable key alone 401, a broken session 401. Never the digest: that sends notifications.
+//   --sessions  the user paths, signed in with the seeded test accounts: master 1001 and manager 3001 get cards,
+//               worker 2001 gets 403, a manager asking for the digest 403.
 //   --live      (paid, about 0.05 USD a run) this repo's handler with the local Anthropic key
 //               (.secrets/anthropic.env), the project database through the secret key and the JSON ledger
 //               .secrets/llm-ledger.json as the budget guard: the 92 day history and «покажи проблемы участка
@@ -45,9 +47,11 @@ const DEMO_QUERY = 'покажи проблемы участка дроблен�
 const HISTORY = { from: '2026-07-07T19:00:00.000Z', to: '2026-10-07T19:00:00.000Z' };
 
 const args = new Set(process.argv.slice(2));
-const any = args.has('--patterns') || args.has('--deployed') || args.has('--live');
+const any =
+  args.has('--patterns') || args.has('--deployed') || args.has('--sessions') || args.has('--live');
 const doPatterns = args.has('--patterns') || !any;
 const doDeployed = args.has('--deployed') || !any;
+const doSessions = args.has('--sessions');
 const doLive = args.has('--live');
 
 const root = resolve(import.meta.dirname, '..');
@@ -320,17 +324,12 @@ async function callFn(body: unknown, headers: Record<string, string>) {
   return { status: res.status, body: json, ms: Math.round(performance.now() - t0) };
 }
 
-async function deployed(): Promise<void> {
-  console.log('\n== deployed ai-insights ==');
-  const master = await signIn('1001', '1111');
-  const manager = await signIn('3001', '3333');
-  const worker = await signIn('2001', '1234');
-  const as = (token: string) => ({ apikey: publishable!, authorization: `Bearer ${token}` });
-
-  const plain = await callFn({ ...HISTORY, filters: {} }, as(master));
+/** The cards path, for any caller that may ask: 92 days, the demo question, then the cache. */
+async function askAs(headers: Record<string, string>, who: string): Promise<void> {
+  const plain = await callFn({ ...HISTORY, filters: {} }, headers);
   check(
     plain.status === 200 && Array.isArray(plain.body?.cards),
-    'master, 92 days',
+    `${who}, 92 days`,
     `${plain.status}, ${plain.ms} ms`,
   );
   if (plain.body?.scope) {
@@ -352,9 +351,9 @@ async function deployed(): Promise<void> {
       to: new Date().toISOString(),
       query: DEMO_QUERY,
     },
-    as(manager),
+    headers,
   );
-  check(asked.status === 200, 'manager, the demo question', `${asked.status}, ${asked.ms} ms`);
+  check(asked.status === 200, `${who}, the demo question`, `${asked.status}, ${asked.ms} ms`);
   const s = asked.body?.scope;
   if (s) {
     console.log(
@@ -364,22 +363,56 @@ async function deployed(): Promise<void> {
       s.area_name === 'Участок дробления' && s.label === '30 дней',
       'the question sets area and period',
     );
-    const k3 = asked.body?.cards.find((c) => c.kind === 'top_equipment');
+    // the rules card says «7 внеплановых остановок за 30 дней, 5 из них шифр М-02»; a model card may say it its way
+    const k3 = asked.body?.cards.find((c) => /К-3/.test(`${c.title} ${c.body}`));
+    const text = k3 ? `${k3.title} ${k3.body}` : '';
     check(
-      !!k3 && /7 .*остановок/.test(k3.body) && /5 из них шифр М-02/.test(k3.body),
+      /(^|\D)7(\D|$)/.test(text) && /(^|\D)5(\D|$)/.test(text) && /М-02/.test(text),
       'К-3: 7 stops, 5 of them М-02',
       k3?.body ?? 'no card',
     );
   }
 
-  const again = await callFn({ ...HISTORY, filters: {} }, as(master));
+  const again = await callFn({ ...HISTORY, filters: {} }, headers);
   check(
     again.status === 200 && again.body?.scope.cached === true,
-    'the same scope again comes from the cache',
+    `${who}, the same scope again comes from the cache`,
     `${again.ms} ms`,
   );
+}
 
-  check((await callFn({}, { apikey: publishable! })).status === 401, 'no session: 401');
+async function deployed(): Promise<void> {
+  console.log('\n== deployed ai-insights, secret key ==');
+  await askAs({ apikey: secret! }, 'secret key');
+  // past the cache: the provider the project runs (mock until LLM_PROVIDER=anthropic is set) answers
+  const week = {
+    from: new Date(Date.now() - 7 * 86_400_000).toISOString(),
+    to: new Date().toISOString(),
+    fresh: true,
+  };
+  const fresh = await callFn(week, { apikey: secret! });
+  check(
+    fresh.status === 200 && fresh.body?.scope.cached === false,
+    'a fresh call computes cards',
+    `${fresh.status}, ${fresh.ms} ms, source ${fresh.body?.scope.source}, ${fresh.body?.cards.length} cards, ${fresh.body?.scope.label}`,
+  );
+  check((await callFn({}, {})).status === 401, 'no credentials: 401');
+  check((await callFn({}, { apikey: publishable! })).status === 401, 'publishable key alone: 401');
+  check(
+    (await callFn({}, { apikey: publishable!, authorization: 'Bearer not-a-session' })).status ===
+      401,
+    'a broken session: 401',
+  );
+}
+
+async function sessions(): Promise<void> {
+  console.log('\n== deployed ai-insights, test accounts ==');
+  const as = (token: string) => ({ apikey: publishable!, authorization: `Bearer ${token}` });
+  const master = await signIn('1001', '1111');
+  const manager = await signIn('3001', '3333');
+  const worker = await signIn('2001', '1234');
+  await askAs(as(master), 'master');
+  await askAs(as(manager), 'manager');
   check((await callFn({}, as(worker))).status === 403, 'worker: 403');
   check((await callFn({ digest: true }, as(manager))).status === 403, 'digest as a manager: 403');
 }
@@ -518,5 +551,6 @@ async function live(): Promise<void> {
 
 if (doPatterns) await patterns();
 if (doDeployed) await deployed();
+if (doSessions) await sessions();
 if (doLive) await live();
 process.exit(failed ? 1 : 0);

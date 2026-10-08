@@ -519,25 +519,29 @@ function statFacts(stats: Record<string, unknown>): Fact[] {
 interface StatChartSpec {
   title: string;
   subtitle: string;
-  /** How a value prints: a count, a percent of a share (0..1), a quantity with its unit. */
+  /** How a value prints: a count, a percent, a quantity with its unit. */
   format: (v: number) => string;
+  /** Values in the units they print in (shares already as percents), so the axis scales them as they read. */
   bars: { label: string; value: number }[];
 }
 
 const asCount = (v: number) => formatInt(v);
-const asPercent = (v: number) => `${formatNumber(v * 100, 0)}%`;
+const asPercent = (v: number) => `${formatInt(v)}%`;
 
+/** Two numbers of the row side by side; `percent` turns shares (0..1) into whole percents. */
 function pair(
   stats: Record<string, unknown>,
   a: [string, Key],
   b: [string, Key],
+  percent = false,
 ): { label: string; value: number }[] | null {
   const va = num(stats[a[0]]);
   const vb = num(stats[b[0]]);
   if (va == null || vb == null) return null;
+  const scale = (v: number) => (percent ? Math.round(v * 100) : v);
   return [
-    { label: t(a[1]), value: va },
-    { label: t(b[1]), value: vb },
+    { label: t(a[1]), value: scale(va) },
+    { label: t(b[1]), value: scale(vb) },
   ];
 }
 
@@ -576,6 +580,7 @@ function statChart(kind: string, stats: Record<string, unknown>): StatChartSpec 
         stats,
         ['repeat_share', 'analytics.chart.worker'],
         ['team_share', 'analytics.chart.team'],
+        true,
       );
       return bars
         ? {
@@ -591,6 +596,7 @@ function statChart(kind: string, stats: Record<string, unknown>): StatChartSpec 
         stats,
         ['followed_by_failure', 'analytics.chart.after_ppr'],
         ['unit_base', 'analytics.chart.other_time'],
+        true,
       );
       return bars
         ? {
@@ -644,7 +650,7 @@ function StatChart({ spec }: { spec: StatChartSpec }) {
         <BarChart data={data} margin={{ top: 20, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid {...gridProps} />
           <XAxis {...xAxisProps} dataKey="label" interval={0} />
-          <YAxis {...yAxisProps} width={36} hide />
+          <YAxis {...yAxisProps} width={36} allowDecimals hide />
           <Tooltip
             {...tooltipProps}
             content={(p) => <ChartTooltip {...p} format={(v) => spec.format(v)} />}
