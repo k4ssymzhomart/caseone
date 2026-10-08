@@ -1,0 +1,40 @@
+{
+  "name": "rota",
+  "private": true,
+  "type": "module",
+  "description": "Rota: work orders with AI control for Kostanai Minerals. Qostanai Industry Hackathon 2026.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": "^22.13.0 || ^24.3.0"
+  },
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "scripts": {
+    "dev:mobile": "npm run start --workspace apps/mobile",
+    "ios": "npm run ios --workspace apps/mobile",
+    "android": "npm run android --workspace apps/mobile",
+    "dev:web": "npm run dev --workspace apps/web",
+    "build:web": "npm run build --workspace apps/web --if-present",
+    "tokens": "node packages/design/scripts/build-tokens.mjs",
+    "assets": "tsx tools/gen-assets.ts",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc --noEmit -p tools && (test ! -f supabase/functions/_shared/tsconfig.json || tsc --noEmit -p supabase/functions/_shared)",
+    "test": "vitest run",
+    "check": "npm run tokens && test -z \"$(git status --porcelain -- packages/design/src/generated packages/design/web)\" && npm run typecheck && npm test && npm run build:web",
+    "llm:smoke": "tsx tools/llm-smoke.ts",
+    "push:test": "tsx tools/push-test.ts"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "^22.20.5",
+    "ajv": "^8.20.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.3"
+  }
+}
