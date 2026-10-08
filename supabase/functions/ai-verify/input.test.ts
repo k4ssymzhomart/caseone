@@ -161,6 +161,17 @@ describe('answer normalization', () => {
     expect(n.confidence).toBe(1);
   });
 
+  it('drops NUL and lone surrogates, which jsonb cannot store, and keeps real surrogate pairs', () => {
+    const odd = {
+      ...good,
+      summary_master: 'итог\u0000 ок\uD800',
+      feedback_worker: { good: ['a\u0000b'], improve: ['\uDC00x \u{20000}'] },
+    };
+    const n = normalizeVerifyAnswer(odd);
+    expect(n.summary_master).toBe('итог ок');
+    expect(n.feedback_worker).toEqual({ good: ['ab'], improve: ['x \u{20000}'] });
+  });
+
   it('throws a retryable BAD_RESPONSE when the verdict fields are missing', () => {
     const bads: unknown[] = [
       null,

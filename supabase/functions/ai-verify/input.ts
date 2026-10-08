@@ -126,17 +126,20 @@ export function buildVerifyRequest(
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
   v !== null && typeof v === 'object' && !Array.isArray(v);
-const str = (v: unknown): string => (typeof v === 'string' ? v : '');
+/** NUL and lone surrogates: Postgres jsonb refuses them, so one such character would make ai_submit fail. */
+const UNSTORABLE = /\u0000|[\uD800-\uDFFF]/gu;
+const str = (v: unknown): string => (typeof v === 'string' ? v.replace(UNSTORABLE, '') : '');
 const strList = (v: unknown): string[] =>
-  Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+  Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string').map(str) : [];
 const oneOf = <T extends string>(v: unknown, values: readonly T[]): T | null =>
   typeof v === 'string' && (values as readonly string[]).includes(v) ? (v as T) : null;
 
 /**
  * Checks the answer against the verify schema and returns it in the shape ai_submit reads.
  * Structured outputs already guarantee the shape with Anthropic; this guards the mock and on-prem providers.
- * Values pass through unchanged, except: score_1_5 becomes an integer 0..5 (ai_submit casts it to int)
- * and confidence is held to 0..1 (the threshold decision is the same either way).
+ * Values pass through unchanged, except: score_1_5 becomes an integer 0..5 (ai_submit casts it to int),
+ * confidence is held to 0..1 (the threshold decision is the same either way) and strings lose the characters
+ * jsonb cannot store (NUL, lone surrogates).
  * A missing verdict field throws BAD_RESPONSE, which the retry policy treats as retryable.
  */
 export function normalizeVerifyAnswer(value: unknown): VerifyAnswer {

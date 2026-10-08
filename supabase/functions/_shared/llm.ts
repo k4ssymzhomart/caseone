@@ -719,7 +719,17 @@ export function createLlm(config: LlmConfig = {}): Llm {
     }));
 
     if (provider === 'anthropic') {
-      const spent = Number((await config.spentUsd?.()) ?? 0);
+      // Fail closed: when the spent sum cannot be read (llm_audit down), no paid call goes out.
+      let spent: number;
+      try {
+        spent = Number((await config.spentUsd?.()) ?? 0);
+      } catch (e) {
+        throw new LlmError(
+          'BUDGET_EXCEEDED',
+          `BUDGET_EXCEEDED: the spent sum could not be read (${e instanceof Error ? e.message : String(e)})`,
+          { model },
+        );
+      }
       const estimate = estimateCost(model, {
         input_tokens: estimateInputTokens(system, messages, schema),
         output_tokens: maxTokens,

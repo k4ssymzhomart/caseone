@@ -206,6 +206,10 @@ describe('verify input', () => {
     const back = Uint8Array.from(atob(bytesToBase64(bytes)), (c) => c.charCodeAt(0));
     expect(back).toEqual(bytes);
     expect(bytesToBase64(new TextEncoder().encode('Rota'))).toBe('Um90YQ==');
+    for (let n = 0; n <= 7; n++) {
+      const tail = bytes.subarray(1000, 1000 + n);
+      expect(bytesToBase64(tail)).toBe(btoa(String.fromCharCode(...tail)));
+    }
     expect(mediaTypeForPath('orders/x/after/a.jpg')).toBe('image/jpeg');
     expect(mediaTypeForPath('a.PNG')).toBe('image/png');
     expect(mediaTypeForPath(null)).toBe('image/jpeg');

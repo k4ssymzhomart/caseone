@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LlmError } from '../_shared/llm.ts';
 import {
+  DEFAULT_RETRY_POLICY,
   errorLabelRu,
   isRetryable,
   withRetries,
@@ -132,6 +133,38 @@ describe('withRetries', () => {
       clock,
     );
     expect(timeouts).toEqual([45_000, 39_000]);
+  });
+
+  it('default policy: one 45 s timeout ends the stage, so the function answers within 50 s', async () => {
+    const clock = fakeClock();
+    const out = await withRetries(
+      async (_attempt, timeoutMs) => {
+        clock.t += timeoutMs;
+        throw new LlmError('TIMEOUT', 'x');
+      },
+      DEFAULT_RETRY_POLICY,
+      clock,
+    );
+    expect(out).toMatchObject({ ok: false, tries: 1 });
+    expect(clock.t).toBeLessThanOrEqual(DEFAULT_RETRY_POLICY.deadlineMs);
+    // the app waits 60 s (AI_VERIFY_TIMEOUT_MS) and the watchdog 60 s: the stage plus I/O must fit under both
+    expect(DEFAULT_RETRY_POLICY.deadlineMs).toBeLessThanOrEqual(50_000);
+  });
+
+  it('default policy: fast failures still get all 3 attempts', async () => {
+    const clock = fakeClock();
+    let calls = 0;
+    const out = await withRetries(
+      async () => {
+        calls++;
+        clock.t += 2000;
+        throw http(529);
+      },
+      DEFAULT_RETRY_POLICY,
+      clock,
+    );
+    expect(calls).toBe(3);
+    expect(out.ok).toBe(false);
   });
 
   it('wraps unexpected exceptions as BAD_RESPONSE', async () => {

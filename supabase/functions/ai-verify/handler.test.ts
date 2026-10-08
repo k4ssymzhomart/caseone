@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import directories from '../../seed/directories.json';
 import type { LlmAuditRequest, LlmConfig } from '../_shared/llm.ts';
+import type { DirectoryEmployee } from '../_shared/privacy.ts';
 import type { VerifyAnswer } from '../_shared/schemas.ts';
 import type { VerifyUser } from './auth.ts';
 import {
@@ -30,6 +31,9 @@ function fakeDb(
     assignee?: string;
     existing?: VerifyReview | null;
     submitError?: Error;
+    /** An error for this submit (null lets it through); called before every submit. */
+    submitFails?: (llm: VerifyAnswer | null) => Error | null;
+    employees?: () => Promise<DirectoryEmployee[]>;
   } = {},
 ) {
   const submitted: Submitted[] = [];
@@ -40,13 +44,15 @@ function fakeDb(
     orderAssignee: async () => ({ assignee_id: opts.assignee ?? 'worker-1' }),
     context: async () => ctx,
     review: async () => opts.existing ?? null,
-    employees: async () => directories.employees,
+    employees: opts.employees ?? (async () => directories.employees),
     download: async (path) => {
       downloads.push(path);
       return jpegBytes(path.includes('after') ? 4096 : 2048);
     },
     submit: async (orderId, llm, meta) => {
       if (opts.submitError) throw opts.submitError;
+      const fail = opts.submitFails?.(llm);
+      if (fail) throw fail;
       submitted.push({ orderId, llm, meta });
       return {
         id: 77,
@@ -365,5 +371,88 @@ describe('the check', () => {
     await run(post({ order_id: 9001 }), db).res;
     expect(downloads).toHaveLength(0);
     expect(submitted[0]?.llm?.photo.after_present).toBe(false);
+  });
+});
+
+describe('hardening', () => {
+  it('privacy: an empty directory or one without the worker sends nothing to the model', async () => {
+    for (const employees of [
+      async () => [],
+      async () => directories.employees.filter((e) => e.pseudonym !== 'E01'),
+    ]) {
+      const { fetchFn, bodies } = anthropicFetch([[200, sonnetReply(GOOD)]]);
+      const { db, submitted } = fakeDb({ employees });
+      const res = await run(post({ order_id: 9001 }), db, anthropicConfig(fetchFn)).res;
+      expect(await res.json()).toMatchObject({ rules_only: true });
+      expect(bodies).toHaveLength(0);
+      expect(submitted[0]?.llm).toBeNull();
+      expect(submitted[0]?.meta).toMatchObject({ error_code: 'CONFIG', error: 'ИИ не настроен' });
+    }
+  });
+
+  it('a failed directory read ends in a rules-only review, not in a 500 without a review', async () => {
+    const { fetchFn, bodies } = anthropicFetch([[200, sonnetReply(GOOD)]]);
+    const { db, submitted } = fakeDb({
+      employees: async () => {
+        throw new DbError('connection reset');
+      },
+    });
+    const res = await run(post({ order_id: 9001 }), db, anthropicConfig(fetchFn)).res;
+    expect(res.status).toBe(200);
+    expect(bodies).toHaveLength(0);
+    expect(submitted[0]?.meta).toMatchObject({ error_code: 'INPUT', model: 'rules' });
+  });
+
+  it('an answer the database refuses still leaves a rules-only review', async () => {
+    const { db, submitted } = fakeDb({
+      submitFails: (llm) =>
+        llm ? new DbError('unsupported Unicode escape sequence', '22P05') : null,
+    });
+    const { res, logs } = run(post({ order_id: 9001 }), db);
+    expect(await (await res).json()).toMatchObject({ rules_only: true, review: { id: 77 } });
+    expect(submitted).toHaveLength(1);
+    expect(submitted[0]?.llm).toBeNull();
+    expect(submitted[0]?.meta).toMatchObject({
+      error_code: 'SUBMIT',
+      error: 'ответ ИИ не сохранён',
+    });
+    expect(logs.find((l) => l.event === 'submit_fallback')).toMatchObject({ error: '22P05' });
+    expect(JSON.stringify(logs)).not.toContain('Unicode');
+  });
+
+  it('two calls for the same attempt at once share one model call', async () => {
+    const { fetchFn, bodies } = anthropicFetch([[200, sonnetReply(GOOD)]]);
+    const { db, submitted } = fakeDb();
+    const config = anthropicConfig(fetchFn);
+    const a = run(post({ order_id: 9001, source: 'app' }), db, config);
+    const b = run(post({ order_id: 9001, source: 'retry' }), db, config);
+    const [ra, rb] = await Promise.all([a.res, b.res]);
+    expect(bodies).toHaveLength(1);
+    expect(submitted).toHaveLength(1);
+    expect(await ra.json()).toEqual(await rb.json());
+    expect(b.logs.some((l) => l.event === 'joined')).toBe(true);
+    // the next call after both finished runs again (here: a fresh check, as the fake has no stored review)
+    await run(post({ order_id: 9001 }), db, config).res;
+    expect(submitted).toHaveLength(2);
+  });
+
+  it('an already reviewed attempt never reaches the model, even when the row lookup comes back empty', async () => {
+    const { fetchFn, bodies } = anthropicFetch([[200, sonnetReply(GOOD)]]);
+    const { db, submitted } = fakeDb({ ctx: demoContext({ already_reviewed: true }) });
+    const res = await run(post({ order_id: 9001 }), db, anthropicConfig(fetchFn)).res;
+    expect(await res.json()).toMatchObject({ already_reviewed: true, review: { id: 77 } });
+    expect(bodies).toHaveLength(0);
+    expect(submitted[0]).toMatchObject({ llm: null, meta: { attempt: 1 } });
+  });
+
+  it('logs the source as a short token only', async () => {
+    const { db } = fakeDb();
+    const { res, logs } = run(
+      post({ order_id: 9001, source: 'Ахметов Ерлан, тел 8 707 123 45 67' }),
+      db,
+    );
+    await res;
+    expect(logs.find((l) => l.event === 'reviewed')?.source).toBe('other');
+    expect(JSON.stringify(logs)).not.toMatch(/Ахметов|707/);
   });
 });

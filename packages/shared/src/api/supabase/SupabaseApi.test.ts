@@ -653,10 +653,12 @@ describe('SupabaseApi', () => {
       expect(await empty.api.ai.verify(8)).toEqual(rulesReview);
     });
 
-    it('falls back to the rules check after 20 s without an answer', async () => {
+    it('falls back to the rules check after AI_VERIFY_TIMEOUT_MS without an answer', async () => {
       vi.useFakeTimers();
       const { api, rpcCalls } = makeApi(rules, () => new Promise(() => undefined));
       const pending = api.ai.verify(8);
+      // longer than the 50 s LLM stage of ai-verify, so a slow but valid answer is never preempted
+      expect(AI_VERIFY_TIMEOUT_MS).toBeGreaterThanOrEqual(55_000);
       await vi.advanceTimersByTimeAsync(AI_VERIFY_TIMEOUT_MS - 1);
       expect(rpcCalls('ai_check_rules')).toHaveLength(0);
       await vi.advanceTimersByTimeAsync(1);

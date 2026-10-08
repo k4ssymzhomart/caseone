@@ -219,6 +219,24 @@ describe('anthropic call', () => {
     expect(calls).toHaveLength(0);
   });
 
+  it('the budget guard fails closed when the spent sum cannot be read', async () => {
+    const { fetch, calls } = fakeFetch(anthropicReply({ ok: true, echo: 'x' }));
+    const llm = createLlm({
+      provider: 'anthropic',
+      apiKey: 'k',
+      budgetUsd: 4,
+      spentUsd: async () => {
+        throw new Error('llm_audit read failed: HTTP 503');
+      },
+      fetch,
+    });
+    await expect(llm.call({ purpose: 'verify', messages })).rejects.toMatchObject({
+      code: 'BUDGET_EXCEEDED',
+      message: expect.stringContaining('HTTP 503'),
+    });
+    expect(calls).toHaveLength(0);
+  });
+
   it('the budget guard lets a call through under the cap', async () => {
     const { fetch, calls } = fakeFetch(anthropicReply({ ok: true, echo: 'x' }, HAIKU));
     const llm = createLlm({

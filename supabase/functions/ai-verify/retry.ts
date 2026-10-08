@@ -1,6 +1,10 @@
 // Retry policy of the one verify call (CLAUDE.md §11 step 3): up to 3 attempts on network errors, 5xx and 429,
 // timeouts and unparsable answers; never on BUDGET_EXCEEDED, CONFIG, REFUSAL, MAX_TOKENS or other 4xx.
-// The whole LLM stage stays inside a deadline, so the function ends well before the Edge wall clock limit.
+// The whole LLM stage stays inside a 50 s deadline, so the function answers before the two callers give up:
+// the app falls back to the rules only check after AI_VERIFY_TIMEOUT_MS (60 s, SupabaseApi), and the watchdog
+// calls again 60 s after review_started. A late answer would lose to that rules only review (one per attempt)
+// and a second call would pay for the model twice. One 45 s timeout therefore leaves no room for another try;
+// fast failures (429, 5xx, a bad answer) still get all 3.
 
 import { DEFAULT_TIMEOUT_MS, isLlmError, LlmError, type LlmErrorCode } from '../_shared/llm.ts';
 
@@ -20,7 +24,7 @@ export const DEFAULT_RETRY_POLICY: RetryPolicy = {
   maxAttempts: 3,
   baseDelayMs: 1000,
   attemptTimeoutMs: DEFAULT_TIMEOUT_MS,
-  deadlineMs: 100_000,
+  deadlineMs: 50_000,
   minAttemptMs: 15_000,
 };
 

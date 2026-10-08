@@ -10,7 +10,7 @@
 //
 // Known differences from MockApi: ai.verify calls the ai-verify Edge Function (rules + LLM, CLAUDE.md §11) and
 // falls back to the rules only check (ai_check_rules, model 'rules', needs_master_review unless a rule fails)
-// when the function is missing, fails or takes over 20 s; shiftSummary and explainRating build their text from the
+// when the function is missing, fails or takes over 60 s; shiftSummary and explainRating build their text from the
 // real report numbers with the deterministic writers of the mock until the Phase 5 Edge Functions exist.
 
 import type { SupabaseClient, User } from '@supabase/supabase-js';
@@ -93,11 +93,13 @@ const BOARD_STATUSES = [...ACTIVE_STATUSES, 'rejected', 'done', 'ai_review'] as 
 const DONE_STATUSES = ['done', 'ai_review', 'closed'] as const;
 
 /**
- * How long ai.verify waits for the ai-verify Edge Function (one Sonnet call takes about 10 s) before it falls back
- * to the rules only check, so the loop never stalls. A late LLM answer is harmless: ai_submit keeps one review per
- * attempt and returns the first one.
+ * How long ai.verify waits for the ai-verify Edge Function before it falls back to the rules only check.
+ * ai_submit keeps the first review of an attempt, so a fallback that comes too early throws away the model's
+ * verdict: the wait covers the function's whole LLM stage (one 45 s call, fast retries, all inside 50 s,
+ * ai-verify/retry.ts) plus the database and photo I/O. One Sonnet call takes about 10 s. Nobody blocks on it:
+ * the close form does not await verify, and the review screen waits through realtime and polling.
  */
-export const AI_VERIFY_TIMEOUT_MS = 20_000;
+export const AI_VERIFY_TIMEOUT_MS = 60_000;
 
 /** functions.invoke of supabase-js, duck typed: clients without Edge Functions (tests, old builds) use the rules. */
 type FunctionsInvoke = (
