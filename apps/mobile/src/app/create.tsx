@@ -111,6 +111,8 @@ function CreateScreen() {
   const [areaId, setAreaId] = useState<number | null>(null);
   const [equipmentId, setEquipmentId] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
+  // After a unit is picked the list folds to that one chip, so the problem chips and «Выдать» move up.
+  const [unitsOpen, setUnitsOpen] = useState(true);
   const [templateId, setTemplateId] = useState<number | null>(null);
   const [description, setDescription] = useState('');
   const [manual, setManual] = useState<AssigneeSelection | null>(null);
@@ -191,12 +193,13 @@ function CreateScreen() {
   const filtered = areaId == null ? orderedEquipment : orderedEquipment.filter((e) => e.area_id === areaId);
   const showAll = areaId != null || expanded;
   const visibleUnits = (() => {
+    if (equipment && !unitsOpen) return [equipment];
     if (showAll) return filtered;
     const head = filtered.slice(0, COLLAPSED_UNITS);
     if (equipment && !head.some((e) => e.id === equipment.id)) head.push(equipment);
     return head;
   })();
-  const hiddenUnits = filtered.length - visibleUnits.length;
+  const hiddenUnits = equipment && !unitsOpen ? 0 : filtered.length - visibleUnits.length;
 
   const templates: ProblemTemplate[] = useMemo(
     () =>
@@ -240,6 +243,7 @@ function CreateScreen() {
   const chooseArea = (id: number | null) => {
     tap();
     setAreaId(id);
+    setUnitsOpen(true);
     if (id != null && equipment && equipment.area_id !== id) {
       clearTemplateFor(null);
       setEquipmentId(null);
@@ -253,6 +257,7 @@ function CreateScreen() {
     clearTemplateFor(e);
     setEquipmentId(e.id);
     setAreaId(e.area_id);
+    setUnitsOpen(false);
   };
 
   const chooseTemplate = (p: ProblemTemplate) => {
@@ -518,6 +523,15 @@ function CreateScreen() {
                 />
               );
             })}
+            {equipment && !unitsOpen ? (
+              <Chip
+                label={t('create.equipment.other')}
+                onPress={() => {
+                  tap();
+                  setUnitsOpen(true);
+                }}
+              />
+            ) : null}
             {hiddenUnits > 0 ? (
               <Chip
                 label={t('create.equipment.more', { n: hiddenUnits })}

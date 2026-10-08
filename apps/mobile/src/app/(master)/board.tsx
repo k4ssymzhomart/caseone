@@ -113,6 +113,16 @@ export default function BoardScreen() {
     setReassignOpen(true);
   };
 
+  // Until the master picks a column, open on the first one that has cards (overdue first: it needs action).
+  const [picked, setPicked] = useState(isBoardColumn(params.column));
+  useEffect(() => {
+    if (picked || !board.data) return;
+    const order: BoardColumn[] = ['overdue', ...BOARD_COLUMNS.filter((c) => c !== 'overdue')];
+    const first = order.find((c) => (columns.get(c)?.length ?? 0) > 0);
+    if (first) setColumn(first);
+    setPicked(true);
+  }, [picked, board.data, columns]);
+
   const filtered = hasBoardFilters(filters);
   const list = columns.get(column) ?? [];
 
@@ -184,7 +194,10 @@ export default function BoardScreen() {
             };
           })}
           value={column}
-          onChange={setColumn}
+          onChange={(c) => {
+            setPicked(true);
+            setColumn(c);
+          }}
           accessibilityLabel={t('master.board.columns')}
         />
         <View style={{ gap: theme.space[3] }}>{body}</View>

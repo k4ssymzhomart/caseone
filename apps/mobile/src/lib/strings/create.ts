@@ -22,6 +22,7 @@ export const createRu: Record<string, string> = {
   'create.section.equipment': 'Оборудование',
   'create.area.all': 'Все участки',
   'create.equipment.more': 'Ещё {n}',
+  'create.equipment.other': 'Другое оборудование',
   'create.equipment.openOrders': 'Открытых нарядов: {n}',
 
   // Problem

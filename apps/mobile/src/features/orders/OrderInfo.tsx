@@ -131,7 +131,12 @@ export function OrderInfo({ order: o, viewer, now, onOpenEquipment }: OrderInfoP
       <InfoRow
         viewer={viewer}
         label={t('order.detail.priority')}
-        value={`${PRIORITY_LABEL[o.priority]} · ${ORDER_TYPE_LABEL[o.type]}`}
+        value={
+          // A planned order with the planned priority would read «Плановый · Плановый»: say it once.
+          PRIORITY_LABEL[o.priority] === ORDER_TYPE_LABEL[o.type]
+            ? PRIORITY_LABEL[o.priority]
+            : `${PRIORITY_LABEL[o.priority]} · ${ORDER_TYPE_LABEL[o.type]}`
+        }
         critical={o.priority === 'emergency'}
       />
       <InfoRow viewer={viewer} label={t('order.detail.due')} value={due.text} critical={due.critical} />

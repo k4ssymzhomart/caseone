@@ -103,7 +103,7 @@ export default function EquipmentHistoryScreen() {
           <Counter
             align="center"
             style={{ flex: 1 }}
-            value={formatDuration(history.data.downtime_min)}
+            value={compactDowntime(history.data.downtime_min)}
             label={t('master.equipment.downtime')}
             bad={equipment?.is_stopped ?? false}
           />
@@ -156,4 +156,10 @@ export default function EquipmentHistoryScreen() {
       <View style={{ gap: theme.space[5] }}>{body}</View>
     </Screen>
   );
+}
+
+/** «45 мин» under an hour, whole hours above it («14 ч»): a third of the row cannot fit «14 ч 17 мин» in mono. */
+function compactDowntime(minutes: number): string {
+  if (minutes < 60) return formatDuration(Math.round(minutes));
+  return formatDuration(Math.round(minutes / 60) * 60);
 }
