@@ -110,9 +110,11 @@ export function workerFeedback(review: AiReview): { good: string[]; improve: str
   if (good.length === 0) {
     good = checks.filter((c) => c.status === 'pass').map((c) => t('review.goodCheck', { title: c.title }));
   }
-  if (improve.length === 0) {
-    improve = unique(checks.filter((c) => c.status === 'warn' || c.status === 'fail').flatMap((c) => splitMessages(c.message_ru)));
-  }
+  // Failed rules always lead the list: they are the reasons for a rework (CLAUDE.md §11, demo step 7: «нет фото
+  // после» and «перерасход»), whatever the LLM wrote. Warnings fill in when the LLM gave no advice.
+  const failed = unique(checks.filter((c) => c.status === 'fail').flatMap((c) => splitMessages(c.message_ru)));
+  const warned = unique(checks.filter((c) => c.status === 'warn').flatMap((c) => splitMessages(c.message_ru)));
+  improve = unique([...failed, ...(improve.length > 0 ? improve : warned)]);
   return { good, improve };
 }
 
