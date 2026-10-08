@@ -222,6 +222,8 @@ describe('answers', () => {
 
   it('keeps fault codes and finds numbers the input never had', () => {
     expect(cleanText('Шифр М-02 на К-3')).toBe('Шифр М-02 на К-3');
+    expect(cleanText('Поговорить с Иванов С.. Затем')).toBe('Поговорить с Иванов С. Затем');
+    expect(cleanText('Итого 5.. и т.д.')).toBe('Итого 5.. и т.д.');
     expect(numbersIn('4,2 мин и 05 и М-02')).toEqual(['4.2', '5', '2']);
     expect(unknownNumbers('Выдано 7, исполнено 5, рост 30%', 'выдано 7, исполнено 5')).toEqual(['30']);
   });

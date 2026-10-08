@@ -328,9 +328,13 @@ export function buildShiftSummaryText(report: ShiftReportData, ctx: SummaryInput
 // answers
 // ---------------------------------------------------------------------------
 
-/** Spaced dashes as punctuation become commas (the UI copy rule); codes like «М-02» keep their hyphen. */
+/**
+ * Spaced dashes as punctuation become commas (the UI copy rule); codes like «М-02» keep their hyphen. A short name
+ * put back at the end of a sentence («с E02.» → «с Иванов С..») loses the second period.
+ */
 export function cleanText(text: string): string {
   return text
+    .replace(/(\s\p{Lu}\.)\./gu, '$1')
     .replace(/\s+[—–‒―]\s+/g, ', ')
     .replace(/\s+-\s+/g, ', ')
     .replace(/[ \t]+/g, ' ')

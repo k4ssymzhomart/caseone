@@ -8,6 +8,8 @@ const projects = [
   'packages/design',
   'supabase/functions/_shared',
   'supabase/functions/ai-verify',
+  'supabase/functions/ai-shift-summary',
+  'supabase/functions/ai-explain-rating',
   'apps/mobile',
 ].filter((dir) => existsSync(dir));
 
