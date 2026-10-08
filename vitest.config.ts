@@ -3,9 +3,13 @@ import { defineConfig } from 'vitest/config';
 
 // Projects appear as the lanes create them; a missing folder is skipped instead of failing the run.
 // apps/mobile runs only the pure library tests (no React Native imports) under src/lib.
-const projects = ['packages/shared', 'packages/design', 'supabase/functions/_shared', 'apps/mobile'].filter((dir) =>
-  existsSync(dir),
-);
+const projects = [
+  'packages/shared',
+  'packages/design',
+  'supabase/functions/_shared',
+  'supabase/functions/ai-verify',
+  'apps/mobile',
+].filter((dir) => existsSync(dir));
 
 export default defineConfig({
   test: {

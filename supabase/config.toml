@@ -424,3 +424,8 @@ verify_jwt = false
 
 [functions.telegram-webhook]
 verify_jwt = false
+
+# §11: called by the app right after complete (user session) and by the watchdog retry (pg_net, secret key);
+# authorizes in code: the secret key in apikey, or the order's assignee or staff via auth.getUser.
+[functions.ai-verify]
+verify_jwt = false
