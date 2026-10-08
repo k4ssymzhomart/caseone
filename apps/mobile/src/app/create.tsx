@@ -133,7 +133,10 @@ function CreateScreen() {
   const codeNorm = suggestedCode
     ? (dirs?.work_norms.find((n) => n.fault_code === suggestedCode)?.norm_hours ?? null)
     : null;
-  const specialty = requiredSpecialty(description, faultCode?.specialty ?? null);
+  const typeSpecialty = equipment
+    ? (dirs?.equipment_type_specialty.find((s) => s.type === equipment.type)?.specialty ?? null)
+    : null;
+  const specialty = requiredSpecialty(description, typeSpecialty, faultCode?.specialty ?? null);
 
   const suggestQ = useQuery({
     queryKey: qk.suggest(equipmentId ?? 0, specialty),

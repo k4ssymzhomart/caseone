@@ -39,6 +39,10 @@ export const authRu: Record<string, string> = {
   'profile.onShiftOn': 'Мастер может выдавать вам наряды',
   'profile.onShiftOff': 'Наряды вам сейчас не выдают',
   'profile.onShiftError': 'Не удалось изменить смену',
+  'profile.connection': 'Связь',
+  'profile.connection.live': 'На связи',
+  'profile.connection.connecting': 'Подключение…',
+  'profile.connection.offline': 'Нет связи',
 
   'profile.rating.eyebrow': 'Рейтинг за 30 дней',
   'profile.rating.of': 'из 100',

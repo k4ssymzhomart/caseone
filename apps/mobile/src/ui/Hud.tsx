@@ -54,6 +54,8 @@ export type HudTone = 'default' | 'critical';
 
 export interface HudToastProps {
   message: string;
+  /** A second, smaller text under the message (up to 3 lines), e.g. a notification body. The capsule grows. */
+  detail?: string;
   /** Number or code shown in mono before the message, for example «№147». */
   monoPrefix?: string;
   /** Short verb after a divider, for example «Открыть». */
@@ -67,19 +69,35 @@ export interface HudToastProps {
 /**
  * The Rota HUD capsule: glass, 44 high, the mark, a mono prefix, the message, an optional action.
  * The layout box is `size.tapMin` (56) high so the action keeps a glove sized target on Android
- * too; the visible capsule inside it is `size.hud` (44).
+ * too; the visible capsule inside it is `size.hud` (44). With a `detail` line (a notification body) the
+ * capsule grows into a rounded card around the title and up to 3 lines of detail.
  */
-export function HudToast({ message, monoPrefix, actionLabel, onAction, tone = 'default', style }: HudToastProps) {
+export function HudToast({ message, detail, monoPrefix, actionLabel, onAction, tone = 'default', style }: HudToastProps) {
   const theme = useTheme();
   const critical = tone === 'critical';
   const ios = Platform.OS === 'ios';
   const inset = (theme.size.tapMin - theme.size.hud) / 2;
+  // With a detail line the capsule becomes a rounded card that grows with its text.
+  const tall = !!detail;
+  const radius = tall ? theme.radius.lg : theme.radius.full;
+
+  const title = (
+    <T
+      variant="callout"
+      numberOfLines={tall ? 2 : 1}
+      weight={tall ? 'semibold' : undefined}
+      accessibilityLiveRegion="polite"
+      style={tall ? undefined : { flexShrink: 1 }}
+    >
+      {message}
+    </T>
+  );
 
   return (
     <View
       style={[
         {
-          height: theme.size.tapMin,
+          ...(tall ? { minHeight: theme.size.tapMin, paddingVertical: theme.space[2] } : { height: theme.size.tapMin }),
           flexDirection: 'row',
           alignItems: 'center',
           alignSelf: 'center',
@@ -94,14 +112,16 @@ export function HudToast({ message, monoPrefix, actionLabel, onAction, tone = 'd
       <View
         pointerEvents="none"
         style={[
-          {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: inset,
-            height: theme.size.hud,
-            borderRadius: theme.radius.full,
-          },
+          tall
+            ? { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: radius }
+            : {
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: inset,
+                height: theme.size.hud,
+                borderRadius: radius,
+              },
           theme.shadow.soft,
         ]}
       >
@@ -109,7 +129,7 @@ export function HudToast({ message, monoPrefix, actionLabel, onAction, tone = 'd
           style={[
             StyleSheet.absoluteFill,
             {
-              borderRadius: theme.radius.full,
+              borderRadius: radius,
               overflow: 'hidden',
               borderWidth: StyleSheet.hairlineWidth,
               borderColor: critical ? theme.status.critical : theme.glass.stroke,
@@ -141,14 +161,16 @@ export function HudToast({ message, monoPrefix, actionLabel, onAction, tone = 'd
           </T>
         </>
       ) : null}
-      <T
-        variant="callout"
-        numberOfLines={1}
-        accessibilityLiveRegion="polite"
-        style={{ flexShrink: 1 }}
-      >
-        {message}
-      </T>
+      {tall ? (
+        <View style={{ flexShrink: 1, gap: theme.space[1] }}>
+          {title}
+          <T variant="footnote" tone="secondary" numberOfLines={3}>
+            {detail}
+          </T>
+        </View>
+      ) : (
+        title
+      )}
       {actionLabel ? (
         <>
           <View
@@ -184,6 +206,8 @@ export function HudToast({ message, monoPrefix, actionLabel, onAction, tone = 'd
 
 export interface HudShowOptions {
   message: string;
+  /** Second line under the message, up to 3 lines (a notification body). */
+  detail?: string;
   monoPrefix?: string;
   actionLabel?: string;
   /** Runs on tap; the toast then hides. */
@@ -210,6 +234,11 @@ export interface HudProviderProps {
   topOffset?: number;
   /** Default time on screen for every toast, 2500 ms. */
   duration?: number;
+  /**
+   * A capsule that stays up while set and no toast shows, e.g. «Нет связи» while offline. A toast takes its
+   * place and it returns when the toast is gone. Its action and duration are ignored.
+   */
+  persistent?: HudShowOptions | null;
 }
 
 interface HudItem extends HudShowOptions {
@@ -224,7 +253,7 @@ function clearTimer(timer: { current: ReturnType<typeof setTimeout> | null }) {
 }
 
 /** Renders the app plus the HUD toast host above the tab bar. Put it inside `ThemeProvider`. */
-export function HudProvider({ children, topOffset, duration = DEFAULT_DURATION_MS }: HudProviderProps) {
+export function HudProvider({ children, topOffset, duration = DEFAULT_DURATION_MS, persistent = null }: HudProviderProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
@@ -273,9 +302,8 @@ export function HudProvider({ children, topOffset, duration = DEFAULT_DURATION_M
       setCurrent(item);
       progress.set(0);
       animateTo(1);
-      AccessibilityInfo.announceForAccessibility(
-        item.monoPrefix ? `${item.monoPrefix} ${item.message}` : item.message,
-      );
+      const spoken = item.monoPrefix ? `${item.monoPrefix} ${item.message}` : item.message;
+      AccessibilityInfo.announceForAccessibility(item.detail ? `${spoken}. ${item.detail}` : spoken);
       const ms = item.duration ?? durationRef.current;
       scheduleHide(queue.current.length > 0 ? Math.min(ms, MIN_VISIBLE_MS) : ms);
     };
@@ -304,6 +332,7 @@ export function HudProvider({ children, topOffset, duration = DEFAULT_DURATION_M
         phase.current === 'showing' &&
         shown &&
         shown.message === options.message &&
+        shown.detail === options.detail &&
         shown.monoPrefix === options.monoPrefix &&
         queue.current.length === 0
       ) {
@@ -359,6 +388,13 @@ export function HudProvider({ children, topOffset, duration = DEFAULT_DURATION_M
   });
 
   const top = topOffset ?? insets.top + theme.space[2];
+  const hostStyle = {
+    position: 'absolute' as const,
+    left: theme.size.gutter,
+    right: theme.size.gutter,
+    top: top - (theme.size.tapMin - theme.size.hud) / 2,
+    alignItems: 'center' as const,
+  };
 
   return (
     <HudContext.Provider value={api}>
@@ -368,16 +404,7 @@ export function HudProvider({ children, topOffset, duration = DEFAULT_DURATION_M
             native modal or sheet presented since (WindowOverlay). */}
         {current ? (
           <WindowOverlay>
-            <View
-              pointerEvents="box-none"
-              style={{
-                position: 'absolute',
-                left: theme.size.gutter,
-                right: theme.size.gutter,
-                top: top - (theme.size.tapMin - theme.size.hud) / 2,
-                alignItems: 'center',
-              }}
-            >
+            <View pointerEvents="box-none" style={hostStyle}>
               <Animated.View
                 key={current.key}
                 style={[{ maxWidth: '100%' }, animated]}
@@ -385,6 +412,7 @@ export function HudProvider({ children, topOffset, duration = DEFAULT_DURATION_M
               >
                 <HudToast
                   message={current.message}
+                  detail={current.detail}
                   monoPrefix={current.monoPrefix}
                   actionLabel={current.actionLabel}
                   tone={current.tone}
@@ -393,13 +421,24 @@ export function HudProvider({ children, topOffset, duration = DEFAULT_DURATION_M
               </Animated.View>
             </View>
           </WindowOverlay>
+        ) : persistent ? (
+          <WindowOverlay>
+            <View pointerEvents="none" style={hostStyle}>
+              <HudToast
+                message={persistent.message}
+                detail={persistent.detail}
+                monoPrefix={persistent.monoPrefix}
+                tone={persistent.tone}
+              />
+            </View>
+          </WindowOverlay>
         ) : null}
       </View>
     </HudContext.Provider>
   );
 }
 
-/** `show({ message, monoPrefix?, actionLabel?, onAction?, tone?, duration? })` and `hide()`. */
+/** `show({ message, detail?, monoPrefix?, actionLabel?, onAction?, tone?, duration? })` and `hide()`. */
 export function useHud(): HudApi {
   const ctx = useContext(HudContext);
   if (!ctx) throw new Error('useHud outside HudProvider');

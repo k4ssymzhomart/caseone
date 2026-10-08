@@ -1,7 +1,7 @@
 // Every order mutation from the phone goes through here (PHASE_2 §2.3): one client_action_id per tap,
 // reused on every retry of that tap; the button shows its spinner; HUD on success or error; the server's
 // ANOTHER_IN_PROGRESS and NOT_ON_SHIFT become a confirm sheet and a retry with the flag.
-import { isRotaError, type ActionPayload, type AnotherInProgressDetails, type Order, type OrderAction } from '@rota/shared';
+import { isRotaError, parseAnotherInProgress, type ActionPayload, type Order, type OrderAction } from '@rota/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 
@@ -10,7 +10,7 @@ import { haptic } from '@/lib/haptics';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
 import { useConfirm } from '@/ui/ConfirmSheet';
-import { useHud } from '@/ui/Hud';
+import { useHud, type HudApi } from '@/ui/Hud';
 
 export interface RunOptions {
   /** HUD text on success, e.g. «В работе». The order number is shown as the mono prefix. */
@@ -23,6 +23,25 @@ export interface RunOptions {
 export function errorText(e: unknown): string {
   if (isRotaError(e)) return e.message;
   return t('error.UNKNOWN');
+}
+
+/**
+ * The error of a mutation outside order_action (on shift, demo settings, reset) in the HUD. NETWORK reads
+ * «Нет связи. Повторить?» and offers «Повторить», which runs `retry` (PHASE_2 §2.3 every mutation).
+ * `fallback` replaces the generic text for an error that is not a RotaError.
+ */
+export function showErrorHud(hud: HudApi, e: unknown, retry?: () => void, fallback?: string): void {
+  const network = isRotaError(e) && e.code === 'NETWORK';
+  hud.show({
+    message: !isRotaError(e) && fallback ? fallback : errorText(e),
+    tone: 'critical',
+    ...(network && retry ? { actionLabel: t('common.retry'), onAction: retry, duration: 6000 } : {}),
+  });
+}
+
+/** True when the order is no longer visible to me: reassigned to someone else (RLS) or deleted by a demo reset. */
+export function isOrderGone(e: unknown): boolean {
+  return isRotaError(e) && e.code === 'BAD_INPUT' && e.details === 'order not found';
 }
 
 export function useOrderAction() {
@@ -54,7 +73,8 @@ export function useOrderAction() {
           } catch (e) {
             if (isRotaError(e)) {
               if (e.code === 'ANOTHER_IN_PROGRESS' && !p.pause_current) {
-                const d = e.details as AnotherInProgressDetails | undefined;
+                // Supabase hands the details over as JSON text, the mock as an object.
+                const d = parseAnotherInProgress(e.details);
                 const ok = await confirm({
                   title: t('error.ANOTHER_IN_PROGRESS', { number: d?.number ?? '' }),
                   confirmLabel: t('confirm.pauseAndStart'),
@@ -74,7 +94,8 @@ export function useOrderAction() {
                 if (ok) continue;
                 return null;
               }
-              if (e.code === 'BAD_TRANSITION') {
+              // The order moved on elsewhere, or left me (reassign hides it): refetch so the screen catches up.
+              if (e.code === 'BAD_TRANSITION' || e.code === 'FORBIDDEN') {
                 await qc.invalidateQueries({ queryKey: qk.order(orderId) });
                 await qc.invalidateQueries({ queryKey: qk.orders });
               }

@@ -20,12 +20,13 @@ import { OrderSection } from '@/features/orders/OrderSection';
 import { splitWorkerOrders } from '@/features/orders/workerSections';
 import { ErrorView, LoadingView } from '@/features/orders/StateViews';
 import { useNow } from '@/features/orders/useNow';
-import { errorText } from '@/features/orders/useOrderAction';
+import { showErrorHud } from '@/features/orders/useOrderAction';
 import { useApi, useSession } from '@/lib/api';
 import { useDirectories } from '@/lib/directories';
 import { haptic } from '@/lib/haptics';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
+import { liveHub } from '@/lib/liveHub';
 import { useTheme } from '@/lib/theme';
 import { EmptyState } from '@/ui/EmptyState';
 import { useHud } from '@/ui/Hud';
@@ -74,7 +75,7 @@ function WorkerHomeBody({ session }: { session: Session }) {
       hud.show({ message: t(next ? 'worker.home.onShiftHud' : 'worker.home.offShiftHud') });
     } catch (e) {
       void haptic.error();
-      hud.show({ message: errorText(e), tone: 'critical' });
+      showErrorHud(hud, e, () => void toggleShift(next));
     } finally {
       setPendingShift(null);
     }
@@ -83,13 +84,13 @@ function WorkerHomeBody({ session }: { session: Session }) {
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    api.realtime.resync();
+    liveHub.resync();
     try {
       await Promise.all([orders.refetch(), workers.refetch()]);
     } finally {
       setRefreshing(false);
     }
-  }, [api, orders, workers]);
+  }, [orders, workers]);
 
   const shift = shiftOf(now);
   const eyebrow = t('worker.home.eyebrow', {

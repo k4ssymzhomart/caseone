@@ -14,7 +14,8 @@ const key = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 export const apiMode: ApiMode =
   process.env.EXPO_PUBLIC_API_MODE === 'supabase' && url && key ? 'supabase' : 'mock';
 
-export const demoAccounts = process.env.EXPO_PUBLIC_DEMO_ACCOUNTS !== 'false';
+/** One tap demo logins on the login screen: opt in only (PHASE_2 §2.3), so a build without the variable has none. */
+export const demoAccounts = process.env.EXPO_PUBLIC_DEMO_ACCOUNTS === 'true';
 
 export const supabase: SupabaseClient<RotaDatabase> | null =
   apiMode === 'supabase' && url && key

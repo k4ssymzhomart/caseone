@@ -27,6 +27,7 @@ export const orderRu: Record<string, string> = {
   'order.detail.timeline': 'История',
   'order.detail.loadError': 'Не удалось открыть наряд',
   'order.detail.badId': 'Наряд не найден',
+  'order.detail.gone': 'Этот наряд вам больше не доступен',
   'order.detail.photoClose': 'Закрыть',
 
   // banners

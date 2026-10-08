@@ -4,6 +4,8 @@
 import { router, type Href } from 'expo-router';
 
 const shown = new Set<string>();
+/** Orders being accepted from a system notification's «Принять»: the foreground check must not alarm again. */
+const accepting = new Set<string>();
 
 /** The emergency screen calls this on mount; the returned function unregisters it on unmount. */
 export function registerEmergencyScreen(id: string): () => void {
@@ -17,9 +19,18 @@ export function isEmergencyShown(id: string | number): boolean {
   return shown.has(String(id));
 }
 
-/** Pushes /emergency/{id} unless that screen is already open. */
+/** Marks an order as being accepted (notification action); the returned function clears the mark. */
+export function markAccepting(id: string | number): () => void {
+  const key = String(id);
+  accepting.add(key);
+  return () => {
+    accepting.delete(key);
+  };
+}
+
+/** Pushes /emergency/{id} unless that screen is already open or the order is being accepted right now. */
 export function openEmergency(id: string | number): void {
-  if (isEmergencyShown(id)) return;
+  if (isEmergencyShown(id) || accepting.has(String(id))) return;
   router.push(`/emergency/${id}` as Href);
 }
 

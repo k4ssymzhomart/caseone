@@ -7,6 +7,8 @@
 // iOS presents one modal at a time from the root, so the sheet closes before the action runs (the HUD and any
 // retry sheet of useOrderAction then show above the screen), and the off shift question is asked inside the
 // sheet first; the action then goes out with allow_off_shift and the server never raises NOT_ON_SHIFT.
+// The action runs through the parent's useOrderAction (`run`), so the screen's «Переназначить» shows the
+// spinner and the bar stays disabled while the request is in flight.
 import {
   WORKER_STATE_LABEL,
   workerStateText,
@@ -20,7 +22,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
-import { useOrderAction } from '@/features/orders/useOrderAction';
+import type { useOrderAction } from '@/features/orders/useOrderAction';
 import { useApi } from '@/lib/api';
 import { useDirectories } from '@/lib/directories';
 import { t } from '@/lib/i18n';
@@ -53,12 +55,13 @@ export interface ReassignSheetProps {
   onClose: () => void;
   /** Employee id proposed by the escalation (`/order/{id}?reassign={candidate_id}`). */
   preselectId?: string | null;
+  /** The screen's useOrderAction().run, so its pending state covers the reassign. */
+  run: ReturnType<typeof useOrderAction>['run'];
 }
 
-export function ReassignSheet({ visible, order, onClose, preselectId }: ReassignSheetProps) {
+export function ReassignSheet({ visible, order, onClose, preselectId, run }: ReassignSheetProps) {
   const api = useApi();
   const theme = useTheme();
-  const { run } = useOrderAction();
   const dirs = useDirectories();
   const [tab, setTab] = useState<Tab>('workers');
   const [ask, setAsk] = useState<Target | null>(null);

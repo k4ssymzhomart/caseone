@@ -10,6 +10,7 @@ import { last30DaysFrom, periodFrom } from '@/features/profile/period';
 import { useApi } from '@/lib/api';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
+import { liveHub } from '@/lib/liveHub';
 import { useTheme } from '@/lib/theme';
 import { Avatar } from '@/ui/Avatar';
 import { Banner } from '@/ui/Banner';
@@ -45,6 +46,7 @@ export default function ManagerSummary() {
 
   const onRefresh = async () => {
     setRefreshing(true);
+    liveHub.resync();
     try {
       await dashboard.refetch();
     } finally {

@@ -88,9 +88,16 @@ export function MasterReview({ detail, review, dirs, canAct, refreshing, onRefre
   const fc = o.fault_code ? idx.faultCodes.get(o.fault_code) : undefined;
 
   const closed = o.status === 'closed';
-  const verdict = closed && o.final_verdict ? o.final_verdict : review.verdict;
+  // While open, the master's decision on this attempt (a return) outranks the AI's verdict.
+  const verdict = closed && o.final_verdict ? o.final_verdict : (review.master_verdict ?? review.verdict);
   const score = closed && o.final_score != null ? o.final_score : review.score;
   const overridden = closed && (o.final_score !== review.score || o.final_verdict !== review.verdict);
+  const returned = !closed && review.master_verdict != null && review.master_verdict !== review.verdict;
+  // «из 5» follows the score shown (CLAUDE.md §11: clamp(round(score / 20), 1, 5)); the AI's own values stay in
+  // the «ИИ: …» line below.
+  const secondary = overridden
+    ? t('review.score5', { score5: Math.max(1, Math.min(5, Math.round(score / 20))) })
+    : scoreSecondary(review);
   const needsMaster = o.status === 'ai_review' && review.needs_master_review;
   const showActions = canAct && (o.status === 'ai_review' || o.status === 'rework');
   const time = timeLine(o, dirs.work_norms);
@@ -173,14 +180,14 @@ export function MasterReview({ detail, review, dirs, canAct, refreshing, onRefre
             outOfLabel={t('review.outOf')}
             verdictLabel={verdictLabel(verdict)}
             verdictTone={toVerdictTone(verdict)}
-            secondary={scoreSecondary(review)}
+            secondary={secondary}
           />
-          {overridden ? (
+          {overridden || returned ? (
             <T variant="callout" tone="secondary">
               {t('review.aiWas', { score: review.score, verdict: verdictLabel(review.verdict) })}
             </T>
           ) : null}
-          {closed && review.master_comment ? <T variant="body">{review.master_comment}</T> : null}
+          {(closed || returned) && review.master_comment ? <T variant="body">{review.master_comment}</T> : null}
           {review.model ? (
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: theme.space[2], flexWrap: 'wrap' }}>
               <T variant="footnote" tone="secondary">

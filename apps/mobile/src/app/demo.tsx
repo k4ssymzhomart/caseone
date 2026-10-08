@@ -6,11 +6,12 @@ import { Redirect, router, type Href } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { errorText } from '@/features/orders/useOrderAction';
+import { errorText, showErrorHud } from '@/features/orders/useOrderAction';
 import { useApi, useSession } from '@/lib/api';
 import { haptic } from '@/lib/haptics';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
+import { liveHub } from '@/lib/liveHub';
 import { permissionState, sendTestNotification } from '@/lib/notifications';
 import { useTheme } from '@/lib/theme';
 import { Banner } from '@/ui/Banner';
@@ -57,8 +58,8 @@ function DemoContent() {
       qc.setQueryData(qk.settings, next);
       // The create screen may read demo_mode from the cached directories: keep them in step.
       qc.setQueryData<Directories>(qk.directories, (d) => (d ? { ...d, settings: next } : d));
-    } catch {
-      hud.show({ message: t('demo.saveError'), tone: 'critical' });
+    } catch (e) {
+      showErrorHud(hud, e, () => void save(key, patch), t('demo.saveError'));
     } finally {
       setSaving(null);
       setOptimistic({});
@@ -75,15 +76,20 @@ function DemoContent() {
       destructive: true,
     });
     if (!ok) return;
+    await runReset();
+  };
+
+  /** demo_reset is idempotent, so the NETWORK retry simply runs it again (no second confirm). */
+  const runReset = async () => {
     setResetting(true);
     try {
       await api.demo.reset();
-      api.realtime.resync();
+      liveHub.resync();
       await qc.invalidateQueries();
       void haptic.success();
       hud.show({ message: t('demo.resetDone') });
     } catch (e) {
-      hud.show({ message: errorText(e), tone: 'critical' });
+      showErrorHud(hud, e, () => void runReset());
     } finally {
       setResetting(false);
     }

@@ -5,8 +5,24 @@ import { create } from 'zustand';
 
 type Listener = (n: AppNotification) => void;
 const listeners = new Set<Listener>();
+const noop = () => undefined;
+let resyncImpl: () => void = noop;
 
 export const liveHub = {
+  /**
+   * Refetch everything the live sync covers (pull to refresh, PHASE_2 §2.5): createLiveSync.resync() in supabase
+   * mode, the mock's resync plus a full invalidation otherwise. A no op while signed out.
+   */
+  resync(): void {
+    resyncImpl();
+  },
+  /** LiveBridge registers the current live sync; the returned function unregisters it. */
+  setResync(fn: () => void): () => void {
+    resyncImpl = fn;
+    return () => {
+      if (resyncImpl === fn) resyncImpl = noop;
+    };
+  },
   emitNotification(n: AppNotification): void {
     listeners.forEach((l) => {
       try {

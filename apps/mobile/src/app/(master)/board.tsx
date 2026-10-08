@@ -28,10 +28,12 @@ import { ReassignSheet } from '@/features/master/ReassignSheet';
 import { ShiftCounters } from '@/features/master/ShiftCounters';
 import { useNow } from '@/features/master/useNow';
 import { orderCardProps } from '@/features/orders/present';
+import { useOrderAction } from '@/features/orders/useOrderAction';
 import { useApi } from '@/lib/api';
 import { useDirectories } from '@/lib/directories';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
+import { liveHub } from '@/lib/liveHub';
 import { useTheme } from '@/lib/theme';
 import { Button } from '@/ui/Button';
 import { EmptyState } from '@/ui/EmptyState';
@@ -75,6 +77,9 @@ export default function BoardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [reassignOrder, setReassignOrder] = useState<OrderView | null>(null);
   const [reassignOpen, setReassignOpen] = useState(false);
+  // One mutation hook for the board: the reassign of a rejected card shows its spinner on that card's button.
+  const { run, pending } = useOrderAction();
+  const reassigning = pending === 'reassign';
 
   // The shift panel opens a column with `/board?column=overdue&at=…` (at makes a repeated tap count).
   useEffect(() => {
@@ -95,13 +100,13 @@ export default function BoardScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    api.realtime.resync();
+    liveHub.resync();
     try {
       await Promise.all([qc.invalidateQueries({ queryKey: qk.orders }), qc.invalidateQueries({ queryKey: qk.shift })]);
     } finally {
       setRefreshing(false);
     }
-  }, [api, qc]);
+  }, [qc]);
 
   const openReassign = (o: OrderView) => {
     setReassignOrder(o);
@@ -145,6 +150,8 @@ export default function BoardScreen() {
             label={t('action.reassign')}
             variant="secondary"
             full
+            loading={reassigning && reassignOrder?.id === o.id}
+            disabled={reassigning}
             onPress={() => openReassign(o)}
             testID={`board-reassign-${o.number}`}
           />
@@ -183,7 +190,12 @@ export default function BoardScreen() {
         <View style={{ gap: theme.space[3] }}>{body}</View>
       </View>
       {reassignOrder ? (
-        <ReassignSheet visible={reassignOpen} order={reassignOrder} onClose={() => setReassignOpen(false)} />
+        <ReassignSheet
+          visible={reassignOpen}
+          order={reassignOrder}
+          onClose={() => setReassignOpen(false)}
+          run={run}
+        />
       ) : null}
     </Screen>
   );

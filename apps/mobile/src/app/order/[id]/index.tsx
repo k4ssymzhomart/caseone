@@ -30,11 +30,12 @@ import { orderBadge, orderEyebrow, pillTone, type Viewer } from '@/features/orde
 import { ReworkCard } from '@/features/orders/ReworkCard';
 import { ErrorView, LoadingView } from '@/features/orders/StateViews';
 import { useNow } from '@/features/orders/useNow';
-import { useOrderAction } from '@/features/orders/useOrderAction';
+import { isOrderGone, useOrderAction } from '@/features/orders/useOrderAction';
 import { useApi, useSession } from '@/lib/api';
 import { indexDirectories, useDirectories } from '@/lib/directories';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
+import { liveHub } from '@/lib/liveHub';
 import { useTheme } from '@/lib/theme';
 import { Banner } from '@/ui/Banner';
 import { Card } from '@/ui/Card';
@@ -101,13 +102,13 @@ function OrderScreenBody({ session }: { session: Session }) {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    api.realtime.resync();
+    liveHub.resync();
     try {
       await query.refetch();
     } finally {
       setRefreshing(false);
     }
-  }, [api, query]);
+  }, [query]);
 
   const actions = useMemo(
     () => (detail ? availableActions(detail.order, session, detail.events, detail.reviews.length > 0) : []),
@@ -181,6 +182,16 @@ function OrderScreenBody({ session }: { session: Session }) {
       <Screen>
         <BackBar />
         <ErrorView title={t('order.detail.badId')} />
+      </Screen>
+    );
+  }
+
+  // Reassigned away from me (RLS hides it now) or removed by a demo reset: no stale card with dead buttons.
+  if (query.isError && isOrderGone(query.error)) {
+    return (
+      <Screen>
+        <BackBar />
+        <ErrorView title={t('order.detail.gone')} mascot="peek" />
       </Screen>
     );
   }
@@ -323,6 +334,7 @@ function OrderScreenBody({ session }: { session: Session }) {
           order={order}
           onClose={() => setReassignOpen(false)}
           preselectId={params.reassign ?? null}
+          run={run}
         />
       ) : null}
       <PhotoViewer uri={photo} onClose={() => setPhoto(null)} />

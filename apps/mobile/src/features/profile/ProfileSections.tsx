@@ -1,15 +1,16 @@
-// Shared pieces of the profile screens: identity, «На смене», push status, Telegram, theme, sign out.
-import type { Session } from '@rota/shared';
+// Shared pieces of the profile screens: identity, «На смене», connection, push status, Telegram, theme, sign out.
+import type { LiveStatus, Session } from '@rota/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, type Href } from 'expo-router';
 import { useState } from 'react';
 import { Linking, View } from 'react-native';
 
-import { errorText } from '@/features/orders/useOrderAction';
+import { errorText, showErrorHud } from '@/features/orders/useOrderAction';
 import { useApi } from '@/lib/api';
 import { useDirectories } from '@/lib/directories';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
+import { useLiveStatus } from '@/lib/liveHub';
 import { sendTestNotification } from '@/lib/notifications';
 import { useTheme, useThemePreference, type ThemePreference } from '@/lib/theme';
 import { Card } from '@/ui/Card';
@@ -82,8 +83,8 @@ export function OnShiftGroup({ employeeId }: { employeeId: string }) {
     try {
       await api.workers.setOnShift(employeeId, next);
       await qc.invalidateQueries({ queryKey: qk.workers });
-    } catch {
-      hud.show({ message: t('profile.onShiftError'), tone: 'critical' });
+    } catch (e) {
+      showErrorHud(hud, e, () => void toggle(next), t('profile.onShiftError'));
     } finally {
       setOptimistic(null);
     }
@@ -103,6 +104,28 @@ export function OnShiftGroup({ employeeId }: { employeeId: string }) {
             accessibilityLabel={t('profile.onShift')}
           />
         }
+      />
+    </ListGroup>
+  );
+}
+
+const LIVE_PILL: Record<LiveStatus, { label: string; tone: PillTone }> = {
+  live: { label: 'profile.connection.live', tone: 'success' },
+  connecting: { label: 'profile.connection.connecting', tone: 'warning' },
+  offline: { label: 'profile.connection.offline', tone: 'critical' },
+};
+
+/** The live channel's state (PHASE_2 §2.1): «На связи», «Подключение…» or «Нет связи», a dot plus a word. */
+export function ConnectionGroup({ density }: { density: ListRowDensity }) {
+  const status = useLiveStatus((s) => s.status);
+  const pill = LIVE_PILL[status];
+  return (
+    <ListGroup>
+      <ListRow
+        density={density}
+        title={t('profile.connection')}
+        right={<Pill label={t(pill.label)} tone={pill.tone} />}
+        testID="profile-connection"
       />
     </ListGroup>
   );

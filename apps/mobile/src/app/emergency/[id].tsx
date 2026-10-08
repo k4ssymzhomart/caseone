@@ -1,11 +1,12 @@
 // The emergency screen (CLAUDE.md §8, PHASE_0 §7.1): full screen red, siren and heavy haptics until the
 // worker answers. «Принять» accepts and opens the order; «Отклонить» opens the reject reasons. It never
 // dismisses by itself; once the order is no longer «Выдан» (accepted on another phone, reassigned, rejected)
-// it gives way to the order screen. The id `demo` (test notification) shows sample text and only closes.
+// it gives way to the order screen; once it is not mine any more (reassigned away: RLS hides it) it closes.
+// The id `demo` (test notification) shows sample text and only closes.
 // Android's back button does nothing here: the worker answers with «Принять» or «Отклонить».
 import { primitives, withAlpha } from '@rota/design';
 import { hhmm, type Status } from '@rota/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Redirect, router, useFocusEffect, useLocalSearchParams, type Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef } from 'react';
@@ -14,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { registerEmergencyScreen } from '@/features/notifications/emergencyGate';
 import { goBack } from '@/features/orders/BackBar';
-import { useOrderAction } from '@/features/orders/useOrderAction';
+import { isOrderGone, useOrderAction } from '@/features/orders/useOrderAction';
 import { useApi, useSession } from '@/lib/api';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
@@ -40,6 +41,7 @@ export default function EmergencyScreen() {
 function EmergencyBody({ idParam, demo }: { idParam: string; demo: boolean }) {
   const theme = useTheme();
   const api = useApi();
+  const qc = useQueryClient();
   const insets = useSafeAreaInsets();
   const orderId = Number(idParam);
   const valid = !demo && Number.isInteger(orderId) && orderId > 0;
@@ -68,6 +70,8 @@ function EmergencyBody({ idParam, demo }: { idParam: string; demo: boolean }) {
   const leaving = useRef(false);
   const accepted = useRef(false);
   const sirenToken = useRef(0);
+  /** Only a «not found» from a fetch made while this screen is up counts (an old cached one may be outdated). */
+  const mountedAt = useRef(Date.now());
   const status = useRef<Status | null>(null);
   status.current = order?.status ?? null;
 
@@ -83,16 +87,28 @@ function EmergencyBody({ idParam, demo }: { idParam: string; demo: boolean }) {
     });
   }, []);
 
-  /** Not «Выдан» any more: stop and show the order. Only while this screen is on top (a sheet may cover it). */
+  /**
+   * Not «Выдан» any more: stop and show the order. Not mine any more (reassigned, or gone in a demo reset): the
+   * refetch fails with «order not found» while the cache keeps the old «Выдан», so stop and close. Only while
+   * this screen is on top (a sheet may cover it). The query state is read from the client, not from the last
+   * render, so a failed «Принять» (FORBIDDEN, then a refetch) is seen right after it returns.
+   */
   const leaveIfAnswered = useCallback(() => {
     if (demo || !focused.current || leaving.current) return;
+    const state = qc.getQueryState(qk.order(orderId));
+    if (state?.status === 'error' && state.errorUpdatedAt >= mountedAt.current && isOrderGone(state.error)) {
+      leaving.current = true;
+      silence();
+      goBack();
+      return;
+    }
     const s = status.current;
     if (s && s !== 'issued') {
       leaving.current = true;
       silence();
       router.replace(`/order/${orderId}` as Href);
     }
-  }, [demo, orderId, silence]);
+  }, [demo, orderId, qc, silence]);
 
   // The notification openers skip an order whose red screen is already up (no second copy after an unlock).
   useEffect(() => registerEmergencyScreen(idParam), [idParam]);
@@ -114,7 +130,7 @@ function EmergencyBody({ idParam, demo }: { idParam: string; demo: boolean }) {
 
   useEffect(() => {
     leaveIfAnswered();
-  }, [order?.status, leaveIfAnswered]);
+  }, [order?.status, query.error, leaveIfAnswered]);
 
   const accept = async () => {
     silence();

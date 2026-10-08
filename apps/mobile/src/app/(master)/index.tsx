@@ -15,6 +15,7 @@ import { useApi } from '@/lib/api';
 import { useDirectories } from '@/lib/directories';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
+import { liveHub } from '@/lib/liveHub';
 import { useTheme } from '@/lib/theme';
 import { EmptyState } from '@/ui/EmptyState';
 import { ListGroup } from '@/ui/ListGroup';
@@ -56,7 +57,7 @@ export default function ShiftScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    api.realtime.resync();
+    liveHub.resync();
     try {
       await Promise.all([
         qc.invalidateQueries({ queryKey: qk.workers }),
@@ -66,7 +67,7 @@ export default function ShiftScreen() {
     } finally {
       setRefreshing(false);
     }
-  }, [api, qc]);
+  }, [qc]);
 
   let body: ReactNode;
   if (workers.isPending) {

@@ -9,6 +9,7 @@ import { View } from 'react-native';
 import { useSession } from '@/lib/api';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
+import { liveHub } from '@/lib/liveHub';
 import { useTheme } from '@/lib/theme';
 import { Avatar } from '@/ui/Avatar';
 import { ListGroup } from '@/ui/ListGroup';
@@ -18,6 +19,7 @@ import { useTabBarHeight } from '@/ui/TabBar';
 
 import { last30DaysFrom } from './period';
 import {
+  ConnectionGroup,
   IdentityCard,
   NotificationsGroup,
   OnShiftGroup,
@@ -54,6 +56,7 @@ function ProfileContent({ session, variant }: { session: Session; variant: Profi
 
   const onRefresh = async () => {
     setRefreshing(true);
+    liveHub.resync();
     try {
       await Promise.all([
         qc.refetchQueries({ queryKey: qk.workers }),
@@ -79,6 +82,7 @@ function ProfileContent({ session, variant }: { session: Session; variant: Profi
       <View style={{ gap: theme.space[6] }}>
         <IdentityCard session={session} />
         {worker ? <OnShiftGroup employeeId={session.user_id} /> : null}
+        <ConnectionGroup density={density} />
         {worker ? <RatingSection employeeId={session.user_id} from={from} /> : null}
         <NotificationsGroup density={density} testUrl={HOME[variant]} />
         <TelegramGroup density={density} />

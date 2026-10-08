@@ -46,7 +46,8 @@ export function WorkerReview({ detail, review, norms, celebrate, refreshing, onR
   const o = detail.order;
 
   const closed = o.status === 'closed';
-  const verdict = closed && o.final_verdict ? o.final_verdict : review.verdict;
+  // While open, the master's decision on this attempt (a return) outranks the AI's verdict.
+  const verdict = closed && o.final_verdict ? o.final_verdict : (review.master_verdict ?? review.verdict);
   const score = closed && o.final_score != null ? o.final_score : review.score;
   const score5 = Math.max(1, Math.min(5, Math.round(score / 20)));
   const waitingMaster = o.status === 'ai_review';

@@ -12,6 +12,7 @@ import { useNow } from '@/features/orders/useNow';
 import { useApi, useSession } from '@/lib/api';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
+import { liveHub } from '@/lib/liveHub';
 import { useTheme } from '@/lib/theme';
 import { Card } from '@/ui/Card';
 import { Counter } from '@/ui/Counter';
@@ -20,6 +21,8 @@ import { Screen } from '@/ui/Screen';
 import { useTabBarHeight } from '@/ui/TabBar';
 
 const PERIOD_DAYS = 30;
+/** The query reaches back further by creation time: an order raised earlier may have closed within the 30 days. */
+const FETCH_DAYS = 120;
 const DAY_MS = 24 * 60 * 60_000;
 
 export default function WorkerClosed() {
@@ -36,31 +39,30 @@ function WorkerClosedBody({ session }: { session: Session }) {
   const tabBar = useTabBarHeight();
   const me = session.user_id;
 
-  // Fixed per mount, so the query key stays stable while the screen is open.
-  const [since] = useState(() => new Date(Date.now() - PERIOD_DAYS * DAY_MS).toISOString());
+  // Fixed per mount, so the query key stays stable while the screen is open. `since` filters on created_at, so
+  // the 30 days are applied to closed_at on the client.
+  const [since] = useState(() => new Date(Date.now() - FETCH_DAYS * DAY_MS).toISOString());
   const filter = useMemo<OrderFilter>(() => ({ assignee_id: me, statuses: ['closed'], since }), [me, since]);
   const query = useQuery({ queryKey: qk.ordersList(filter), queryFn: () => api.orders.list(filter) });
 
-  const closed = useMemo(
-    () =>
-      [...(query.data ?? [])].sort(
-        (a, b) => Date.parse(b.closed_at ?? b.created_at) - Date.parse(a.closed_at ?? a.created_at),
-      ),
-    [query.data],
-  );
+  const closed = useMemo(() => {
+    const from = now.getTime() - PERIOD_DAYS * DAY_MS;
+    const closedAt = (o: { closed_at: string | null; created_at: string }) => Date.parse(o.closed_at ?? o.created_at);
+    return (query.data ?? []).filter((o) => closedAt(o) >= from).sort((a, b) => closedAt(b) - closedAt(a));
+  }, [query.data, now]);
   const scores = closed.map((o) => o.final_score).filter((s): s is number => s !== null);
   const average = scores.length > 0 ? scores.reduce((sum, s) => sum + s, 0) / scores.length : null;
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    api.realtime.resync();
+    liveHub.resync();
     try {
       await query.refetch();
     } finally {
       setRefreshing(false);
     }
-  }, [api, query]);
+  }, [query]);
 
   let content;
   if (query.data === undefined) {

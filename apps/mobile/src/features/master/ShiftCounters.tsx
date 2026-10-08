@@ -1,5 +1,7 @@
 // The shift counters row (CLAUDE.md §10b): выдано, выполнено, просрочено, в простое since the shift start.
-// The query key carries the shift start, so the row refetches by itself when the shift changes.
+// The query key carries the shift start, so the row refetches by itself when the shift changes. An order going
+// overdue changes no orders row (no realtime event): the overdue notification refetches it (NotificationBridge),
+// and a 30 s poll covers the rest.
 import { shiftStart } from '@rota/shared';
 import { useQuery } from '@tanstack/react-query';
 
@@ -10,11 +12,17 @@ import { useTheme } from '@/lib/theme';
 import { Card } from '@/ui/Card';
 import { Counter } from '@/ui/Counter';
 
+const COUNTERS_POLL_MS = 30_000;
+
 export function useShiftCounters(now: Date) {
   const api = useApi();
   const start = shiftStart(now);
   const iso = start.toISOString();
-  return useQuery({ queryKey: qk.shiftCounters(iso), queryFn: () => api.shift.counters(start) });
+  return useQuery({
+    queryKey: qk.shiftCounters(iso),
+    queryFn: () => api.shift.counters(start),
+    refetchInterval: COUNTERS_POLL_MS,
+  });
 }
 
 export interface ShiftCountersProps {

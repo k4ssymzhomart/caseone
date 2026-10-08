@@ -6,9 +6,10 @@ import { primitives } from '@rota/design';
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 import { t } from './i18n';
+import { useLiveStatus } from './liveHub';
 
 export const CHANNEL = { orders: 'orders', emergency: 'emergency', reminders: 'reminders' } as const;
 export type ChannelId = (typeof CHANNEL)[keyof typeof CHANNEL];
@@ -22,13 +23,23 @@ export async function configureNotifications(): Promise<void> {
   if (configured) return;
   configured = true;
 
+  // In the foreground the same event arrives through realtime as the HUD toast or the red screen with its own
+  // siren (CLAUDE.md §8 in-app), so a remote push then stays silent in the list. Local notifications (the test
+  // buttons) keep their banner, and so does a push while the live channel is down: it is the only signal then.
   Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowBanner: true,
-      shouldShowList: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    }),
+    handleNotification: async (n) => {
+      const trigger = n.request.trigger as { type?: string } | null;
+      const quiet =
+        trigger?.type === 'push' &&
+        AppState.currentState === 'active' &&
+        useLiveStatus.getState().status === 'live';
+      return {
+        shouldShowBanner: !quiet,
+        shouldShowList: true,
+        shouldPlaySound: !quiet,
+        shouldSetBadge: false,
+      };
+    },
   });
 
   if (Platform.OS === 'android') {

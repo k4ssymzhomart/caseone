@@ -4,6 +4,7 @@
 import {
   ACTIVE_STATUSES,
   compareOrders,
+  isRotaError,
   workerStateText,
   workerStateTone,
   type OrderFilter,
@@ -57,7 +58,8 @@ export default function WorkerSheet() {
 
   // The switch flips at once; the server value takes over after the refetch.
   const [shiftPending, setShiftPending] = useState<boolean | null>(null);
-  const [shiftError, setShiftError] = useState<string | null>(null);
+  // The HUD sits under a native sheet, so the error shows inline; NETWORK offers «Повторить» with the same value.
+  const [shiftError, setShiftError] = useState<{ text: string; retry: boolean | null } | null>(null);
   const onShift = shiftPending ?? w?.on_shift ?? false;
 
   const setShift = async (next: boolean) => {
@@ -73,8 +75,7 @@ export default function WorkerSheet() {
       ]);
     } catch (e) {
       void haptic.error();
-      // The HUD sits under a native sheet, so the error shows inline.
-      setShiftError(errorText(e));
+      setShiftError({ text: errorText(e), retry: isRotaError(e) && e.code === 'NETWORK' ? next : null });
     } finally {
       setShiftPending(null);
     }
@@ -168,7 +169,15 @@ export default function WorkerSheet() {
             }
           />
         </ListGroup>
-        {shiftError ? <Banner tone="critical" text={shiftError} /> : null}
+        {shiftError ? (
+          <Banner
+            tone="critical"
+            text={shiftError.text}
+            {...(shiftError.retry !== null
+              ? { actionLabel: t('common.retry'), onAction: () => void setShift(shiftError.retry as boolean) }
+              : {})}
+          />
+        ) : null}
         {list}
       </>
     );

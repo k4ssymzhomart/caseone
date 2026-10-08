@@ -13,6 +13,7 @@ import { useApi } from '@/lib/api';
 import { useDirectories } from '@/lib/directories';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
+import { liveHub } from '@/lib/liveHub';
 import { useTheme } from '@/lib/theme';
 import { Banner } from '@/ui/Banner';
 import { Button } from '@/ui/Button';
@@ -61,13 +62,13 @@ export default function EquipmentHistoryScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    api.realtime.resync();
+    liveHub.resync();
     try {
       await history.refetch();
     } finally {
       setRefreshing(false);
     }
-  }, [api, history]);
+  }, [history]);
 
   const back = () => (router.canGoBack() ? router.back() : router.replace('/' as Href));
 

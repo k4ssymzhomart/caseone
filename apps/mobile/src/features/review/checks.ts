@@ -142,18 +142,26 @@ export function normHours(o: Pick<Order, 'norm_hours' | 'fault_code'>, norms: re
   return norms.find((n) => n.fault_code === o.fault_code)?.norm_hours ?? null;
 }
 
-/** «Время: 2 ч 10 мин при нормативе 3 ч», or only the time when the order has no norm. */
+/** A demo job shorter than this is compared with the accelerated norm (CLAUDE.md §20, SQL rule R4). */
+const DEMO_SHORT_JOB_MIN = 15;
+/** Demo acceleration: one norm hour is 2 minutes. */
+const DEMO_NORM_DIVISOR = 30;
+
+/**
+ * «Время: 2 ч 10 мин при нормативе 3 ч», or only the time when the order has no norm. A demo job of a few
+ * minutes shows the accelerated norm, as rule R4 judged it.
+ */
 export function timeLine(
-  o: Pick<Order, 'started_at' | 'done_at' | 'paused_total_sec' | 'norm_hours' | 'fault_code'>,
+  o: Pick<Order, 'started_at' | 'done_at' | 'paused_total_sec' | 'norm_hours' | 'fault_code' | 'is_demo'>,
   norms: readonly WorkNorm[],
 ): string | null {
   const minutes = workMinutes(o);
   if (minutes == null) return null;
   const actual = formatDuration(Math.max(1, minutes));
   const norm = normHours(o, norms);
-  return norm != null
-    ? t('review.time', { actual, norm: formatDuration(norm * 60) })
-    : t('review.timeOnly', { actual });
+  if (norm == null) return t('review.timeOnly', { actual });
+  const shown = o.is_demo && minutes < DEMO_SHORT_JOB_MIN ? norm / DEMO_NORM_DIVISOR : norm;
+  return t('review.time', { actual, norm: formatDuration(shown * 60) });
 }
 
 /** «4 из 5 · уверенность 86%». */

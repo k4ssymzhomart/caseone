@@ -1,5 +1,5 @@
-// Required specialty for the AI executor suggestion (CLAUDE.md §10): the description keywords first,
-// then the suggested fault code's specialty; null lets suggest_assignees fall back to the equipment type.
+// Required specialty for the AI executor suggestion (CLAUDE.md §10), in its order: the description keywords,
+// then the equipment type default (equipment_type_specialty), then the suggested fault code's specialty.
 
 /** CLAUDE.md §10 keyword map, in its order. Ties go to the earlier specialty. */
 const KEYWORDS: readonly (readonly [specialty: string, pattern: RegExp])[] = [
@@ -36,7 +36,14 @@ export function specialtyFromText(text: string): string | null {
   return best;
 }
 
-/** Keywords of the description, else the suggested fault code's specialty, else null. */
-export function requiredSpecialty(description: string, faultCodeSpecialty: string | null): string | null {
-  return specialtyFromText(description) ?? faultCodeSpecialty ?? null;
+/**
+ * Keywords of the description, else the equipment type's default, else the suggested fault code's specialty,
+ * else null (suggest_assignees then falls back to the equipment type itself).
+ */
+export function requiredSpecialty(
+  description: string,
+  typeSpecialty: string | null,
+  faultCodeSpecialty: string | null,
+): string | null {
+  return specialtyFromText(description) ?? typeSpecialty ?? faultCodeSpecialty ?? null;
 }
