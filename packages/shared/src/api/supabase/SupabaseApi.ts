@@ -8,9 +8,10 @@
 // set_on_shift, set_setting, ...). Realtime: realtime.subscribe() runs a createLiveSync channel of its own
 // (`rota-api-{uid}`) while it has subscribers; the apps' React Query layer uses createLiveSync directly.
 //
-// Known differences from MockApi: the AI check is rules only until Phase 4 (ai_check_rules, model 'rules',
-// needs_master_review unless a rule fails); shiftSummary and explainRating build their text from the real
-// report numbers with the deterministic writers of the mock until the Phase 5 Edge Functions exist.
+// Known differences from MockApi: ai.verify calls the ai-verify Edge Function (rules + LLM, CLAUDE.md §11) and
+// falls back to the rules only check (ai_check_rules, model 'rules', needs_master_review unless a rule fails)
+// when the function is missing, fails or takes over 20 s; shiftSummary and explainRating build their text from the
+// real report numbers with the deterministic writers of the mock until the Phase 5 Edge Functions exist.
 
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { ACTIVE_STATUSES, ROLES, type OrderAction, type Role } from '../../domain/enums';
@@ -54,7 +55,7 @@ import { settings as DEFAULT_SETTINGS } from '../../fixtures/settings';
 import { accountEmail, accountPassword } from '../../fixtures/ids';
 import { startOfLocalDay } from '../../format/time';
 import { createLiveSync, type LiveChange, type LiveSync } from '../../live/createLiveSync';
-import { later } from '../../util/timers';
+import { cancelLater, later, type TimerHandle } from '../../util/timers';
 import type { Json } from '../database.types';
 import type { RotaDatabase, RpcName } from '../database.extra';
 import { RotaError } from '../errors';
@@ -90,6 +91,46 @@ const SIGNED_URL_MARGIN_MS = 5 * 60_000;
 const SESSION_KEY = 'rota.supabase.session';
 const BOARD_STATUSES = [...ACTIVE_STATUSES, 'rejected', 'done', 'ai_review'] as const;
 const DONE_STATUSES = ['done', 'ai_review', 'closed'] as const;
+
+/**
+ * How long ai.verify waits for the ai-verify Edge Function (one Sonnet call takes about 10 s) before it falls back
+ * to the rules only check, so the loop never stalls. A late LLM answer is harmless: ai_submit keeps one review per
+ * attempt and returns the first one.
+ */
+export const AI_VERIFY_TIMEOUT_MS = 20_000;
+
+/** functions.invoke of supabase-js, duck typed: clients without Edge Functions (tests, old builds) use the rules. */
+type FunctionsInvoke = (
+  name: string,
+  options: { body: unknown; timeout?: number },
+) => Promise<{ data: unknown; error: unknown }>;
+
+/**
+ * The HTTP status of a functions.invoke error: the Response status for FunctionsHttpError, 0 when the request never
+ * got an answer (FunctionsFetchError: network, abort, timeout) or the relay failed (FunctionsRelayError).
+ */
+export function functionErrorStatus(error: unknown): number {
+  const e = error as { name?: unknown; context?: { status?: unknown } | null } | null;
+  if (e?.name === 'FunctionsRelayError') return 0;
+  const status = e?.context?.status;
+  return typeof status === 'number' ? status : 0;
+}
+
+/** The review in an ai-verify answer ({review, already_reviewed?, rules_only?}), or null when the shape is off. */
+function reviewOf(data: unknown): AiReview | null {
+  let body = data;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body) as unknown;
+    } catch {
+      return null;
+    }
+  }
+  const review = (body as { review?: Partial<AiReview> } | null)?.review;
+  return review && typeof review.id === 'number' && typeof review.verdict === 'string'
+    ? (review as AiReview)
+    : null;
+}
 
 const TOPIC_OF: Readonly<Record<LiveChange['table'], RealtimeTopic>> = {
   orders: 'orders',
@@ -830,27 +871,70 @@ export class SupabaseApi implements RotaApi {
     urls: async (paths) => this.signedUrls(paths),
   };
 
+  /**
+   * The ai-verify Edge Function (CLAUDE.md §11): the review, or null when the caller should fall back to the rules
+   * only check: no functions client, a network error or timeout (AI_VERIFY_TIMEOUT_MS), 404 (function not
+   * deployed), 5xx, a relay error, 409 (the order left ai_review: the rules path finds the review that moved it)
+   * or an answer without a review. 401 and 403 are FORBIDDEN and 400 is BAD_INPUT, as the rules path would say.
+   */
+  private async verifyByFunction(orderId: number): Promise<AiReview | null> {
+    const functions = (this.client as { functions?: { invoke?: FunctionsInvoke } }).functions;
+    const invoke = functions?.invoke;
+    if (typeof invoke !== 'function') return null;
+    let timer: TimerHandle | undefined;
+    const timedOut = new Promise<'timeout'>((resolve) => {
+      timer = later(() => resolve('timeout'), AI_VERIFY_TIMEOUT_MS);
+    });
+    let res: { data: unknown; error: unknown } | 'timeout';
+    try {
+      res = await Promise.race([
+        invoke.call(functions, 'ai-verify', {
+          body: { order_id: orderId, source: 'app' },
+          timeout: AI_VERIFY_TIMEOUT_MS,
+        }),
+        timedOut,
+      ]);
+    } catch {
+      return null;
+    } finally {
+      if (timer !== undefined) cancelLater(timer);
+    }
+    if (res === 'timeout') return null;
+    if (!res.error) return reviewOf(res.data);
+    const status = functionErrorStatus(res.error);
+    if (status === 401 || status === 403) {
+      throw new RotaError('FORBIDDEN', { details: `ai-verify ${status}`, cause: res.error });
+    }
+    if (status === 400) {
+      throw new RotaError('BAD_INPUT', { details: 'ai-verify 400', cause: res.error });
+    }
+    return null;
+  }
+
+  /** public.ai_check_rules: the rules only review a signed-in assignee or master may start. */
+  private async verifyByRules(orderId: number): Promise<AiReview> {
+    try {
+      return await (this.rpc('ai_check_rules', { p_order_id: orderId }) as Promise<AiReview>);
+    } catch (e) {
+      if (!(e instanceof RotaError) || e.code !== 'BAD_TRANSITION') throw e;
+      // the order moved on (rework, closed): the review that moved it
+      const row = await unwrap<{ ai_review_id: number | null } | null>(
+        this.db.from('orders').select('ai_review_id').eq('id', orderId).maybeSingle(),
+      );
+      const review =
+        row?.ai_review_id != null
+          ? await unwrap<AiReview | null>(
+              this.db.from('ai_reviews').select('*').eq('id', row.ai_review_id).maybeSingle(),
+            )
+          : await this.ai.review(orderId);
+      if (review) return review;
+      throw e;
+    }
+  }
+
   ai: RotaApi['ai'] = {
-    verify: async (orderId) => {
-      // Phase 1 and 2: rules only. Phase 4 swaps in functions.invoke('ai-verify') behind the same method.
-      try {
-        return await (this.rpc('ai_check_rules', { p_order_id: orderId }) as Promise<AiReview>);
-      } catch (e) {
-        if (!(e instanceof RotaError) || e.code !== 'BAD_TRANSITION') throw e;
-        // the order moved on (rework, closed): the review that moved it
-        const row = await unwrap<{ ai_review_id: number | null } | null>(
-          this.db.from('orders').select('ai_review_id').eq('id', orderId).maybeSingle(),
-        );
-        const review =
-          row?.ai_review_id != null
-            ? await unwrap<AiReview | null>(
-                this.db.from('ai_reviews').select('*').eq('id', row.ai_review_id).maybeSingle(),
-              )
-            : await this.ai.review(orderId);
-        if (review) return review;
-        throw e;
-      }
-    },
+    verify: async (orderId) =>
+      (await this.verifyByFunction(orderId)) ?? (await this.verifyByRules(orderId)),
     review: async (orderId) =>
       unwrap<AiReview | null>(
         this.db

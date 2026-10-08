@@ -2,14 +2,20 @@
 // the error mapping of PHASE_1 §6, the session, the signed URL cache and realtime on createLiveSync.
 // The live project runs the shared contract in SupabaseApi.contract.test.ts (RUN_SUPABASE=1).
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RealtimeEvent } from '../../domain/types';
 import { isRotaError, parseAnotherInProgress, RotaError } from '../errors';
 import { createApi } from '../index';
 import { memoryStorage } from '../RotaApi';
 import { fromAuth, fromPostgrest, fromStorage, fromThrown } from './errors';
-import { downtimeMinutes, foldSettings, SupabaseApi } from './SupabaseApi';
+import {
+  AI_VERIFY_TIMEOUT_MS,
+  downtimeMinutes,
+  foldSettings,
+  functionErrorStatus,
+  SupabaseApi,
+} from './SupabaseApi';
 
 // ---------------------------------------------------------------------------
 // a fake supabase-js client
@@ -30,6 +36,12 @@ interface Response {
 }
 
 type Responder = (call: Call) => Response | undefined;
+
+/** functions.invoke of the fake client; absent unless a test passes one. */
+type FakeInvoke = (
+  name: string,
+  options: { body: unknown; timeout?: number },
+) => Promise<{ data: unknown; error: unknown }>;
 
 function query(call: Call, calls: Call[], respond: Responder): unknown {
   calls.push(call);
@@ -87,7 +99,7 @@ const EMPLOYEES: Record<string, Record<string, unknown>> = {
   },
 };
 
-function fakeClient(respond: Responder = () => undefined) {
+function fakeClient(respond: Responder = () => undefined, invoke?: FakeInvoke) {
   const calls: Call[] = [];
   const channels: FakeChannel[] = [];
   let session: { user: { id: string; app_metadata: Record<string, unknown> } } | null = null;
@@ -142,6 +154,7 @@ function fakeClient(respond: Responder = () => undefined) {
         return { data: { subscription: { unsubscribe: () => undefined } } };
       },
     },
+    ...(invoke ? { functions: { invoke } } : {}),
     from: (table: string) => query({ target: table, ops: [] }, calls, answer),
     rpc: (fn: string, args?: unknown) =>
       query({ target: `rpc:${fn}`, args, ops: [] }, calls, answer),
@@ -222,8 +235,8 @@ function fakeClient(respond: Responder = () => undefined) {
 
 let clock = new Date('2026-10-08T10:00:00Z'); // 15:00 local
 
-function makeApi(respond?: Responder) {
-  const fake = fakeClient(respond);
+function makeApi(respond?: Responder, invoke?: FakeInvoke) {
+  const fake = fakeClient(respond, invoke);
   const api = new SupabaseApi({
     mode: 'supabase',
     client: fake.client,
@@ -561,7 +574,7 @@ describe('SupabaseApi', () => {
     expect(await api.photos.urls([])).toEqual({});
   });
 
-  it('verifies by rules and falls back to the review that moved the order on', async () => {
+  it('verifies by rules without a functions client and falls back to the review that moved the order on', async () => {
     const { api, rpcCalls } = makeApi((call) => {
       if (call.target === 'rpc:ai_check_rules') {
         return {
@@ -578,6 +591,162 @@ describe('SupabaseApi', () => {
     });
     expect(await api.ai.verify(8)).toEqual({ id: 44, verdict: 'rework' });
     expect(rpcCalls('ai_check_rules')[0]?.args).toEqual({ p_order_id: 8 });
+  });
+
+  describe('ai.verify through the ai-verify Edge Function', () => {
+    const llmReview = {
+      id: 51,
+      order_id: 8,
+      attempt: 1,
+      verdict: 'accepted',
+      model: 'claude-sonnet-5-5',
+    };
+    const rulesReview = { id: 52, order_id: 8, attempt: 1, verdict: 'accepted', model: 'rules' };
+    const rules: Responder = (call) =>
+      call.target === 'rpc:ai_check_rules' ? { data: rulesReview } : undefined;
+    const failing =
+      (error: unknown): FakeInvoke =>
+      async () => ({ data: null, error });
+
+    it('returns the review of ai-verify without the rules check', async () => {
+      const invocations: [string, unknown][] = [];
+      const { api, rpcCalls } = makeApi(rules, async (name, options) => {
+        invocations.push([name, options]);
+        return { data: { review: llmReview }, error: null };
+      });
+      expect(await api.ai.verify(8)).toEqual(llmReview);
+      expect(invocations).toEqual([
+        ['ai-verify', { body: { order_id: 8, source: 'app' }, timeout: AI_VERIFY_TIMEOUT_MS }],
+      ]);
+      expect(rpcCalls('ai_check_rules')).toHaveLength(0);
+    });
+
+    it('reads the review of an already reviewed attempt and a JSON text body', async () => {
+      const { api } = makeApi(rules, async () => ({
+        data: JSON.stringify({ review: llmReview, already_reviewed: true }),
+        error: null,
+      }));
+      expect(await api.ai.verify(8)).toEqual(llmReview);
+    });
+
+    it.each([
+      [
+        'a network error',
+        { name: 'FunctionsFetchError', context: new TypeError('Network request failed') },
+      ],
+      ['a missing function', { name: 'FunctionsHttpError', context: { status: 404 } }],
+      ['a server error', { name: 'FunctionsHttpError', context: { status: 503 } }],
+      ['a relay error', { name: 'FunctionsRelayError', context: { status: 400 } }],
+      ['a rate limit', { name: 'FunctionsHttpError', context: { status: 429 } }],
+    ])('falls back to the rules check on %s', async (_, error) => {
+      const { api, rpcCalls } = makeApi(rules, failing(error));
+      expect(await api.ai.verify(8)).toEqual(rulesReview);
+      expect(rpcCalls('ai_check_rules')[0]?.args).toEqual({ p_order_id: 8 });
+    });
+
+    it('falls back when invoke throws or answers without a review', async () => {
+      const thrown = makeApi(rules, async () => {
+        throw new Error('boom');
+      });
+      expect(await thrown.api.ai.verify(8)).toEqual(rulesReview);
+      const empty = makeApi(rules, async () => ({ data: { ok: true }, error: null }));
+      expect(await empty.api.ai.verify(8)).toEqual(rulesReview);
+    });
+
+    it('falls back to the rules check after 20 s without an answer', async () => {
+      vi.useFakeTimers();
+      const { api, rpcCalls } = makeApi(rules, () => new Promise(() => undefined));
+      const pending = api.ai.verify(8);
+      await vi.advanceTimersByTimeAsync(AI_VERIFY_TIMEOUT_MS - 1);
+      expect(rpcCalls('ai_check_rules')).toHaveLength(0);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(await pending).toEqual(rulesReview);
+    });
+
+    it('finds the review that moved the order on when ai-verify answers 409', async () => {
+      const { api } = makeApi(
+        (call) => {
+          if (call.target === 'rpc:ai_check_rules') {
+            return { error: { code: 'P0001', message: 'BAD_TRANSITION', details: null } };
+          }
+          if (call.target === 'orders') return { data: { ai_review_id: 44 } };
+          if (call.target === 'ai_reviews') return { data: { id: 44, verdict: 'rework' } };
+          return undefined;
+        },
+        failing({ name: 'FunctionsHttpError', context: { status: 409 } }),
+      );
+      expect(await api.ai.verify(8)).toEqual({ id: 44, verdict: 'rework' });
+    });
+
+    it('keeps 401 and 403 as FORBIDDEN and 400 as BAD_INPUT, without the rules check', async () => {
+      for (const [status, code] of [
+        [401, 'FORBIDDEN'],
+        [403, 'FORBIDDEN'],
+        [400, 'BAD_INPUT'],
+      ] as const) {
+        const { api, rpcCalls } = makeApi(
+          rules,
+          failing({ name: 'FunctionsHttpError', context: { status } }),
+        );
+        expect((await failure(api.ai.verify(8))).code).toBe(code);
+        expect(rpcCalls('ai_check_rules')).toHaveLength(0);
+      }
+    });
+
+    it('works with the real supabase-js functions client', async () => {
+      const json = (body: unknown, status = 200) =>
+        new Response(JSON.stringify(body), {
+          status,
+          headers: { 'content-type': 'application/json' },
+        });
+      for (const [fnStatus, expected] of [
+        [200, llmReview],
+        [404, rulesReview],
+        [503, rulesReview],
+      ] as const) {
+        const urls: string[] = [];
+        const client = createClient('https://example.supabase.co', 'sb_publishable_test', {
+          auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+          global: {
+            fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+              const url = String(input);
+              urls.push(`${init?.method ?? 'GET'} ${new URL(url).pathname}`);
+              if (url.includes('/functions/v1/ai-verify')) {
+                expect(JSON.parse(String(init?.body))).toEqual({ order_id: 8, source: 'app' });
+                return fnStatus === 200
+                  ? json({ review: llmReview })
+                  : json({ error: 'X' }, fnStatus);
+              }
+              if (url.includes('/rest/v1/rpc/ai_check_rules')) return json(rulesReview);
+              return json({}, 404);
+            },
+          },
+        });
+        const api = new SupabaseApi({
+          mode: 'supabase',
+          client,
+          storage: memoryStorage(),
+          uuid: () => '11111111-2222-4333-8444-555555555555',
+          now: () => clock,
+        });
+        expect(await api.ai.verify(8)).toEqual(expected);
+        expect(urls[0]).toBe('POST /functions/v1/ai-verify');
+        expect(urls.includes('POST /rest/v1/rpc/ai_check_rules')).toBe(fnStatus !== 200);
+      }
+    });
+
+    it('reads the status of a functions error', () => {
+      expect(functionErrorStatus({ name: 'FunctionsHttpError', context: { status: 502 } })).toBe(
+        502,
+      );
+      expect(functionErrorStatus({ name: 'FunctionsRelayError', context: { status: 500 } })).toBe(
+        0,
+      );
+      expect(
+        functionErrorStatus({ name: 'FunctionsFetchError', context: new TypeError('x') }),
+      ).toBe(0);
+      expect(functionErrorStatus(null)).toBe(0);
+    });
   });
 
   it('counts the shift from the server clock and stopped units', async () => {
