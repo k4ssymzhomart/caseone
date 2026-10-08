@@ -35,8 +35,11 @@ Each card is an `ai_insights` row: `id`, `created_at`, `scope`, `kind`, `severit
    number in the title, body and recommendation must come from those rows, the period or the detector windows
    (5 days after ППР, 7 days for a repeat, 6 weeks of trend, a 3 hour peak, the 08:00 and 20:00 shift change),
    rounded or as a percent. A card with any other number, or without a known ref, is dropped and the rules card
-   of its kind takes its place (`source: mixed`). No usable card at all, a failed call, `BUDGET_EXCEEDED`, no key
-   or the mock provider: the cards of `insight_cards` (filtered to the focus, if any).
+   of its kind takes its place. A finding of `insight_cards` that no model card cites (the model writes at most 8)
+   follows the model's cards as its rules card, so the planted patterns always show (at most 12 cards; with a
+   focus only its kinds). Either makes the answer `source: mixed`; model cards carry `evidence.stats.refs`, rules
+   cards do not. No usable card at all, a failed call, `BUDGET_EXCEEDED`, no key or the mock provider: the cards
+   of `insight_cards` (filtered to the focus, if any).
 5. The cards go into `ai_insights` with the scope (plus `key`, `batch`, `prompt_version`).
 
 The whole ask stays inside 36 s (the app falls back to `rpc('insight_cards')` after 40 s); the digest inside 50 s

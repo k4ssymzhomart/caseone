@@ -553,6 +553,72 @@ export function mergeWithRules(
   return { cards: slots.slice(0, MAX_CARDS).map(({ index: _i, ...c }) => c), replaced };
 }
 
+/**
+ * What identifies a finding across two calls (the downtime of open orders moves with the clock, so rows are not
+ * compared whole). Material rows of a worker and of the brigade with the same code and material are one finding.
+ */
+export function rowIdentity(kind: string, row: Row): string {
+  const k = (...keys: string[]): string =>
+    `${kind}:${keys.map((x) => String(row[x] ?? '')).join('|')}`;
+  switch (kind) {
+    case 'top_equipment':
+    case 'post_ppr':
+    case 'trend':
+      return k('equipment_id');
+    case 'repeat_faults':
+      return k('equipment_id', 'code');
+    case 'time_patterns':
+      return k('area_id', 'group');
+    case 'worker_repeats':
+      return k('employee_id');
+    case 'materials':
+      return k('code', 'material_id');
+    case 'top_areas':
+      return k('area_id');
+    default:
+      return `${kind}:${JSON.stringify(row)}`;
+  }
+}
+
+/** The model writes at most MAX_CARDS; findings it left out may bring the answer up to this many. */
+export const MAX_TOTAL_CARDS = 12;
+
+/**
+ * Rules cards for findings the model left out, after the model's cards, so the planted patterns always show: a
+ * rules card whose detector row no model card cites (or, when that row was not sent, whose kind no model card
+ * has). With a focus, only rules cards of the focus kinds. Up to MAX_TOTAL_CARDS.
+ */
+export function fillUncovered(
+  cards: readonly Card[],
+  rules: readonly Card[],
+  refs: ReadonlyMap<string, RefEntry>,
+  focus: readonly Detector[],
+): { cards: Card[]; filled: number } {
+  const cited = new Set<string>();
+  for (const c of cards) {
+    const list = c.evidence.stats.refs;
+    if (!Array.isArray(list)) continue;
+    for (const ref of list) {
+      const e = refs.get(String(ref));
+      if (e) cited.add(rowIdentity(e.kind, e.row));
+    }
+  }
+  const sent = new Set([...refs.values()].map((e) => rowIdentity(e.kind, e.row)));
+  const kinds = new Set(cards.map((c) => c.kind));
+  const out = [...cards];
+  let filled = 0;
+  for (const rule of rules) {
+    if (out.length >= MAX_TOTAL_CARDS) break;
+    if (focus.length > 0 && !(isDetector(rule.kind) && focus.includes(rule.kind))) continue;
+    if (out.some((c) => c.title === rule.title)) continue;
+    const id = rowIdentity(rule.kind, rule.evidence.stats);
+    if (sent.has(id) ? cited.has(id) : kinds.has(rule.kind)) continue;
+    out.push(rule);
+    filled += 1;
+  }
+  return { cards: out, filled };
+}
+
 /** A rules card from public.insight_cards, checked and given the Card shape. */
 export function normalizeRuleCard(raw: unknown): Card | null {
   const o = (raw && typeof raw === 'object' ? raw : {}) as Row;

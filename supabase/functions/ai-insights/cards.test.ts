@@ -8,10 +8,12 @@ import {
   collectNumbers,
   collectRefs,
   compactRow,
+  fillUncovered,
   focusCards,
   hasFindings,
   insightsMessage,
   mergeWithRules,
+  rowIdentity,
   normalizeRuleCard,
   numbersIn,
   ungroundedNumbers,
@@ -256,6 +258,49 @@ describe('the model answer', () => {
     expect(focusCards(rules92, ['trend']).map((c) => c.kind)).toEqual(['trend']);
     expect(focusCards(rules92, ['top_areas'])).toHaveLength(rules92.length);
     expect(focusCards(rules92, [])).toHaveLength(rules92.length);
+  });
+
+  it('adds rules cards for the findings the model left out', () => {
+    const { cards } = assembleCards(
+      {
+        cards: [
+          card({
+            body: 'Конвейер К-3: 21 внеплановая остановка за 3 месяца, 15 из них шифр М-02.',
+            refs: ['top_equipment.0'],
+          }),
+          card({
+            kind: 'materials',
+            title: 'Перерасход смазки: Касымов Б.',
+            body: 'Литол-24 по С-01 в 2,2 раза выше нормы, 55 нарядов.',
+            refs: ['materials.0'],
+          }),
+        ],
+      },
+      refs92,
+      s92,
+    );
+    expect(cards).toHaveLength(2);
+    const plain = cards.map(({ index: _i, ...c }) => c);
+    const full = fillUncovered(plain, rules92, refs92, []);
+    // К-3 and the Литол-24 finding (worker and brigade rows alike) are covered; the other five come as rules cards
+    expect(full.filled).toBe(5);
+    expect(full.cards.map((c) => c.kind)).toEqual([
+      'top_equipment',
+      'materials',
+      'repeat_faults',
+      'post_ppr',
+      'time_patterns',
+      'worker_repeats',
+      'trend',
+    ]);
+    expect(fillUncovered(plain, rules92, refs92, ['trend']).cards.map((c) => c.kind)).toEqual([
+      'top_equipment',
+      'materials',
+      'trend',
+    ]);
+    expect(
+      rowIdentity('materials', { kind: 'worker', id: 'x', code: 'С-01', material_id: 18 }),
+    ).toBe(rowIdentity('materials', { kind: 'brigade', id: '1', code: 'С-01', material_id: 18 }));
   });
 
   it('reads the rules cards of insight_cards', () => {

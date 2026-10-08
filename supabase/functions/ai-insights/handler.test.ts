@@ -323,18 +323,25 @@ describe('anthropic', () => {
       source: 'mixed',
       area_name: 'Участок дробления',
     });
-    expect(body.cards.map((c) => c.kind)).toEqual(['top_equipment', 'trend', 'materials']);
-    // the trend card is the rules card; the materials card is rehydrated
-    expect(body.cards[1]!.title).toBe(
-      (area2.rules as { kind: string; title: string }[]).find((r) => r.kind === 'trend')!.title,
-    );
+    // the trend card is the rules card in the dropped card's place; the materials card is rehydrated and covers
+    // the brigade's materials row too; the post_ppr finding the model left out follows as its rules card
+    expect(body.cards.map((c) => c.kind)).toEqual([
+      'top_equipment',
+      'trend',
+      'materials',
+      'post_ppr',
+    ]);
+    const ruleTitle = (kind: string) =>
+      (area2.rules as { kind: string; title: string }[]).find((r) => r.kind === kind)!.title;
+    expect(body.cards[1]!.title).toBe(ruleTitle('trend'));
     expect(body.cards[2]!.title).toBe('Перерасход смазки: Касымов Б.');
+    expect(body.cards[3]!.title).toBe(ruleTitle('post_ppr'));
     expect(body.cards[0]!.evidence.order_ids).toHaveLength(7);
     expect(audits.map((a) => a.purpose)).toEqual(['parse_query', 'insights']);
     expect(logs.at(-1)).toMatchObject({
       event: 'insights',
       source: 'mixed',
-      replaced: 1,
+      replaced: 2,
       dropped: 1,
     });
     expect(Number(logs.at(-1)!.cost_usd)).toBeGreaterThan(0);
@@ -379,11 +386,28 @@ describe('anthropic', () => {
     ]);
     const config = anthropicConfig(fetchFn);
     const first = await run(post({ filters: { area_id: 2 } }), db, config);
-    expect(first.body.scope).toMatchObject({ source: 'llm', model: 'claude-sonnet-5-5' });
+    // one model card, the three findings it left out as rules cards
+    expect(first.body.scope).toMatchObject({ source: 'mixed', model: 'claude-sonnet-5-5' });
+    expect(first.body.cards).toHaveLength(4);
     const second = await run(post({ filters: { area_id: 2 } }), db, config, NOW + 30 * 60_000);
-    expect(second.body.scope).toMatchObject({ source: 'llm', cached: true });
+    expect(second.body.scope).toMatchObject({ source: 'mixed', cached: true });
     expect(second.body.cards[0]!.title).toBe(first.body.cards[0]!.title);
     expect(bodies).toHaveLength(1);
+  });
+
+  it('shares one model call between two requests for the same scope', async () => {
+    const { db } = fakeDb();
+    const { fetchFn, bodies } = anthropicFetch([
+      [200, reply('claude-sonnet-5-5', { cards: [SONNET.cards[0]] })],
+    ]);
+    const config = anthropicConfig(fetchFn);
+    const [a, b] = await Promise.all([
+      run(post({ filters: { area_id: 2 } }), db, config),
+      run(post({ filters: { area_id: 2 } }), db, config),
+    ]);
+    expect(bodies).toHaveLength(1);
+    expect(a.body.cards[0]!.title).toBe(b.body.cards[0]!.title);
+    expect([...a.logs, ...b.logs].some((l) => l.event === 'joined')).toBe(true);
   });
 
   it('skips the model when the detectors found nothing', async () => {

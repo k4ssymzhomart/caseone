@@ -27,6 +27,7 @@ import { INSIGHTS_PROMPT_VERSION } from '../_shared/prompts.ts';
 import {
   assembleCards,
   collectRefs,
+  fillUncovered,
   focusCards,
   hasFindings,
   insightsMessage,
@@ -245,10 +246,8 @@ async function computeCards(
     });
     costUsd = r.costUsd;
     const assembled = assembleCards(r.data, refs, scope);
-    const needRules =
-      assembled.cards.length === 0 ||
-      assembled.dropped.some((d) => d.reason === 'ungrounded' || d.reason === 'no_refs');
-    const rules = needRules ? await rulesOnly(deps, scope) : [];
+    // the rules cards stand in for dropped cards and for findings the model left out
+    const rules = await rulesOnly(deps, scope);
     if (assembled.cards.length === 0) {
       return {
         cards: rules,
@@ -261,13 +260,14 @@ async function computeCards(
       };
     }
     const merged = mergeWithRules(assembled, rules);
+    const full = fillUncovered(merged.cards, rules, refs, scope.focus);
     return {
-      cards: merged.cards,
-      source: merged.replaced > 0 ? 'mixed' : 'llm',
+      cards: full.cards,
+      source: merged.replaced + full.filled > 0 ? 'mixed' : 'llm',
       model: r.model,
       costUsd,
       dropped: assembled.dropped,
-      replaced: merged.replaced,
+      replaced: merged.replaced + full.filled,
       error: null,
     };
   } catch (e) {
@@ -360,6 +360,40 @@ async function run(
     }
   }
 
+  // two requests for one scope in this isolate (two tabs, a refetch) share one model call
+  let job = inflight.get(opts.key);
+  if (job) {
+    const shared = await job;
+    log({ fn: FN, event: 'joined', digest: opts.digest });
+    return {
+      body: {
+        ...shared.body,
+        scope: { ...shared.body.scope, query: scope.query, parsed_by: scope.parsed_by },
+      },
+      computed: null,
+    };
+  }
+  const started = computeAndStore(deps, scope, opts, setup, log, now);
+  const forget = (): void => {
+    if (inflight.get(opts.key) === started) inflight.delete(opts.key);
+  };
+  started.then(forget, forget);
+  inflight.set(opts.key, started);
+  job = started;
+  return await job;
+}
+
+/** Answers being computed in this isolate, by cache key. */
+const inflight = new Map<string, Promise<RunResult>>();
+
+async function computeAndStore(
+  deps: InsightsDeps,
+  scope: Scope,
+  opts: { key: string; digest: boolean; deadline: number },
+  setup: LlmSetup | null,
+  log: (e: Record<string, unknown>) => void,
+  now: () => number,
+): Promise<RunResult> {
   const computed = await computeCards(deps, scope, setup, opts.deadline, now);
   const responseScope: ResponseScope = {
     ...scope,
