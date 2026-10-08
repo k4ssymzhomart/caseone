@@ -242,6 +242,16 @@ describe('the model answer', () => {
     );
   });
 
+  it('writes decimals with a comma and drops the doubled period after a short name', () => {
+    expect(cleanText('254.7 часа простоя, в 2.5 раза, с 08.07.2026')).toBe(
+      '254,7 часа простоя, в 2,5 раза, с 08.07.2026',
+    );
+    expect(cleanText('по 55 нарядам исполнителя Касымов Б..')).toBe(
+      'по 55 нарядам исполнителя Касымов Б.',
+    );
+    expect(cleanText('и так далее...')).toBe('и так далее...');
+  });
+
   it('filters by focus unless nothing is left', () => {
     expect(focusCards(rules92, ['trend']).map((c) => c.kind)).toEqual(['trend']);
     expect(focusCards(rules92, ['top_areas'])).toHaveLength(rules92.length);

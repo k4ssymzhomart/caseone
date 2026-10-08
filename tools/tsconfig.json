@@ -3,7 +3,11 @@
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node"],
+    // ai-insights/db.ts imports the supabase-js types under the Deno specifier; the workspace copy stands in
+    "paths": {
+      "npm:@supabase/supabase-js@2.117.3": ["../node_modules/@supabase/supabase-js/dist/index.d.mts"]
+    }
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]

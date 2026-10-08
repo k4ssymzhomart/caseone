@@ -407,12 +407,18 @@ export function ungroundedNumbers(
 // the model's answer → cards
 // ---------------------------------------------------------------------------
 
-/** One line of plain text: spaced dashes become commas (UI copy has no dashes; «М-02» keeps its hyphen). */
+/**
+ * One line of plain text: spaced dashes become commas (UI copy has no dashes; «М-02» keeps its hyphen), decimals
+ * get the Russian comma («254.7» → «254,7», dates untouched), and a short name rehydrated before a full stop
+ * loses the doubled period («Касымов Б..» → «Касымов Б.»).
+ */
 export function cleanText(s: unknown): string {
   if (typeof s !== 'string') return '';
   return s
     .replace(/[\u0000-\u001f\u007f]/g, ' ')
     .replace(/\s+[‒-―−-]+\s+/g, ', ')
+    .replace(/(?<![\d.])(\d+)\.(\d+)(?![\d.])/g, '$1,$2')
+    .replace(/([^.])\.\.(?!\.)/g, '$1.')
     .replace(/\s+/g, ' ')
     .replace(/\s+([,.;:!?])/g, '$1')
     .trim();

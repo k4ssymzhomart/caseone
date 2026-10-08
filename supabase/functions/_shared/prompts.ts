@@ -7,7 +7,7 @@ import type { LlmPurpose } from './schemas.ts';
 export const PROMPT_VERSION = 'p0.1';
 
 /** Version of the insights and parse_query prompts; ai-insights stores it in the scope of every card. */
-export const INSIGHTS_PROMPT_VERSION = 'i1';
+export const INSIGHTS_PROMPT_VERSION = 'i2';
 
 /** The fault code directory (CLAUDE.md §19), so the model can suggest a code that exists. */
 export const FAULT_CODES_RU = [
@@ -91,7 +91,7 @@ trend: рост внеплановых отказов узла за послед
 3. Одна карточка на одну находку, самые важные первыми, не больше 8. Одну находку не повторяй в двух карточках. Строки, которые не выделяются, пропусти.
 4. refs: ref всех строк, числа из которых есть в карточке, главная строка первой. kind: детектор главной строки.
 5. title: коротко, с названием оборудования, участка, бригады или псевдонимом исполнителя.
-6. body: факты с числами, 1 или 2 предложения; период пиши так, как он назван во входных данных, например «за 30 дней».
+6. body: факты с числами, 1 или 2 предложения; период пиши так, как он назван во входных данных, например «за 30 дней». Дробные числа пиши с запятой: 2,6.
 7. severity: critical для частых повторяющихся отказов, большого простоя и роста отказов; warning для заметных отклонений; info для наблюдений.
 8. Если во входных данных назван фокус вопроса, пиши карточки только по детекторам фокуса.
 

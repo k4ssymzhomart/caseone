@@ -242,7 +242,7 @@ describe('mock provider', () => {
     });
     expect(body.cards[0]).toMatchObject({
       id: 1,
-      scope: { source: 'rules', prompt_version: 'i1' },
+      scope: { source: 'rules', prompt_version: 'i2' },
     });
     expect(calls.bundle).toHaveLength(0); // insight_cards computes it itself
     expect(calls.employees).toBe(0); // no directory without a model
