@@ -142,3 +142,79 @@ export function periodFor(preset: PeriodPreset, now: DateInput = new Date()): Pe
 export function hoursWord(n: number): string {
   return plural(n, ['час', 'часа', 'часов']);
 }
+
+// ---------------------------------------------------------------------------
+// screen helpers
+// ---------------------------------------------------------------------------
+
+/** Short shift names for eyebrows: «СМЕНА · ДЕНЬ · С 08:00 ДО 20:00» (uppercase it in the UI). */
+export const SHIFT_LABEL: Readonly<Record<Shift, string>> = { day: 'День', night: 'Ночь' };
+
+/** «с 08:00 до 20:00» or «с 20:00 до 08:00». */
+export function shiftHours(shift: Shift): string {
+  return shift === 'day' ? 'с 08:00 до 20:00' : 'с 20:00 до 08:00';
+}
+
+/** Local calendar parts of an instant; month is 1..12. */
+export interface LocalParts {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+}
+
+export function localParts(value: DateInput): LocalParts {
+  const d = local(value);
+  return {
+    year: d.getUTCFullYear(),
+    month: d.getUTCMonth() + 1,
+    day: d.getUTCDate(),
+    hour: d.getUTCHours(),
+    minute: d.getUTCMinutes(),
+  };
+}
+
+/** UTC instant of a local wall time (month 1..12), for the date and time picker of the deadline sheet. */
+export function fromLocalParts(parts: LocalParts): Date {
+  return fromLocal(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute);
+}
+
+export function addMinutes(value: DateInput, minutes: number): Date {
+  return new Date(toDate(value).getTime() + minutes * MINUTE);
+}
+
+/** Same local calendar day? */
+export function isSameLocalDay(a: DateInput, b: DateInput): boolean {
+  return startOfLocalDay(a).getTime() === startOfLocalDay(b).getTime();
+}
+
+/** Whole minutes until `due`, rounded up; negative once it has passed. */
+export function minutesUntil(due: DateInput, now: DateInput = new Date()): number {
+  return Math.ceil((toDate(due).getTime() - toDate(now).getTime()) / MINUTE);
+}
+
+/** «до 11:30» today, «до 09.10 11:30» on another day. */
+export function formatDue(due: DateInput, now: DateInput = new Date()): string {
+  return isSameLocalDay(due, now) ? `до ${hhmm(due)}` : `до ${formatDateTime(due)}`;
+}
+
+/** The deadline pill of the create screen: «2 ч · до 11:30». */
+export function formatDeadline(due: DateInput, now: DateInput = new Date()): string {
+  return `${formatDuration(Math.max(0, minutesUntil(due, now)))} · ${formatDue(due, now)}`;
+}
+
+/** Norm hours as a duration: 1.5 → «1 ч 30 мин», 0.5 → «30 мин». */
+export function formatNorm(hours: number): string {
+  return formatDuration(hours * 60);
+}
+
+/** Notification list and timeline: «только что», «5 мин назад», «14:05» today, «вчера 14:05», «07.10 14:05». */
+export function formatAgo(value: DateInput, now: DateInput = new Date()): string {
+  const mins = minutesBetween(value, now);
+  if (mins < 1) return 'только что';
+  if (mins < 60) return `${mins} мин назад`;
+  if (isSameLocalDay(value, now)) return hhmm(value);
+  if (isSameLocalDay(value, toDate(now).getTime() - DAY)) return `вчера ${hhmm(value)}`;
+  return formatDateTime(value);
+}

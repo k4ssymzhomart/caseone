@@ -45,3 +45,26 @@ export function formatInt(value: number): string {
   const sign = value < 0 ? '−' : '';
   return sign + String(Math.abs(Math.round(value))).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
+
+/** «№147». */
+export function formatOrderNo(n: number): string {
+  return `№${n}`;
+}
+
+/** «85 из 100», «4 из 5». */
+export function formatOutOf(value: number, max: number): string {
+  return `${Math.round(value)} из ${max}`;
+}
+
+/** Material quantity with its unit and the decimal comma: «2 шт», «0,5 кг», «1,25 л». */
+export function formatQty(qty: number, unit: string): string {
+  return `${formatNumber(qty, 2)} ${unit}`;
+}
+
+/**
+ * A quantity printed like the SQL internal.ru_num: integers without a fraction, otherwise every
+ * significant digit (float noise cut at 6 digits) with the decimal comma: 2 → «2», 0.5 → «0,5», 1.25 → «1,25».
+ */
+export function ruNum(value: number): string {
+  return formatNumber(value, 6);
+}
