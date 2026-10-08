@@ -9,6 +9,7 @@ import type {
   Dashboard,
   EquipmentHistory,
   Insight,
+  InsightScope,
   InsightsInput,
   Order,
   Period,
@@ -383,6 +384,37 @@ export function parseMockQuery(
     period:
       days == null ? period : { from: new Date(to - days * DAY).toISOString(), to: period.to },
     area_id: area,
+  };
+}
+
+/**
+ * The scope of cards made without ai-insights (MockApi, and SupabaseApi when the function is out of reach): the
+ * keyword reader of the ask box sets the period and the area, the cards are the rules cards.
+ */
+export function ruleInsightScope(
+  input: InsightsInput,
+  areaName: (id: number) => string | null,
+): InsightScope {
+  let period: Period = { from: input.from, to: input.to };
+  let filters: ReportFilters = { ...(input.filters ?? {}) };
+  const query = input.query?.replace(/\s+/g, ' ').trim() || null;
+  if (query) {
+    const parsed = parseMockQuery(query, period);
+    period = parsed.period;
+    if (parsed.area_id != null) filters = { ...filters, area_id: parsed.area_id };
+  }
+  return {
+    from: period.from,
+    to: period.to,
+    label: periodLabel(period),
+    filters,
+    area_name: filters.area_id != null ? areaName(filters.area_id) : null,
+    focus: [],
+    query,
+    parsed_by: query ? 'rules' : null,
+    source: 'rules',
+    cached: false,
+    model: null,
   };
 }
 

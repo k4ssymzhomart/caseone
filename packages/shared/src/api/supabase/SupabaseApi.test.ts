@@ -10,10 +10,12 @@ import { createApi } from '../index';
 import { memoryStorage } from '../RotaApi';
 import { fromAuth, fromPostgrest, fromStorage, fromThrown } from './errors';
 import {
+  AI_INSIGHTS_TIMEOUT_MS,
   AI_VERIFY_TIMEOUT_MS,
   downtimeMinutes,
   foldSettings,
   functionErrorStatus,
+  insightsOf,
   SupabaseApi,
 } from './SupabaseApi';
 
@@ -748,6 +750,122 @@ describe('SupabaseApi', () => {
         functionErrorStatus({ name: 'FunctionsFetchError', context: new TypeError('x') }),
       ).toBe(0);
       expect(functionErrorStatus(null)).toBe(0);
+    });
+  });
+
+  describe('ai.ask through the ai-insights Edge Function', () => {
+    const period = { from: '2026-09-08T10:00:00.000Z', to: '2026-10-08T10:00:00.000Z' };
+    const ruleCard = {
+      kind: 'top_equipment',
+      severity: 'critical',
+      title: 'Конвейер К-3 ломается чаще всех',
+      body: 'Конвейер К-3: 7 внеплановых остановок за 30 дней.',
+      recommendation: 'Рекомендуем проверить соосность привода.',
+      evidence: { order_ids: [1, 2], stats: { equipment_id: 13 } },
+    };
+    const fnAnswer = {
+      cards: [{ ...ruleCard, id: 9, title: 'Конвейер К-3: подшипниковые отказы' }],
+      scope: {
+        ...period,
+        label: '30 дней',
+        filters: { area_id: 2 },
+        area_name: 'Участок дробления',
+        focus: ['top_equipment'],
+        query: 'покажи проблемы участка дробления за месяц',
+        parsed_by: 'llm',
+        source: 'llm',
+        cached: false,
+        model: 'claude-sonnet-5-5',
+        key: 'internal',
+      },
+    };
+    const rules: Responder = (call) =>
+      call.target === 'rpc:insight_cards' ? { data: [ruleCard] } : undefined;
+
+    it('returns the cards and scope of ai-insights without the rpc', async () => {
+      const invocations: [string, unknown][] = [];
+      const { api, rpcCalls } = makeApi(rules, async (name, options) => {
+        invocations.push([name, options]);
+        return { data: fnAnswer, error: null };
+      });
+      const r = await api.ai.ask({
+        ...period,
+        query: ' покажи проблемы участка дробления за месяц ',
+      });
+      expect(invocations).toEqual([
+        [
+          'ai-insights',
+          {
+            body: { ...period, filters: {}, query: 'покажи проблемы участка дробления за месяц' },
+            timeout: AI_INSIGHTS_TIMEOUT_MS,
+          },
+        ],
+      ]);
+      expect(r.cards.map((c) => c.title)).toEqual(['Конвейер К-3: подшипниковые отказы']);
+      expect(r.scope).toEqual({ ...fnAnswer.scope, key: undefined });
+      expect(rpcCalls('insight_cards')).toHaveLength(0);
+      expect((await api.ai.insights(period)).map((c) => c.id)).toEqual([9]);
+    });
+
+    it('falls back to insight_cards with the keyword reader', async () => {
+      const { api, rpcCalls } = makeApi(rules, async () => ({
+        data: null,
+        error: { name: 'FunctionsHttpError', context: { status: 404 } },
+      }));
+      const r = await api.ai.ask({
+        ...period,
+        query: 'покажи проблемы участка дробления за неделю',
+      });
+      expect(r.cards).toEqual([ruleCard]);
+      expect(r.scope).toMatchObject({
+        label: 'неделю',
+        area_name: 'Участок дробления',
+        parsed_by: 'rules',
+        source: 'rules',
+      });
+      expect(rpcCalls('insight_cards')[0]?.args).toMatchObject({
+        p_to: period.to,
+        p_filters: { area_id: 2 },
+      });
+      // no functions client at all: the same rules path
+      const plain = makeApi(rules);
+      expect((await plain.api.ai.ask(period)).scope).toMatchObject({
+        label: '30 дней',
+        query: null,
+      });
+    });
+
+    it('falls back after AI_INSIGHTS_TIMEOUT_MS and on a broken answer', async () => {
+      vi.useFakeTimers();
+      const slow = makeApi(rules, () => new Promise(() => undefined));
+      const pending = slow.api.ai.ask(period);
+      await vi.advanceTimersByTimeAsync(AI_INSIGHTS_TIMEOUT_MS);
+      expect((await pending).cards).toEqual([ruleCard]);
+      vi.useRealTimers();
+      const broken = makeApi(rules, async () => ({ data: { cards: 'x' }, error: null }));
+      expect((await broken.api.ai.ask(period)).scope.source).toBe('rules');
+    });
+
+    it('keeps 401 and 403 as FORBIDDEN', async () => {
+      const { api, rpcCalls } = makeApi(rules, async () => ({
+        data: null,
+        error: { name: 'FunctionsHttpError', context: { status: 403 } },
+      }));
+      expect((await failure(api.ai.ask(period))).code).toBe('FORBIDDEN');
+      expect(rpcCalls('insight_cards')).toHaveLength(0);
+    });
+
+    it('reads a JSON text answer and fills missing scope fields', () => {
+      const r = insightsOf(JSON.stringify({ cards: [ruleCard], scope: { ...period } }));
+      expect(r?.scope).toMatchObject({
+        label: '',
+        filters: {},
+        focus: [],
+        source: 'rules',
+        cached: false,
+      });
+      expect(insightsOf('nope')).toBeNull();
+      expect(insightsOf({ cards: [] })).toBeNull();
     });
   });
 

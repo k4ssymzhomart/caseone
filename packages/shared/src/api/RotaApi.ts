@@ -16,6 +16,7 @@ import type {
   EquipmentHistory,
   Insight,
   InsightsInput,
+  InsightsResult,
   Order,
   OrderDetail,
   OrderFilter,
@@ -100,6 +101,12 @@ export interface RotaApi {
     verify(orderId: number): Promise<AiReview>;
     /** Latest review of the order, or null. */
     review(orderId: number): Promise<AiReview | null>;
+    /**
+     * Insight cards and the scope they answer (CLAUDE.md §15): the ai-insights Edge Function (Haiku reads the
+     * question, Sonnet writes the cards), else rpc insight_cards with the keyword reader. Staff only.
+     */
+    ask(input: InsightsInput): Promise<InsightsResult>;
+    /** The cards of ask(). */
     insights(input: InsightsInput): Promise<Insight[]>;
     shiftSummary(input: ShiftReportInput): Promise<ShiftSummary>;
     /** Three sentences: what helped, what hurt, one action. */

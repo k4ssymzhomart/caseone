@@ -721,6 +721,20 @@ describe('MockApi reports', () => {
       query: 'покажи проблемы участка дробления за месяц',
     });
     expect(asked.every((c) => c.evidence.order_ids.length > 0)).toBe(true);
+    const answer = await api.ai.ask({
+      ...month,
+      query: 'покажи проблемы участка дробления за месяц',
+    });
+    expect(answer.cards).toEqual(asked);
+    expect(answer.scope).toMatchObject({
+      label: '30 дней',
+      area_name: 'Участок дробления',
+      filters: { area_id: 2 },
+      parsed_by: 'rules',
+      source: 'rules',
+      query: 'покажи проблемы участка дробления за месяц',
+    });
+    expect((await api.ai.ask(month)).scope).toMatchObject({ query: null, parsed_by: null });
 
     expect(await api.ai.explainRating(serikov?.id ?? '', month)).toMatch(
       /^Сильнее всего рейтинг поднимает .+\. Ниже всего .+\. .+\.$/,

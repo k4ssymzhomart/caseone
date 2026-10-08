@@ -27,7 +27,9 @@ import type {
   Equipment,
   EquipmentHistory,
   Insight,
+  InsightScope,
   InsightsInput,
+  InsightsResult,
   Order,
   OrderDetail,
   OrderEvent,
@@ -51,6 +53,7 @@ import type {
   WorkerStatusView,
 } from '../../domain/types';
 import { REALTIME_TOPICS } from '../../domain/types';
+import { areas as FIXTURE_AREAS } from '../../fixtures/areas';
 import { settings as DEFAULT_SETTINGS } from '../../fixtures/settings';
 import { accountEmail, accountPassword } from '../../fixtures/ids';
 import { startOfLocalDay } from '../../format/time';
@@ -60,7 +63,7 @@ import type { Json } from '../database.types';
 import type { RotaDatabase, RpcName } from '../database.extra';
 import { RotaError } from '../errors';
 import { mockExplainRating, mockShiftSummary } from '../mock/ai';
-import { parseMockQuery } from '../mock/reports';
+import { ruleInsightScope } from '../mock/reports';
 import type { CreateApiOptions, KeyValueStorage, RotaApi } from '../RotaApi';
 import {
   fromAuth,
@@ -116,6 +119,52 @@ export function functionErrorStatus(error: unknown): number {
   if (e?.name === 'FunctionsRelayError') return 0;
   const status = e?.context?.status;
   return typeof status === 'number' ? status : 0;
+}
+
+/**
+ * How long ai.ask waits for ai-insights before it falls back to rpc insight_cards. The function keeps its own
+ * work inside 36 s (one Haiku and one Sonnet call take about 15 s), so the wait covers it with room to spare.
+ */
+export const AI_INSIGHTS_TIMEOUT_MS = 40_000;
+
+const SCOPE_SOURCES = ['llm', 'rules', 'mixed'] as const;
+
+/** {cards, scope} of an ai-insights answer, or null when the shape is off. */
+export function insightsOf(data: unknown): InsightsResult | null {
+  let body = data;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body) as unknown;
+    } catch {
+      return null;
+    }
+  }
+  const o = (body ?? {}) as { cards?: unknown; scope?: Partial<InsightScope> | null };
+  const s = o.scope;
+  if (!Array.isArray(o.cards) || !s || typeof s.from !== 'string' || typeof s.to !== 'string') {
+    return null;
+  }
+  const cards = (o.cards as Insight[]).filter(
+    (c) => c && typeof c.title === 'string' && typeof c.kind === 'string',
+  );
+  return {
+    cards,
+    scope: {
+      from: s.from,
+      to: s.to,
+      label: typeof s.label === 'string' ? s.label : '',
+      filters: s.filters && typeof s.filters === 'object' ? s.filters : {},
+      area_name: typeof s.area_name === 'string' ? s.area_name : null,
+      focus: Array.isArray(s.focus)
+        ? s.focus.filter((f): f is string => typeof f === 'string')
+        : [],
+      query: typeof s.query === 'string' ? s.query : null,
+      parsed_by: s.parsed_by === 'llm' || s.parsed_by === 'rules' ? s.parsed_by : null,
+      source: SCOPE_SOURCES.find((x) => x === s.source) ?? 'rules',
+      cached: s.cached === true,
+      model: typeof s.model === 'string' ? s.model : null,
+    },
+  };
 }
 
 /** The review in an ai-verify answer ({review, already_reviewed?, rules_only?}), or null when the shape is off. */
@@ -934,6 +983,60 @@ export class SupabaseApi implements RotaApi {
     }
   }
 
+  /**
+   * The ai-insights Edge Function (CLAUDE.md §15): {cards, scope}, or null when the caller should fall back to
+   * rpc insight_cards: no functions client, a network error or timeout (AI_INSIGHTS_TIMEOUT_MS), 404 (function
+   * not deployed), 5xx, a relay error or an answer of the wrong shape. 401 and 403 are FORBIDDEN.
+   */
+  private async insightsByFunction(input: InsightsInput): Promise<InsightsResult | null> {
+    const functions = (this.client as { functions?: { invoke?: FunctionsInvoke } }).functions;
+    const invoke = functions?.invoke;
+    if (typeof invoke !== 'function') return null;
+    const body: Record<string, unknown> = {
+      from: input.from,
+      to: input.to,
+      filters: input.filters ?? {},
+    };
+    const query = input.query?.trim();
+    if (query) body.query = query;
+    let timer: TimerHandle | undefined;
+    const timedOut = new Promise<'timeout'>((resolve) => {
+      timer = later(() => resolve('timeout'), AI_INSIGHTS_TIMEOUT_MS);
+    });
+    let res: { data: unknown; error: unknown } | 'timeout';
+    try {
+      res = await Promise.race([
+        invoke.call(functions, 'ai-insights', { body, timeout: AI_INSIGHTS_TIMEOUT_MS }),
+        timedOut,
+      ]);
+    } catch {
+      return null;
+    } finally {
+      if (timer !== undefined) cancelLater(timer);
+    }
+    if (res === 'timeout') return null;
+    if (!res.error) return insightsOf(res.data);
+    const status = functionErrorStatus(res.error);
+    if (status === 401 || status === 403) {
+      throw new RotaError('FORBIDDEN', { details: `ai-insights ${status}`, cause: res.error });
+    }
+    return null;
+  }
+
+  /** rpc insight_cards with the keyword reader of the ask box: the cards when ai-insights is out of reach. */
+  private async insightsByRules(input: InsightsInput): Promise<InsightsResult> {
+    const scope = ruleInsightScope(
+      input,
+      (id) => FIXTURE_AREAS.find((a) => a.id === id)?.name ?? null,
+    );
+    const cards = await (this.rpc('insight_cards', {
+      p_from: scope.from,
+      p_to: scope.to,
+      p_filters: asJson(scope.filters),
+    }) as Promise<Insight[] | null>);
+    return { cards: cards ?? [], scope };
+  }
+
   ai: RotaApi['ai'] = {
     verify: async (orderId) =>
       (await this.verifyByFunction(orderId)) ?? (await this.verifyByRules(orderId)),
@@ -948,22 +1051,9 @@ export class SupabaseApi implements RotaApi {
           .limit(1)
           .maybeSingle(),
       ),
-    insights: async (input: InsightsInput) => {
-      // the ask box (Phase 6 parses it with Haiku): until then the mock's keyword parser, same answers
-      let period: Period = { from: input.from, to: input.to };
-      let filters: ReportFilters = { ...(input.filters ?? {}) };
-      if (input.query) {
-        const parsed = parseMockQuery(input.query, period);
-        period = parsed.period;
-        if (parsed.area_id != null) filters = { ...filters, area_id: parsed.area_id };
-      }
-      const cards = await (this.rpc('insight_cards', {
-        p_from: period.from,
-        p_to: period.to,
-        p_filters: asJson(filters),
-      }) as Promise<Insight[] | null>);
-      return cards ?? [];
-    },
+    ask: async (input: InsightsInput) =>
+      (await this.insightsByFunction(input)) ?? (await this.insightsByRules(input)),
+    insights: async (input: InsightsInput) => (await this.ai.ask(input)).cards,
     shiftSummary: async (input: ShiftReportInput) =>
       // Phase 5: the ai-shift-summary Edge Function; until then the deterministic summary of the real numbers
       mockShiftSummary(await this.reports.shift(input)),

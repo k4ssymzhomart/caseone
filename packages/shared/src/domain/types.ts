@@ -512,6 +512,7 @@ export interface Dashboard {
 
 export const INSIGHT_KINDS = [
   'top_equipment',
+  'top_areas',
   'repeat_faults',
   'post_ppr',
   'time_patterns',
@@ -523,8 +524,22 @@ export const INSIGHT_KINDS = [
 ] as const;
 export type InsightKind = (typeof INSIGHT_KINDS)[number];
 
+/** The detectors of public.analytics_bundle: the card kinds of ai-insights and the focus of a question. */
+export const INSIGHT_DETECTORS = [
+  'top_equipment',
+  'top_areas',
+  'repeat_faults',
+  'post_ppr',
+  'time_patterns',
+  'worker_repeats',
+  'materials',
+  'trend',
+] as const;
+export type InsightDetector = (typeof INSIGHT_DETECTORS)[number];
+
 export interface InsightEvidence {
   order_ids: number[];
+  /** The detector row the card is built on; model cards also list the rows they cite in `refs`. */
   stats: Record<string, unknown>;
 }
 
@@ -539,6 +554,30 @@ export interface Insight {
   body: string;
   recommendation: string;
   evidence: InsightEvidence;
+}
+
+/** What the cards answer (ai-insights, CLAUDE.md §15): the period and filter actually used and how they came about. */
+export interface InsightScope extends Period {
+  /** «неделю», «30 дней», «3 месяца», else «N дней» (internal.period_label). */
+  label: string;
+  /** The report filter after the question: a named area replaces the FilterBar area. */
+  filters: ReportFilters;
+  area_name: string | null;
+  /** Detector kinds the question asks about; empty for everything. */
+  focus: string[];
+  query: string | null;
+  /** Who read the question: 'llm' (Haiku), 'rules' (the keyword reader); null without a question. */
+  parsed_by: 'llm' | 'rules' | null;
+  /** Where the cards came from: 'llm' (Sonnet), 'rules' (public.insight_cards), 'mixed'. */
+  source: 'llm' | 'rules' | 'mixed';
+  /** True when the cards were made earlier for the same scope. */
+  cached: boolean;
+  model: string | null;
+}
+
+export interface InsightsResult {
+  cards: Insight[];
+  scope: InsightScope;
 }
 
 export interface ShiftSummary {

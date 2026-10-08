@@ -16,6 +16,83 @@
   flex: 1 1 320px;
 }
 
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* a suggested question: one tap asks it */
+.example {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border-strong);
+  /* a pill on one line, a rounded block when a phone wraps it */
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.example:hover {
+  border-color: var(--color-text-secondary);
+  background: var(--color-bg-muted);
+}
+
+.asking {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* how the question was understood */
+.scope {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-muted);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.scopeMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
 .cards {
   display: grid;
   gap: var(--space-3);
@@ -133,6 +210,10 @@
 
 .chart {
   max-width: 640px;
+}
+
+.miniChart {
+  max-width: 420px;
 }
 
 .equipmentLink {
