@@ -1,10 +1,13 @@
-// Chapter 07 (§5.6): the AI review. Six check chips around the mascot, a marquee of verdicts, the score bar.
+// Chapter 07 (§5.6): the AI review. Six check chips around the mascot, a marquee of verdicts, the score bar. The
+// Claude mark stands beside each «Claude»: in the lead and on the label of the model's share of the score.
+import { claudeLogo } from '@rota/design';
 import type { CSSProperties } from 'react';
 import { content } from '../content';
 import s from '../landing.module.css';
 import { CheckIcon, Eyebrow, Glow, Lines } from '../ui/bits';
 import { Mascot } from '../ui/Mascot';
 import { Reveal } from '../ui/Reveal';
+import { Mark, Rich } from './Marks';
 import r from './Review.module.css';
 
 const c = content.review;
@@ -46,7 +49,9 @@ export function Review() {
           <h2 id="ch07-title" className={s.h2}>
             <Lines lines={c.title} />
           </h2>
-          <p className={s.lead}>{c.lead}</p>
+          <p className={s.lead}>
+            <Rich text={c.lead} />
+          </p>
         </Reveal>
 
         <div className={r.stage}>
@@ -86,6 +91,7 @@ export function Review() {
               {c.rulesLabel}
             </span>
             <span className={`${s.mono} ${r.groupLabel} ${r.groupLlm}`} style={{ flexGrow: 35 }}>
+              <Mark logo={claudeLogo} size={16} />
               {c.llmLabel}
             </span>
           </div>

@@ -1,20 +1,24 @@
-// Footer (§5.13): lockup and slogan, three columns, the disclaimer.
+// Footer (§5.13): lockup and slogan, three columns, the disclaimer. The jury links carry their platform marks in a
+// fixed 16 px slot, so every label starts on the same line whether it has a mark or not.
+import { androidLogo, appleLogo, githubLogo, pdfLogo, windowsLogo, type PlatformLogo as Logo } from '@rota/design';
 import { Lockup } from '@/components/rota/Logo/Logo';
 import { content } from '../content';
 import { links } from '../links';
 import s from '../landing.module.css';
 import { TextLink } from '../ui/LinkPill';
 import f from './Footer.module.css';
+import { Mark } from './Marks';
 
 const c = content.footer;
 
 export function Footer() {
-  const jury = [
-    { href: links.apk, label: c.jury.apk },
-    { href: links.panel, label: c.jury.panel },
+  const jury: { href: string; label: string; logo?: Logo }[] = [
+    { href: links.apk, label: c.jury.apk, logo: androidLogo },
+    { href: links.app, label: c.jury.app, logo: appleLogo },
+    { href: links.panel, label: c.jury.panel, logo: windowsLogo },
     { href: links.video, label: c.jury.video },
-    { href: links.pitch, label: c.jury.pitch },
-    { href: links.repo, label: c.jury.repo },
+    { href: links.pitch, label: c.jury.pitch, logo: pdfLogo },
+    { href: links.repo, label: c.jury.repo, logo: githubLogo },
   ];
   return (
     <footer className={f.footer}>
@@ -38,7 +42,8 @@ export function Footer() {
             <p className={`${s.mono} ${f.head}`}>{c.jury.title}</p>
             <ul>
               {jury.map((l) => (
-                <li key={l.label}>
+                <li key={l.label} className={f.marked} data-soon={l.href ? undefined : ''}>
+                  <span className={f.slot}>{l.logo ? <Mark logo={l.logo} size={16} /> : null}</span>
                   <TextLink href={l.href}>{l.label}</TextLink>
                 </li>
               ))}

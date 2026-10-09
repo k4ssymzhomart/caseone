@@ -1,8 +1,9 @@
-// Rollout (§5.10): a road with four stages, the first quarter red.
+// Rollout (§5.10): a road with four stages, the first quarter red. The 1С badge stands beside «1С».
 import { content } from '../content';
 import s from '../landing.module.css';
 import { Eyebrow, Lines } from '../ui/bits';
 import { Reveal } from '../ui/Reveal';
+import { Rich } from './Marks';
 import r from './Rollout.module.css';
 
 const c = content.rollout;
@@ -25,7 +26,9 @@ export function Rollout() {
                 {stage.label}
               </span>
               <h3 className={r.title}>{stage.title}</h3>
-              <p className={r.text}>{stage.text}</p>
+              <p className={r.text}>
+                <Rich text={stage.text} />
+              </p>
             </Reveal>
           ))}
         </ol>

@@ -1,13 +1,16 @@
-// Final CTA, the submission hub (§5.12): every link for the jury and the test accounts.
+// Final CTA, the submission hub (§5.12): every link for the jury and the test accounts. Each link that names a
+// platform carries its mark: Android for the APK, Apple for the browser app (iPhone included), Windows and Apple for
+// the desktop panel, the PDF badge, GitHub.
+import { androidLogo, appleLogo, githubLogo, pdfLogo, windowsLogo } from '@rota/design';
 import { content } from '../content';
 import { links } from '../links';
 import s from '../landing.module.css';
 import { Lines } from '../ui/bits';
-import { LinkPill } from '../ui/LinkPill';
 import { Mascot } from '../ui/Mascot';
 import { PhoneShot } from '../ui/PhoneShot';
 import { Reveal } from '../ui/Reveal';
 import c_ from './Cta.module.css';
+import { MarkPill } from './Marks';
 
 const c = content.cta;
 
@@ -24,22 +27,22 @@ export function Cta() {
             </h2>
             <p className={s.lead}>{c.lead}</p>
             <div className={c_.buttons}>
-              <LinkPill href={links.apk}>{c.apk}</LinkPill>
-              <LinkPill href={links.app} variant="secondary">
+              <MarkPill href={links.apk} logos={[androidLogo]} variant="primary">
+                {c.apk}
+              </MarkPill>
+              <MarkPill href={links.app} logos={[appleLogo]}>
                 {c.app}
-              </LinkPill>
-              <LinkPill href={links.panel} variant="secondary">
+              </MarkPill>
+              <MarkPill href={links.panel} logos={[windowsLogo, appleLogo]}>
                 {c.panel}
-              </LinkPill>
-              <LinkPill href={links.video} variant="secondary">
-                {c.video}
-              </LinkPill>
-              <LinkPill href={links.pitch} variant="secondary">
+              </MarkPill>
+              <MarkPill href={links.video}>{c.video}</MarkPill>
+              <MarkPill href={links.pitch} logos={[pdfLogo]}>
                 {c.pitch}
-              </LinkPill>
-              <LinkPill href={links.repo} variant="secondary">
+              </MarkPill>
+              <MarkPill href={links.repo} logos={[githubLogo]}>
                 {c.repo}
-              </LinkPill>
+              </MarkPill>
             </div>
             <div className={c_.try}>
               <div className={`${s.glass} ${c_.accounts}`}>

@@ -1,10 +1,12 @@
-// FAQ (§5.11): native <details> accordion, the first item open, a plus that turns into a cross.
+// FAQ (§5.11): native <details> accordion, the first item open, a plus that turns into a cross. Answers that name a
+// platform (Android, iPhone, PostgreSQL, Supabase, 1С) show its mark inline.
 import { content } from '../content';
 import s from '../landing.module.css';
 import { Eyebrow, Lines } from '../ui/bits';
 import { Mascot } from '../ui/Mascot';
 import { Reveal } from '../ui/Reveal';
 import f from './Faq.module.css';
+import { Rich } from './Marks';
 
 const c = content.faq;
 
@@ -26,7 +28,9 @@ export function Faq() {
                 <span>{item.q}</span>
                 <span className={f.icon} aria-hidden="true" />
               </summary>
-              <p className={f.answer}>{item.a}</p>
+              <p className={f.answer}>
+                <Rich text={item.a} />
+              </p>
             </details>
           ))}
         </div>

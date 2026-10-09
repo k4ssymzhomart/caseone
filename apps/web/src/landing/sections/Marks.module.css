@@ -1,0 +1,37 @@
+/* Platform marks beside text (Marks.tsx): centered on the line, 8 px from the words. */
+
+.mark {
+  flex: none;
+}
+
+.withMark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.marks {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Inline in running text: the mark scales with the line (about a cap height and a half) and sits on the baseline
+   like a capital letter, a space's width from its word. The inline style of PlatformLogo says middle; this wins. */
+.inline {
+  white-space: nowrap;
+}
+
+.inlineMark {
+  width: 1.1em;
+  height: 1.1em;
+  margin-right: 0.3em;
+  vertical-align: -0.2em !important;
+}
+
+@media (max-width: 767px) {
+  .br {
+    display: none;
+  }
+}

@@ -68,3 +68,25 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
+
+/* Jury links: a 16 px mark slot, 8 px from the label */
+.marked {
+  display: grid;
+  grid-template-columns: 16px auto;
+  align-items: start;
+  justify-content: start;
+  gap: 8px;
+}
+
+/* As tall as the first line of the label, so a wrapped label keeps its mark on the first line */
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 1.5em;
+}
+
+.marked[data-soon] .slot {
+  opacity: 0.45;
+}

@@ -1,5 +1,7 @@
 // Chapter 06 (§5.5): deadlines. The framed stage holds the watchdog timeline; a push in the case's format sits on
-// its lower right corner; text right.
+// its lower right corner; text right, with the two delivery channels and their marks: push on the Android phone and
+// Telegram.
+import { androidLogo, telegramLogo } from '@rota/design';
 import { LogoMark } from '@/components/rota/Logo/Logo';
 import { content } from '../content';
 import s from '../landing.module.css';
@@ -8,6 +10,7 @@ import { Mascot } from '../ui/Mascot';
 import { Reveal } from '../ui/Reveal';
 import d from './Deadlines.module.css';
 import f from './Frame.module.css';
+import { WithMark } from './Marks';
 
 const c = content.deadlines;
 
@@ -48,6 +51,14 @@ export function Deadlines() {
             <Lines lines={c.title} />
           </h2>
           <p className={s.text}>{c.text}</p>
+          <ul className={d.channels} aria-label={c.channelsLabel}>
+            <li className={s.pill}>
+              <WithMark logos={[androidLogo]}>{c.channels.push}</WithMark>
+            </li>
+            <li className={s.pill}>
+              <WithMark logos={[telegramLogo]}>{c.channels.telegram}</WithMark>
+            </li>
+          </ul>
           <ul className={s.bullets}>
             {c.bullets.map((b) => (
               <li key={b}>{b}</li>

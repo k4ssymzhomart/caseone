@@ -192,3 +192,18 @@
     height: 104px;
   }
 }
+
+/* Delivery channels under the text: one row of pills, each led by its mark */
+.channels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.channels li {
+  padding: 9px 16px 9px 12px;
+  font-size: 15px;
+}
