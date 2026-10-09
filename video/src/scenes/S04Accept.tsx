@@ -1,17 +1,23 @@
-// 0:39 Phones A and B side by side: the red screen with the siren, «Принять», «Начать», the master sees each step.
+// 0:37 Phones A and B side by side, recorded together: «Выдать» on A, the red screen on B 0,72 s later, «Принять» and
+// «Начать исполнение» on B, each status on A within 1,4 s. Times are seconds of s04-accept-A/B.mp4
+// (docs/live-loop-timings.md, intervals 1 to 3).
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { Backdrop } from "../components/Backdrop";
 import { LogoChip } from "../components/brand";
-import { CountUp } from "../components/CountUp";
+import { Stopwatch } from "../components/CountUp";
 import { Split } from "../components/layout";
 import { DeviceLabel, Phone, type Shot } from "../components/Phone";
 import { Eyebrow, Headline, Lead, Mono, Reveal, StatusPill } from "../components/text";
-import { NUMBERS } from "../data/numbers";
+import { at } from "../data/footage";
+import { formatRu, NUMBERS } from "../data/numbers";
+import { TAKE } from "../data/take";
 import { C, FONT, T } from "../theme";
 
-const ACCEPT = 150;
-const START = 262;
+const ISSUE = at("s04-accept-A", 0.38); // A taps «Выдать»
+const RED = at("s04-accept-B", 1.1); // B shows the red screen
+const ACCEPT = at("s04-accept-B", 7.21);
+const START = at("s04-accept-B", 10.98);
 
 const B_SHOTS: Shot[] = [
   { still: "pwa/06-B-emergency-red-screen.png", at: 0, taps: [{ at: ACCEPT, x: 0.5, y: 0.856 }] },
@@ -21,45 +27,55 @@ const B_SHOTS: Shot[] = [
 
 const A_SHOTS: Shot[] = [
   { still: "pwa/05-A-after-issue.png", at: 0 },
-  { still: "pwa/09-A-order-accepted.png", at: ACCEPT + 22 },
-  { still: "pwa/11-A-order-in-progress.png", at: START + 22 },
+  { still: "pwa/09-A-order-accepted.png", at: ACCEPT + 42 },
+  { still: "pwa/11-A-order-in-progress.png", at: START + 35 },
 ];
 
-const Step: React.FC<{ at: number; action: string; status: string; color: string }> = ({ at, action, status, color }) => {
+const Step: React.FC<{ at: number; delay: number; action: string; status: string; color: string }> = ({
+  at: tapAt,
+  delay,
+  action,
+  status,
+  color,
+}) => {
   const frame = useCurrentFrame();
-  const on = interpolate(frame, [at, at + 10], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const seen = interpolate(frame, [at + 20, at + 30], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const seenAt = tapAt + Math.round(delay * 30);
+  const on = interpolate(frame, [tapAt, tapAt + 10], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const seen = interpolate(frame, [seenAt, seenAt + 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 16, opacity: 0.3 + 0.7 * on }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 14, opacity: 0.3 + 0.7 * on }}>
       <span
         style={{
           fontFamily: FONT.sans,
           fontWeight: 600,
-          fontSize: 28,
+          fontSize: 26,
           color: "#000",
           background: "#fff",
-          padding: "10px 22px",
+          padding: "9px 20px",
           borderRadius: 999,
           whiteSpace: "nowrap",
         }}
       >
         {action}
       </span>
-      <Mono size={28} color={C.text3}>
+      <Mono size={26} color={C.text3}>
         →
       </Mono>
       <span style={{ opacity: 0.35 + 0.65 * seen }}>
-        <StatusPill color={color} size={26}>
+        <StatusPill color={color} size={24}>
           {status}
         </StatusPill>
       </span>
+      <Mono size={22} color={C.text2} weight={400} style={{ opacity: seen, whiteSpace: "nowrap" }}>
+        {formatRu(delay, 2)} с
+      </Mono>
     </div>
   );
 };
 
 export const S04Accept: React.FC = () => {
   const frame = useCurrentFrame();
-  const alarm = frame < ACCEPT ? 0.6 + 0.4 * Math.abs(Math.sin(frame / 9)) : 0;
+  const alarm = frame >= RED && frame < ACCEPT ? 0.6 + 0.4 * Math.abs(Math.sin(frame / 9)) : 0;
   return (
     <AbsoluteFill>
       <Backdrop variant="glow" />
@@ -69,7 +85,7 @@ export const S04Accept: React.FC = () => {
         }}
       />
       <Split
-        leftWidth={640}
+        leftWidth={660}
         gap={40}
         left={
           <>
@@ -80,26 +96,26 @@ export const S04Accept: React.FC = () => {
               <Headline size={84}>Красный экран и сирена</Headline>
             </Reveal>
             <Reveal delay={12}>
-              <Lead>Аварийный наряд не смахнуть: только «Принять» или «Отклонить».</Lead>
+              <Lead size={32}>Аварийный наряд не смахнуть: только «Принять» или «Отклонить».</Lead>
             </Reveal>
-            <Reveal delay={24}>
+            <Reveal delay={ISSUE - 6}>
               <div style={{ display: "flex", alignItems: "baseline", gap: 22, marginTop: 6 }}>
-                <CountUp {...NUMBERS.redScreen} delay={24} size={112} color={C.red} />
+                <Stopwatch start={ISSUE} stop={NUMBERS.redScreen.value} decimals={2} size={112} color={C.red} runningColor={C.text} />
                 <Lead size={26} style={{ maxWidth: 330 }}>
                   {NUMBERS.redScreen.label}
                 </Lead>
               </div>
             </Reveal>
             <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 6 }}>
-              <Reveal delay={ACCEPT - 20}>
+              <Reveal delay={ACCEPT - 30}>
                 <Mono size={T.small} color={C.text3} weight={400}>
                   ИСПОЛНИТЕЛЬ НАЖИМАЕТ → МАСТЕР ВИДИТ
                 </Mono>
               </Reveal>
-              <Step at={ACCEPT} action="Принять" status="Принят в работу" color={C.queue} />
-              <Step at={START} action="Начать исполнение" status="В работе" color={C.working} />
+              <Step at={ACCEPT} delay={TAKE.live.acceptToMaster} action="Принять" status="Принят в работу" color={C.queue} />
+              <Step at={START} delay={TAKE.live.startToMaster} action="Начать исполнение" status="В работе" color={C.working} />
             </div>
-            <Reveal delay={START + 20}>
+            <Reveal delay={START + 40}>
               <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 8 }}>
                 <LogoChip name="supabase" text="Realtime" size={28} />
                 <Mono size={T.small} color={C.text3} weight={400}>

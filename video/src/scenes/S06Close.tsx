@@ -1,11 +1,16 @@
-// 1:09 Phone B: closing the order with the fault code, materials against the norm and the after photo.
+// 1:06 Phone B closes №660: works text, the fault code Г-01 (2,7 s of s06-close.mp4), materials against the norm
+// (3,8 s), the after photo (6 s) and «Отправить на проверку» (7,9 s). On the simulator the photo comes from the library,
+// which the photo check later marks (R2 7 из 10).
 import React from "react";
 import { AbsoluteFill } from "remotion";
 import { Backdrop } from "../components/Backdrop";
 import { Split } from "../components/layout";
 import { DeviceLabel, Phone, type Shot } from "../components/Phone";
 import { Eyebrow, Headline, Lead, Reveal } from "../components/text";
+import { at } from "../data/footage";
 import { C, FONT } from "../theme";
+
+const SLOT = "s06-close-B";
 
 const SHOTS: Shot[] = [
   { still: "pwa/14-B-close-materials.png", at: 0, taps: [{ at: 44, x: 0.9, y: 0.276 }] },
@@ -61,11 +66,16 @@ export const S06Close: React.FC = () => (
             <Headline>Отчёт и фото с телефона</Headline>
           </Reveal>
           <div style={{ display: "flex", flexDirection: "column", gap: 30, marginTop: 10 }}>
-            <Item delay={18} tag="Г-01" title="Шифр из справочника" detail="Течь масла, повреждение РВД. Подсказка пришла с выдачи." />
-            <Item delay={48} tag="шт · л" title="Материалы рядом с нормой" detail="Обычный расход и максимум видны прямо в форме." />
-            <Item delay={110} tag="фото" title="Фото после: камера, сжатие, хеш" detail="1600 px, sha256 и dHash. Загрузка идёт, пока заполняется форма." />
+            <Item delay={at(SLOT, 2.4)} tag="Г-01" title="Шифр из справочника" detail="Течь масла, повреждение РВД. Подсказка пришла с выдачи." />
+            <Item delay={at(SLOT, 3.8)} tag="шт · л" title="Материалы рядом с нормой" detail="Обычный расход и максимум видны прямо в форме." />
+            <Item
+              delay={at(SLOT, 5.7)}
+              tag="фото"
+              title="Фото после: сжатие и хеш"
+              detail="1600 px, sha256 и dHash, загрузка пока заполняется форма. Здесь снимок из галереи: проверка это отметит."
+            />
           </div>
-          <Reveal delay={200}>
+          <Reveal delay={at(SLOT, 7.0)}>
             <Lead size={28}>Фото после обязательно для внеплановых работ: так требует кейс.</Lead>
           </Reveal>
         </>
@@ -73,7 +83,7 @@ export const S06Close: React.FC = () => (
       right={
         <Phone
           screenHeight={840}
-          slot="s06-close-B"
+          slot={SLOT}
           shots={SHOTS}
           label={<DeviceLabel letter="B" role="Исполнитель" account="2001" />}
         />

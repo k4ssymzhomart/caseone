@@ -1,22 +1,25 @@
-// 2:07 Web panel, AI analytics: the demo question in plain Russian, and the К-3 card in the case's own tone.
-// The card text is the live answer to this question (docs/phase6-acceptance.md, run 2, and the rules card there).
+// 2:11 Web panel, AI analytics as руководитель 3001: the demo question typed, «Спросить», the К-3 card first, then its
+// evidence. The recording (s12-analytics-web.mp4) is zoomed so the card reads at 1080p; the overlays below are drawn
+// only over the stills, with the text of the recorded answer.
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { Backdrop } from "../components/Backdrop";
-import { Browser } from "../components/Browser";
+import { Browser, WEB_H, WEB_W } from "../components/Browser";
 import { LogoChip } from "../components/brand";
 import { CountUp } from "../components/CountUp";
 import { Split } from "../components/layout";
 import { Eyebrow, Glass, Headline, Lead, Mono, Reveal, useIn } from "../components/text";
+import { at } from "../data/footage";
 import { NUMBERS } from "../data/numbers";
 import { C, FONT } from "../theme";
-import { BROWSER_H, BROWSER_W } from "./S10ShiftReport";
 
+const SLOT = "s12-analytics-web";
 const QUESTION = "покажи проблемы участка дробления за месяц";
-const TYPE_FROM = 30;
-const TYPE_TO = 104;
-const ASK = 116;
-const CARD = 150;
+const TYPE_FROM = at(SLOT, 3.2);
+const TYPE_TO = at(SLOT, 8.2);
+const ASK = at(SLOT, 8.6);
+const CARD = at(SLOT, 9.2);
+const EVIDENCE = at(SLOT, 16.8);
 
 /** The question as typed into the ask box, large enough to read, floating over the top of the page. */
 const QuestionBar: React.FC = () => {
@@ -46,7 +49,7 @@ const QuestionBar: React.FC = () => {
             whiteSpace: "nowrap",
           }}
         >
-          {sent ? "ИИ думает…" : "Спросить"}
+          Спросить
         </span>
       </Glass>
     </div>
@@ -86,18 +89,18 @@ const InsightCard: React.FC = () => {
           </span>
         </div>
         <span style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 38, color: C.text, letterSpacing: "-0.02em", lineHeight: 1.12 }}>
-          Конвейер К-3: повторяющиеся отказы подшипника М-02
+          Конвейер К-3: повторяющийся отказ подшипника М-02
         </span>
         <span style={{ fontFamily: FONT.sans, fontSize: 26, color: C.text, lineHeight: 1.36 }}>
-          7 внеплановых остановок за 30 дней, 5 из них шифр М-02, в среднем через 6,3 дня. В 2,3 раза больше медианы по
-          парку, простой 32,3 ч.
+          За 30 дней на конвейере К-3 7 внеплановых остановок, это 2,3 раза больше медианы по парку, простой 32,3 ч. Шифр
+          М-02 (подшипник) повторился 5 раз с медианой 6,3 дня между отказами, ремонты делали 4 разных исполнителя.
         </span>
         <div style={{ borderLeft: `3px solid ${C.red}`, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 4 }}>
           <Mono size={16} color={C.text3}>
             РЕКОМЕНДАЦИЯ
           </Mono>
           <span style={{ fontFamily: FONT.sans, fontSize: 25, color: C.text, lineHeight: 1.35 }}>
-            Проверить соосность привода и смазку, включить замену узла в план ППР.
+            Найти первопричину отказов подшипников (соосность, смазка, натяжение) и включить узел в план ППР.
           </span>
         </div>
         <Mono size={18} color={C.text2}>
@@ -112,42 +115,49 @@ export const S12Analytics: React.FC = () => (
   <AbsoluteFill>
     <Backdrop variant="glow" />
     <Split
-      leftWidth={500}
-      gap={60}
+      leftWidth={446}
+      gap={50}
       left={
         <>
           <Reveal>
             <Eyebrow>Аналитика ИИ</Eyebrow>
           </Reveal>
           <Reveal delay={6}>
-            <Headline size={72}>Спросите обычными словами</Headline>
+            <Headline size={68}>Спросите обычными словами</Headline>
           </Reveal>
-          <Reveal delay={20}>
-            <Lead size={28}>Haiku разбирает вопрос, детекторы считают в SQL, Sonnet пишет выводы только из этих цифр.</Lead>
+          <Reveal delay={16}>
+            <Lead size={27}>Haiku разбирает вопрос, детекторы считают в SQL, Sonnet пишет выводы только из этих цифр.</Lead>
           </Reveal>
-          <Reveal delay={30}>
-            <LogoChip name="claude" text="Claude Sonnet 5.5 · Haiku 5.5" size={26} />
+          <Reveal delay={26}>
+            <LogoChip name="claude" text="Claude Sonnet 5.5 · Haiku 5.5" size={24} />
           </Reveal>
-          <Reveal delay={CARD + 30}>
+          <Reveal delay={CARD + 20}>
+            <Lead size={24} color={C.text}>
+              У каждого вывода рекомендация и доказательства: наряды и график по неделям.
+            </Lead>
+          </Reveal>
+          <Reveal delay={EVIDENCE}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <CountUp {...NUMBERS.patterns} delay={CARD + 30} size={96} color={C.red} />
-              <Lead size={24}>{NUMBERS.patterns.label}</Lead>
+              <CountUp {...NUMBERS.patterns} delay={EVIDENCE} size={80} color={C.red} />
+              <Lead size={23}>{NUMBERS.patterns.label}</Lead>
             </div>
           </Reveal>
         </>
       }
       right={
-        <div style={{ position: "relative" }}>
-          <Browser
-            slot="s12-analytics-web"
-            url="rota-naryad.netlify.app/analytics"
-            width={BROWSER_W}
-            height={BROWSER_H}
-            shots={[{ still: "web-live/w06-analytics.png", at: 0 }]}
-          />
-          <QuestionBar />
-          <InsightCard />
-        </div>
+        <Browser
+          slot={SLOT}
+          url="rota-naryad.netlify.app/analytics"
+          width={WEB_W}
+          height={WEB_H}
+          shots={[{ still: "web-live/w06-analytics.png", at: 0 }]}
+          stillOverlay={
+            <>
+              <QuestionBar />
+              <InsightCard />
+            </>
+          }
+        />
       }
     />
   </AbsoluteFill>

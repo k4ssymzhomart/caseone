@@ -18,19 +18,21 @@ export const NUMBERS = {
     label: "эталонных случаев: вердикт ИИ совпал с ожидаемым",
     source: "docs/golden-results.md · Sonnet 5.5",
   },
+  // The take in the film (two phones, live database). The earlier two browser run measured 1,9 s and 9,5 s
+  // (docs/progress.md, P7); docs/live-loop-timings.md compares both.
   redScreen: {
-    value: 1.9,
-    decimals: 1,
+    value: 0.72,
+    decimals: 2,
     suffix: " с",
     label: "от «Выдать» у мастера до красного экрана у исполнителя",
-    source: "docs/progress.md · P7, два браузера",
+    source: "docs/live-loop-timings.md · дубль фильма",
   },
   verdict: {
-    value: 9.5,
+    value: 8.49,
     decimals: 1,
     suffix: " с",
-    label: "от отправки отчёта до вердикта ИИ",
-    source: "docs/progress.md · P7, тот же прогон",
+    label: "от отправки отчёта до вердикта ИИ на телефоне",
+    source: "docs/live-loop-timings.md · дубль фильма",
   },
   checkCost: {
     value: 0.016,
@@ -62,12 +64,20 @@ export const NUMBERS = {
     source: "npx vitest run · 09.10.2026",
   },
   // Used inside scenes, not on the numbers page.
-  shiftSummarySec: {
-    value: 6.6,
+  /** The reminder of the 1 minute order showed 25,1 to 25,4 s before its deadline. */
+  reminderBefore: {
+    value: 25,
+    suffix: " с",
+    label: "напоминание до срока",
+    source: "docs/live-loop-timings.md",
+  },
+  /** The overdue message reached A 4,35 to 4,62 s and B 4,37 to 4,64 s after the deadline. */
+  overdueAfter: {
+    value: 4.6,
     decimals: 1,
     suffix: " с",
-    label: "Sonnet пишет сводку смены",
-    source: "docs/phase5-acceptance.md",
+    label: "просрочка на обоих телефонах после срока",
+    source: "docs/live-loop-timings.md",
   },
   serikovF: {
     value: 64.7,

@@ -1,13 +1,11 @@
-// 2:17 Architecture in one animated picture (docs/architecture.md), then the privacy gateway close up.
+// 2:22 Architecture in one animated picture (docs/architecture.md). The privacy gateway close up follows in S13Privacy.
 import React from "react";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { Backdrop } from "../components/Backdrop";
 import { Logo, Mascot, type MascotName } from "../components/brand";
-import { Eyebrow, Glass, Headline, Lead, Mono, Reveal, useIn } from "../components/text";
+import { Eyebrow, Headline, Mono, Reveal, useIn } from "../components/text";
 import type { PlatformLogoName } from "../../../packages/design/src/brand/platforms";
-import { C, FONT, ease } from "../theme";
-
-const PRIVACY = 318;
+import { C, FONT } from "../theme";
 
 type Box = { x: number; y: number; w: number; h: number };
 type NodeSpec = Box & { at: number; title: string; sub: string; logos?: PlatformLogoName[]; mascot?: MascotName; accent?: boolean };
@@ -187,86 +185,11 @@ const ChipCell: React.FC<{ delay: number; title: string; sub: string }> = ({ del
   );
 };
 
-const Redact: React.FC<{ name: string; code: string; role: string; at: number }> = ({ name, code, role, at }) => {
-  const frame = useCurrentFrame();
-  const p = interpolate(frame, [at, at + 14], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(...ease.out) });
-  const strike = interpolate(frame, [at - 10, at], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
-      <span style={{ position: "relative", fontFamily: FONT.sans, fontWeight: 600, fontSize: 42, color: C.text, minWidth: 300 }}>
-        {name}
-        <span style={{ position: "absolute", left: 0, top: "52%", height: 3, width: `${strike * 100}%`, background: C.red }} />
-      </span>
-      <Mono size={40} color={C.text3}>
-        →
-      </Mono>
-      <span
-        style={{
-          fontFamily: FONT.mono,
-          fontWeight: 600,
-          fontSize: 42,
-          color: "#fff",
-          background: C.red,
-          padding: "4px 18px",
-          borderRadius: 12,
-          opacity: p,
-          scale: String(interpolate(p, [0, 1], [0.7, 1])),
-        }}
-      >
-        {code}
-      </span>
-      <Mono size={24} color={C.text3} weight={400}>
-        {role}
-      </Mono>
-    </div>
-  );
-};
-
-const Privacy: React.FC = () => {
-  const frame = useCurrentFrame();
-  const p = useIn(PRIVACY, 20);
-  if (frame < PRIVACY - 2) return null;
-  const rows: Array<[string, string, string]> = [
-    ["Ахметов Е.", "E01", "исполнитель, таб. 2001"],
-    ["Жумабаев Н.", "M01", "мастер, таб. 1001"],
-  ];
-  return (
-    <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", opacity: p }}>
-      <Glass strong style={{ width: 1180, padding: "48px 56px", display: "flex", flexDirection: "column", gap: 26 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-          <Mascot name="shield" size={120} />
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <Eyebrow>Шлюз приватности · каждый запрос к модели</Eyebrow>
-            <Headline size={64}>Модель не видит людей</Headline>
-          </div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 6 }}>
-          {rows.map(([name, code, role], i) => (
-            <Redact key={code} name={name} code={code} role={role} at={PRIVACY + 44 + i * 22} />
-          ))}
-        </div>
-        <Reveal delay={PRIVACY + 96}>
-          <Lead size={30}>
-            Фамилии, табельные номера и телефоны заменяются до отправки. Журнал «Что видит ИИ» показывает каждый запрос.
-            Локальная модель подключается переключателем провайдера, без изменения кода.
-          </Lead>
-        </Reveal>
-      </Glass>
-    </AbsoluteFill>
-  );
-};
-
 export const S13Architecture: React.FC = () => {
-  const frame = useCurrentFrame();
-  const dim = interpolate(frame, [PRIVACY - 6, PRIVACY + 14], [1, 0.14], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.bezier(...ease.inOut),
-  });
   return (
     <AbsoluteFill>
       <Backdrop variant="glow" intensity={0.7} />
-      <AbsoluteFill style={{ opacity: dim }}>
+      <AbsoluteFill>
         <div style={{ position: "absolute", left: 120, top: 96, display: "flex", flexDirection: "column", gap: 14 }}>
           <Reveal>
             <Eyebrow>Архитектура</Eyebrow>
@@ -296,7 +219,6 @@ export const S13Architecture: React.FC = () => {
           </Reveal>
         </div>
       </AbsoluteFill>
-      <Privacy />
     </AbsoluteFill>
   );
 };

@@ -7,8 +7,11 @@ import { Split } from "../components/layout";
 import { Eyebrow, Headline, Lead, Mono, Reveal, useIn, useOut } from "../components/text";
 import { C, FONT, T } from "../theme";
 
-// 3 beats of 125 frames (4.2 s) and a 2 s bridge: 435 frames in src/data/scenes.ts.
-const CHAPTER = 125;
+// 3 beats of 117 frames that overlap by 10 (each fades out while the next fades in, so the screen never dips to
+// black), then a 2 s bridge: 380 frames in src/data/scenes.ts.
+const CHAPTER = 117;
+const OVERLAP = 10;
+const STEP = CHAPTER - OVERLAP;
 
 const Typewriter: React.FC<{ text: string; start: number; cps?: number }> = ({ text, start, cps = 16 }) => {
   const frame = useCurrentFrame();
@@ -161,7 +164,7 @@ const Bridge: React.FC = () => {
   const p = useIn(0, 20);
   return (
     <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", gap: 36, flexDirection: "column", opacity: p }}>
-      <RotaMark size={120} rotate={interpolate(frame, [0, 60], [-120, 0], { extrapolateRight: "clamp" })} />
+      <RotaMark size={120} rotate={interpolate(frame, [0, 46], [-120, 0], { extrapolateRight: "clamp" })} />
       <Headline size={T.title + 8} style={{ textAlign: "center" }}>
         Rota переводит наряд в телефон
         <br />и ставит ИИ на контроль
@@ -181,7 +184,7 @@ export const S02Problem: React.FC = () => (
         mascot="tired"
       />
     </Sequence>
-    <Sequence from={CHAPTER} durationInFrames={CHAPTER}>
+    <Sequence from={STEP} durationInFrames={CHAPTER}>
       <Chapter
         index={1}
         title="Сроки никто не видит."
@@ -189,7 +192,7 @@ export const S02Problem: React.FC = () => (
         mascot="dizzy"
       />
     </Sequence>
-    <Sequence from={CHAPTER * 2} durationInFrames={CHAPTER}>
+    <Sequence from={STEP * 2} durationInFrames={CHAPTER}>
       <Chapter
         index={2}
         title="Качество не проверить."
@@ -197,7 +200,7 @@ export const S02Problem: React.FC = () => (
         mascot="search"
       />
     </Sequence>
-    <Sequence from={CHAPTER * 3}>
+    <Sequence from={STEP * 3}>
       <Bridge />
     </Sequence>
   </AbsoluteFill>

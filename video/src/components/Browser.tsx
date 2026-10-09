@@ -1,12 +1,12 @@
 // A browser window for the web panel. Plays public/footage/<scene>-web.mp4 when recorded, otherwise scrolls through
 // the 1440 px wide stills from docs/screenshots/presentation/web-live.
-import { Video } from "@remotion/media";
 import React from "react";
-import { AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { footageFor } from "../data/footage";
 import { STILLS, type StillName } from "../data/stills";
 import { C, FONT, ease } from "../theme";
 import { Logo } from "./brand";
+import { FootagePlayer } from "./Footage";
 
 export type WebShot = {
   still: StillName;
@@ -19,6 +19,11 @@ export type WebShot = {
 export type PageMark = { at: number; until?: number; still: StillName; x: number; y: number; w: number; h: number };
 
 const BAR = 52;
+
+/** The window of the web scenes: a 16:9 page (the recordings are 1920 × 1080) under the address bar, beside a
+ * 446 px caption column (446 + 50 + 1184 = 1920 minus the safe margins). */
+export const WEB_W = 1184;
+export const WEB_H = (WEB_W * 9) / 16 + BAR;
 
 const WebLayer: React.FC<{ shot: WebShot; next?: WebShot; width: number; viewport: number; marks: PageMark[] }> = ({
   shot,
@@ -89,7 +94,6 @@ export const Browser: React.FC<{
   /** Drawn over the page only when there is no recording. */
   stillOverlay?: React.ReactNode;
 }> = ({ slot, url, width, height, shots, marks = [], overlay, stillOverlay }) => {
-  const { fps } = useVideoConfig();
   const footage = footageFor(slot);
   const viewport = height - BAR;
   return (
@@ -145,14 +149,7 @@ export const Browser: React.FC<{
       </div>
       <div style={{ position: "relative", height: viewport, overflow: "hidden" }}>
         {footage ? (
-          <Video
-            src={footage.src}
-            muted
-            trimBefore={Math.round((footage.trimBefore ?? 0) * fps)}
-            playbackRate={footage.playbackRate ?? 1}
-            objectFit="cover"
-          style={{ width: "100%", height: "100%" }}
-          />
+          <FootagePlayer footage={footage} />
         ) : (
           <>
             {shots.map((shot, i) => (

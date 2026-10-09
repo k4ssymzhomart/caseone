@@ -1,4 +1,4 @@
-// 2:46 Outro: the logo, the slogan, the links and the test accounts.
+// 2:50 Outro: the logo, the slogan, the links and the test accounts.
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { Backdrop } from "../components/Backdrop";

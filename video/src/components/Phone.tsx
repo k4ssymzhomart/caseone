@@ -1,9 +1,9 @@
 // A clean phone frame for the portrait screen recordings (1206 × 2622 from the simulators), with the stills as the
 // fallback. Taps and HUD toasts are drawn only over stills: a real recording already shows them.
-import { Video } from "@remotion/media";
 import React from "react";
-import { AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { footageFor } from "../data/footage";
+import { FootagePlayer } from "./Footage";
 import type { StillName } from "../data/stills";
 import { C, FONT, ease } from "../theme";
 
@@ -120,22 +120,11 @@ export const PhoneScreen: React.FC<{
   shots: Shot[];
   toasts?: HudToast[];
   width: number;
-}> = ({ slot, shots, toasts = [], width }) => {
-  const { fps } = useVideoConfig();
+  startAt?: number;
+}> = ({ slot, shots, toasts = [], width, startAt = 0 }) => {
   const footage = footageFor(slot);
   if (footage) {
-    return (
-      <AbsoluteFill>
-        <Video
-          src={footage.src}
-          muted
-          trimBefore={Math.round((footage.trimBefore ?? 0) * fps)}
-          playbackRate={footage.playbackRate ?? 1}
-          objectFit="cover"
-          style={{ width: "100%", height: "100%" }}
-        />
-      </AbsoluteFill>
-    );
+    return <FootagePlayer footage={footage} startAt={startAt} />;
   }
   return (
     <AbsoluteFill style={{ background: "#000" }}>
@@ -161,7 +150,9 @@ export const Phone: React.FC<{
   glow?: string;
   glowStrength?: number;
   label?: React.ReactNode;
-}> = ({ screenHeight, slot, shots, toasts, glow, glowStrength = 1, label }) => {
+  /** Scene frame where the recording starts playing (it shows its first frame until then). */
+  startAt?: number;
+}> = ({ screenHeight, slot, shots, toasts, glow, glowStrength = 1, label, startAt }) => {
   const screenWidth = Math.round(screenHeight * SCREEN_ASPECT);
   const bezel = Math.round(screenWidth * 0.032);
   const radius = Math.round(screenWidth * 0.15);
@@ -194,7 +185,7 @@ export const Phone: React.FC<{
             background: "#000",
           }}
         >
-          <PhoneScreen slot={slot} shots={shots} toasts={toasts} width={screenWidth} />
+          <PhoneScreen slot={slot} shots={shots} toasts={toasts} width={screenWidth} startAt={startAt} />
           <div
             style={{
               position: "absolute",

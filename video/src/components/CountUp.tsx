@@ -41,3 +41,37 @@ export const CountUp: React.FC<{
     </span>
   );
 };
+
+/** A stopwatch that runs in real time from `start` (scene frame) beginning at `from` seconds and stops at `stop`
+ * seconds: the counter on screen moves with the footage beside it. */
+export const Stopwatch: React.FC<{
+  start: number;
+  from?: number;
+  stop: number;
+  decimals?: number;
+  suffix?: string;
+  size: number;
+  color?: string;
+  runningColor?: string;
+}> = ({ start, from = 0, stop, decimals = 1, suffix = " с", size, color = "#fff", runningColor }) => {
+  const frame = useCurrentFrame();
+  const t = Math.min(stop, Math.max(0, from + (frame - start) / 30));
+  const done = t >= stop;
+  return (
+    <span
+      style={{
+        fontFamily: FONT.mono,
+        fontWeight: 500,
+        fontSize: size,
+        lineHeight: 1,
+        letterSpacing: "-0.04em",
+        color: done ? color : (runningColor ?? color),
+        fontVariantNumeric: "tabular-nums",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {formatRu(done ? stop : t, decimals)}
+      <span style={{ fontSize: size * 0.46, letterSpacing: "-0.01em" }}>{suffix}</span>
+    </span>
+  );
+};

@@ -17,8 +17,10 @@ export type SceneId =
   | "s09-rework"
   | "s10-shift-report"
   | "s11-rating"
+  | "s12-dashboard"
   | "s12-analytics"
   | "s13-architecture"
+  | "s13-privacy"
   | "s14-numbers"
   | "s15-outro";
 
@@ -26,20 +28,22 @@ export type SceneMeta = { id: SceneId; frames: number; chapter?: string };
 
 export const SCENES: SceneMeta[] = [
   { id: "s01-cold-open", frames: 240 },
-  { id: "s02-problem", frames: 435 },
+  { id: "s02-problem", frames: 380 },
   { id: "s03-issue", frames: 540, chapter: "Выдача" },
-  { id: "s04-accept", frames: 480, chapter: "Принятие" },
+  { id: "s04-accept", frames: 450, chapter: "Принятие" },
   { id: "s05-deadline", frames: 420, chapter: "Сроки" },
-  { id: "s06-close", frames: 270, chapter: "Закрытие" },
-  { id: "s07-check", frames: 255, chapter: "Проверка ИИ" },
-  { id: "s08-verdict", frames: 360, chapter: "Вердикт" },
+  { id: "s06-close", frames: 258, chapter: "Закрытие" },
+  { id: "s07-check", frames: 270, chapter: "Проверка ИИ" },
+  { id: "s08-verdict", frames: 315, chapter: "Вердикт" },
   { id: "s09-rework", frames: 420, chapter: "Доработка" },
-  { id: "s10-shift-report", frames: 270, chapter: "Отчёт смены" },
-  { id: "s11-rating", frames: 240, chapter: "Рейтинг" },
-  { id: "s12-analytics", frames: 330, chapter: "Аналитика" },
-  { id: "s13-architecture", frames: 540 },
-  { id: "s14-numbers", frames: 360 },
-  { id: "s15-outro", frames: 270 },
+  { id: "s10-shift-report", frames: 300, chapter: "Отчёт смены" },
+  { id: "s11-rating", frames: 290, chapter: "Рейтинг" },
+  { id: "s12-dashboard", frames: 195, chapter: "Сводка" },
+  { id: "s12-analytics", frames: 345, chapter: "Аналитика" },
+  { id: "s13-architecture", frames: 300 },
+  { id: "s13-privacy", frames: 285 },
+  { id: "s14-numbers", frames: 300 },
+  { id: "s15-outro", frames: 240 },
 ];
 
 /** Start frame of each scene in the finished film (transitions overlap neighbours). */

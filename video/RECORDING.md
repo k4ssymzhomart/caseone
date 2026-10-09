@@ -1,8 +1,8 @@
 # Recording the real footage
 
-The film renders today from the stills. This is the plan to replace them with screen recordings of the live product, one
-scene at a time: drop a file into `public/footage/` under the name below and the scene plays it instead of the stills
-(`src/data/footage.ts`). Nothing else changes. After a session, update `src/data/take.ts` (order numbers, score,
+The film plays the recordings of 09.10.2026 (take 2 on the simulators and the scripted web takes). This is how they
+were made and how to record a new take, one scene at a time: drop a file into `public/footage/` under the name below and
+the scene plays it instead of the stills (`src/data/footage.ts`). After a session, update `src/data/take.ts` (order numbers, score,
 confidence, the second order's unit and times) so the captions agree with the recorded screens.
 
 ## Setup
@@ -85,11 +85,13 @@ from the screens.
 
 Use Remotion's bundled ffmpeg (no install needed). It ships only a few filters (no `fps`, `format`, `select`), so the
 output options do the conversion: `-r 30` turns the simulator's variable frame rate into 30 fps, `-pix_fmt yuv420p`
-keeps every player happy, `-an` drops audio. The side by side pairs use the same start and end on both files:
+keeps every player happy, `-an` drops audio. `simctl recordVideo` writes broken decode timestamps (up to 145 s behind
+the presentation times), so read every raw take with `-fflags +igndts` before `-i`, or the cut points drift past about
+430 s. The side by side pairs use the same start and end on both files:
 
 ```sh
 cd video
-npx remotion ffmpeg -y -ss 00:00:12.0 -to 00:00:30.0 -i public/footage/raw/A-take1.mp4 \
+npx remotion ffmpeg -y -fflags +igndts -ss 00:00:12.0 -to 00:00:30.0 -i public/footage/raw/A-take1.mp4 \
   -r 30 -pix_fmt yuv420p -c:v libx264 -crf 16 -an public/footage/s03-issue.mp4
 ```
 
@@ -100,15 +102,17 @@ message): cut each moment, then join them with the concat demuxer:
 cd video/public/footage/raw
 for p in 62:66 70:72 98:101 128:133; do   # start:end in seconds of the raw take (bash and zsh)
   s=${p%%:*}; e=${p##*:}
-  npx remotion ffmpeg -y -ss $s -to $e -i A-take1.mp4 -r 30 -pix_fmt yuv420p -c:v libx264 -crf 16 -an A-part-$s.mp4
+  npx remotion ffmpeg -y -fflags +igndts -ss $s -to $e -i A-take1.mp4 -r 30 -pix_fmt yuv420p -c:v libx264 -crf 16 -an A-part-$s.mp4
 done
 printf "file '%s'\n" A-part-62.mp4 A-part-70.mp4 A-part-98.mp4 A-part-128.mp4 > A-parts.txt
 npx remotion ffmpeg -y -f concat -safe 0 -i A-parts.txt -c copy ../s05-deadline-A.mp4
 ```
 
 A scene shorter than its slot holds the last frame; a longer one is cut by the scene. Fine tune the start with
-`trimBefore` (seconds) and a slow wait with `playbackRate` in `src/data/footage.ts`, then check the scene in the Studio
-(`npm run dev`, folder «Scenes»).
+`trimBefore` (seconds), a slow wait with `playbackRate`, or several stretches at their own speeds with `segments` in
+`src/data/footage.ts` (each spec also needs the clip's `duration`), then check the scene in the Studio (`npm run dev`,
+folder «Scenes») or with `npm run stills`. Captions sync to the take through `at(slot, seconds)`, so a new take only
+needs its clip seconds updated in the scene file.
 
 ## The web panel
 

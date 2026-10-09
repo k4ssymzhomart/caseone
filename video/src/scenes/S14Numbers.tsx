@@ -1,4 +1,4 @@
-// 2:35 Measured numbers in two pages, each with the file that holds the measurement (src/data/numbers.ts).
+// 2:41 Measured numbers in two pages, each with the file that holds the measurement (src/data/numbers.ts).
 import React from "react";
 import { AbsoluteFill, Sequence } from "remotion";
 import { Backdrop } from "../components/Backdrop";
@@ -7,7 +7,7 @@ import { Eyebrow, Headline, Mono, Reveal, useOut } from "../components/text";
 import { NUMBERS, type FilmNumber } from "../data/numbers";
 import { C, FONT, SAFE } from "../theme";
 
-const PAGE = 180;
+const PAGE = 150;
 
 const Tile: React.FC<{ n: FilmNumber; delay: number }> = ({ n, delay }) => (
   <Reveal delay={delay} style={{ flex: 1, minWidth: 0 }}>
@@ -35,7 +35,9 @@ const Tile: React.FC<{ n: FilmNumber; delay: number }> = ({ n, delay }) => (
 const Page: React.FC<{ title: string; items: FilmNumber[] }> = ({ title, items }) => {
   const out = useOut(PAGE - 14);
   return (
-    <AbsoluteFill style={{ padding: `${SAFE.y}px ${SAFE.x}px`, display: "flex", flexDirection: "column", gap: 48, opacity: out }}>
+    <AbsoluteFill
+      style={{ padding: `${SAFE.y}px ${SAFE.x}px`, display: "flex", flexDirection: "column", justifyContent: "center", gap: 48, opacity: out }}
+    >
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <Reveal>
           <Eyebrow>Цифры · измерено, со ссылкой на файл</Eyebrow>
@@ -57,7 +59,7 @@ export const S14Numbers: React.FC = () => (
   <AbsoluteFill>
     <Backdrop variant="glow" />
     <Sequence durationInFrames={PAGE}>
-      <Page title="ИИ точный, быстрый и дешёвый" items={[NUMBERS.golden, NUMBERS.redScreen, NUMBERS.verdict, NUMBERS.checkCost]} />
+      <Page title="Быстрый контур, точный ИИ" items={[NUMBERS.golden, NUMBERS.redScreen, NUMBERS.verdict, NUMBERS.checkCost]} />
     </Sequence>
     <Sequence from={PAGE} durationInFrames={PAGE}>
       <Page title="Данные и надёжность" items={[NUMBERS.history, NUMBERS.patterns, NUMBERS.shiftReport, NUMBERS.tests]} />

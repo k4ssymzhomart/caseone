@@ -18,7 +18,9 @@ import { S09Rework } from "./scenes/S09Rework";
 import { S10ShiftReport } from "./scenes/S10ShiftReport";
 import { S11Rating } from "./scenes/S11Rating";
 import { S12Analytics } from "./scenes/S12Analytics";
+import { S12Dashboard } from "./scenes/S12Dashboard";
 import { S13Architecture } from "./scenes/S13Architecture";
+import { S13Privacy } from "./scenes/S13Privacy";
 import { S14Numbers } from "./scenes/S14Numbers";
 import { S15Outro } from "./scenes/S15Outro";
 import { C, FONT } from "./theme";
@@ -35,8 +37,10 @@ export const SCENE_COMPONENTS: Record<SceneId, React.FC> = {
   "s09-rework": S09Rework,
   "s10-shift-report": S10ShiftReport,
   "s11-rating": S11Rating,
+  "s12-dashboard": S12Dashboard,
   "s12-analytics": S12Analytics,
   "s13-architecture": S13Architecture,
+  "s13-privacy": S13Privacy,
   "s14-numbers": S14Numbers,
   "s15-outro": S15Outro,
 };
