@@ -14,6 +14,7 @@ import { useDirectories } from '@/lib/directories';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
 import { liveHub } from '@/lib/liveHub';
+import { RoleGate } from '@/lib/roleGate';
 import { useTheme } from '@/lib/theme';
 import { Banner } from '@/ui/Banner';
 import { Button } from '@/ui/Button';
@@ -31,7 +32,16 @@ type Kind = 'all' | 'unplanned' | 'planned';
 /** Cards rendered at first and per «Показать ещё». */
 const PAGE = 20;
 
-export default function EquipmentHistoryScreen() {
+/** Opened from the master's order screen and the manager's summary. */
+export default function EquipmentHistoryRoute() {
+  return (
+    <RoleGate allow={['master', 'manager']}>
+      <EquipmentHistoryScreen />
+    </RoleGate>
+  );
+}
+
+function EquipmentHistoryScreen() {
   const { id: raw } = useLocalSearchParams<{ id: string }>();
   const id = Number(raw);
   const valid = Number.isInteger(id) && id > 0;

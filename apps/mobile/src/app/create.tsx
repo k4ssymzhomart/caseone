@@ -37,6 +37,7 @@ import { haptic } from '@/lib/haptics';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
 import { isSimulator, PhotoCancelled, PhotoPermissionDenied, takeBeforePhoto } from '@/lib/photo';
+import { RoleGate } from '@/lib/roleGate';
 import { useTheme } from '@/lib/theme';
 import { Banner } from '@/ui/Banner';
 import { Button } from '@/ui/Button';
@@ -67,9 +68,11 @@ const DEMO_HUD_MS = 5_000;
 export default function CreateRoute() {
   // The confirm sheet is a React Native Modal; rendered inside this native modal it shows above it.
   return (
-    <ConfirmProvider>
-      <CreateScreen />
-    </ConfirmProvider>
+    <RoleGate allow={['master']}>
+      <ConfirmProvider>
+        <CreateScreen />
+      </ConfirmProvider>
+    </RoleGate>
   );
 }
 

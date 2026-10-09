@@ -6,6 +6,7 @@ import { View } from 'react-native';
 import { SignOutGroup } from '@/features/profile/ProfileSections';
 import { useSession } from '@/lib/api';
 import { t } from '@/lib/i18n';
+import { RoleGate } from '@/lib/roleGate';
 import { useTheme } from '@/lib/theme';
 import { EmptyState } from '@/ui/EmptyState';
 import { ListGroup } from '@/ui/ListGroup';
@@ -15,7 +16,15 @@ import { Screen } from '@/ui/Screen';
 /** Public address of the web panel, set at build time once it is deployed (a public value, never a secret). */
 const WEB_PANEL_URL = process.env.EXPO_PUBLIC_WEB_URL;
 
-export default function Admin() {
+export default function AdminRoute() {
+  return (
+    <RoleGate allow={['admin']}>
+      <Admin />
+    </RoleGate>
+  );
+}
+
+function Admin() {
   const theme = useTheme();
   const session = useSession();
   if (!session) return null;
