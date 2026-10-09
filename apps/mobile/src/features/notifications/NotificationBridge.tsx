@@ -5,7 +5,6 @@
 // - sign in or foreground with an emergency order of mine still «Выдан» → the red screen
 import { isRotaError, type AppNotification, type OrderView } from '@rota/shared';
 import { useQueryClient } from '@tanstack/react-query';
-import * as Notifications from 'expo-notifications';
 import { router, useSegments, type Href } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
@@ -16,7 +15,13 @@ import { haptic } from '@/lib/haptics';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
 import { liveHub } from '@/lib/liveHub';
-import { configureNotifications, orderIdOf, urlOf } from '@/lib/notifications';
+import {
+  clearLastNotificationResponse,
+  configureNotifications,
+  orderIdOf,
+  urlOf,
+  useLastNotificationResponse,
+} from '@/lib/notifications';
 import { playDing } from '@/lib/siren';
 import { useHud } from '@/ui/Hud';
 
@@ -120,7 +125,7 @@ export function NotificationBridge() {
 
   // Taps on system notifications, including the one that launched the app. Declared before the emergency check
   // so a «Принять» marks its order before that check runs in the same commit.
-  const lastResponse = Notifications.useLastNotificationResponse();
+  const lastResponse = useLastNotificationResponse();
   useEffect(() => {
     if (!uid || !routed || !lastResponse) return;
     const id = lastResponse.notification.request.identifier + lastResponse.actionIdentifier;
@@ -128,7 +133,7 @@ export function NotificationBridge() {
     handledResponses.add(id);
     // Handled once: a JS reload in the dev client must not replay it.
     try {
-      Notifications.clearLastNotificationResponse();
+      clearLastNotificationResponse();
     } catch {
       // older native module: the handled set still guards this session
     }

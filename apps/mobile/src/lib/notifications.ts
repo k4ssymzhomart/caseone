@@ -11,6 +11,8 @@ import { AppState, Platform } from 'react-native';
 import { t } from './i18n';
 import { useLiveStatus } from './liveHub';
 
+export { orderIdOf, urlOf } from './notificationLinks';
+
 export const CHANNEL = { orders: 'orders', emergency: 'emergency', reminders: 'reminders' } as const;
 export type ChannelId = (typeof CHANNEL)[keyof typeof CHANNEL];
 export const CATEGORY_ORDER_ACTIONS = 'order_actions';
@@ -113,24 +115,12 @@ export async function getPushToken(): Promise<string | null> {
   }
 }
 
-/** URL of a notification: `data.url`, falling back to `data.body.url` (Expo puts push data under `body` on iOS). */
-export function urlOf(notification: Notifications.Notification): string | null {
-  const data = notification.request.content.data as Record<string, unknown> | undefined;
-  const direct = data?.url;
-  if (typeof direct === 'string') return direct;
-  const body = data?.body as Record<string, unknown> | undefined;
-  return typeof body?.url === 'string' ? body.url : null;
-}
+/** The last tap on a system notification (with its action), including the one that launched the app. */
+export const useLastNotificationResponse = Notifications.useLastNotificationResponse;
 
-/** Order id from `/order/{id}`, `/order/{id}/review`, `/emergency/{id}` or `data.order_id`. */
-export function orderIdOf(notification: Notifications.Notification): number | null {
-  const data = notification.request.content.data as Record<string, unknown> | undefined;
-  const raw = data?.order_id ?? (data?.body as Record<string, unknown> | undefined)?.order_id;
-  if (typeof raw === 'number') return raw;
-  if (typeof raw === 'string' && /^\d+$/.test(raw)) return Number(raw);
-  const url = urlOf(notification);
-  const m = url ? /\/(?:order|emergency)\/(\d+)/.exec(url) : null;
-  return m ? Number(m[1]) : null;
+/** Marks the last tap as handled, so a JS reload does not replay it. */
+export function clearLastNotificationResponse(): void {
+  Notifications.clearLastNotificationResponse();
 }
 
 /** Local test notifications for /demo and /kit: Android channel plus iOS sound, a URL to open. */
