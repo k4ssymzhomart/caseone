@@ -29,7 +29,6 @@ export const content = {
   soon: 'скоро',
 
   hero: {
-    brand: 'Rota',
     eyebrow: 'Qostanai Industry Hackathon 2026 · Кейс 1 «НарядAI»',
     title: ['Наряд выдан,', 'ИИ на контроле.'],
     lead:
@@ -38,13 +37,19 @@ export const content = {
     app: 'Открыть в браузере',
     panel: 'Открыть веб панель',
     note: 'Тестовые входы: мастер 1001 / 1111 · исполнитель 2001 / 1234',
+    platformsLabel: 'Работает на',
+    platforms: [
+      { id: 'android', name: 'Android', note: 'APK' },
+      { id: 'iphone', name: 'iPhone', note: 'браузер' },
+      { id: 'desktop', name: 'Windows и Mac', note: 'веб панель' },
+      { id: 'telegram', name: 'Telegram', note: 'уведомления' },
+    ],
     hud: [
       { tone: 'critical', text: 'Аварийный наряд №164 выдан · Ахметов Е.' },
       { tone: 'free', text: 'Ахметов Е. принял наряд №164' },
       { tone: 'mark', text: 'ИИ проверил №164 · 94 из 100' },
     ],
     stats: ['≤ 6 нажатий на выдачу наряда', '< 5 с, и статус у мастера', 'Каждый закрытый наряд проверяет ИИ'],
-    shotMaster: 'Экран мастера «Смена»: кто свободен, кто работает, счётчики смены',
     shotEmergency: 'Экран исполнителя: красный экран аварийного наряда с кнопками «Принять» и «Отклонить»',
   },
 

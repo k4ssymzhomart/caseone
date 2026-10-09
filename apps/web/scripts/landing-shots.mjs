@@ -1,7 +1,8 @@
-// Real app screens and the hero wallpaper for the landing page (docs/LANDING.md §3.1), as WebP files in
-// src/landing/assets/ plus shots.ts with their sizes (no layout shift). Run once after the screenshots change:
+// Real app screens for the landing page (docs/LANDING.md §3.1), as WebP files in src/landing/assets/ plus shots.ts
+// with their sizes (no layout shift). Run once after the screenshots change:
 //   node apps/web/scripts/landing-shots.mjs
-// Sources: docs/screenshots/presentation/mobile (release build on real data) and packages/design/assets.
+// Source: docs/screenshots/presentation/mobile (release build on real data). The hero backdrop comes from
+// tools/gen-hero-bg.ts.
 import { mkdirSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,7 +16,6 @@ mkdirSync(out, { recursive: true });
 const SHOT_WIDTH = 720;
 const QUALITY = 82;
 const MAX_SHOT_BYTES = 120 * 1024;
-const MAX_WALLPAPER_BYTES = 250 * 1024;
 
 /** name in the page → screenshot file in docs/screenshots/presentation/mobile */
 const shots = {
@@ -39,12 +39,6 @@ for (const [name, file] of Object.entries(shots)) {
   sizes[name] = { file: `${kebab(name)}.webp`, width: info.width, height: info.height };
   console.log(`${kebab(name)}.webp ${info.width}×${info.height} ${Math.round(bytes / 1024)} KB`);
 }
-
-const wallpaper = join(out, 'wallpaper.webp');
-await sharp(join(repo, 'packages/design/assets/wallpaper.jpg')).webp({ quality: 80 }).toFile(wallpaper);
-const wallBytes = statSync(wallpaper).size;
-if (wallBytes > MAX_WALLPAPER_BYTES) throw new Error(`wallpaper.webp is ${wallBytes} bytes`);
-console.log(`wallpaper.webp ${Math.round(wallBytes / 1024)} KB`);
 
 const names = Object.keys(sizes);
 const ts = [

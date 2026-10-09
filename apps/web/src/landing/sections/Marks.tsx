@@ -109,24 +109,28 @@ interface MarkPillProps {
   children: string;
   /** Marks before the label; none for a link that names no platform. */
   logos?: readonly Logo[];
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'quiet';
+  /** 'l' 52 px (default), 'm' 36 px for the nav. */
+  size?: 'm' | 'l';
+  className?: string;
 }
 
 /**
  * The LinkPill of ui/ with marks before the label: white primary pill with ink marks, glass pill with brand colors.
  * An empty URL renders the disabled «{label} · скоро» pill, never a dead link.
  */
-export function MarkPill({ href, children, logos = [], variant = 'secondary' }: MarkPillProps) {
+export function MarkPill({ href, children, logos = [], variant = 'secondary', size = 'l', className }: MarkPillProps) {
+  const classes = [buttonStyles.button, className].filter(Boolean).join(' ');
   const marks = logos.length ? (
     <span className={m.marks}>
       {logos.map((logo) => (
-        <Mark key={logo.title} logo={logo} size={20} mono={variant === 'primary'} />
+        <Mark key={logo.title} logo={logo} size={size === 'm' ? 16 : 20} mono={variant === 'primary'} />
       ))}
     </span>
   ) : null;
   if (!href) {
     return (
-      <span className={`${buttonStyles.button} ${u.soon}`} data-variant={variant} data-size="l" aria-disabled="true">
+      <span className={`${classes} ${u.soon}`} data-variant={variant} data-size={size} aria-disabled="true">
         {marks}
         {children} · {content.soon}
       </span>
@@ -134,9 +138,9 @@ export function MarkPill({ href, children, logos = [], variant = 'secondary' }: 
   }
   return (
     <a
-      className={buttonStyles.button}
+      className={classes}
       data-variant={variant}
-      data-size="l"
+      data-size={size}
       href={href}
       {...(isExternal(href) ? { target: '_blank', rel: 'noopener' } : {})}
     >

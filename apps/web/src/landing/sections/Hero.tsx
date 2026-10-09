@@ -1,20 +1,39 @@
-// Hero (§5.1): the Rota wallpaper, the glass widget with the pitch, and the stage with two real screens and the HUD
-// toast looping through issue → accept → AI check.
+// Hero (§5.1) as a close up product shot: a 4K silk backdrop (tools/gen-hero-bg.ts), the pitch set editorially on
+// the left, and on the right one large phone drawn by us (DeviceFrame) with the real emergency screen, turned toward
+// the copy, lit red from behind and dissolving into the page below. The HUD toast loops issue → accept → AI check
+// beside it. Platform marks as in the final CTA: Android on the APK, Chrome and Safari on the browser app, and a
+// «Работает на» row (Android, iPhone, Windows and Mac, Telegram).
+import {
+  androidLogo,
+  appleLogo,
+  chromeLogo,
+  safariLogo,
+  telegramLogo,
+  windowsLogo,
+  type PlatformLogo as Logo,
+} from '@rota/design';
 import { useEffect, useState } from 'react';
 import hudStyles from '@/components/rota/Hud/Hud.module.css';
 import { LogoMark } from '@/components/rota/Logo/Logo';
-import wallpaper from '../assets/wallpaper.webp';
+import { deviceScreens } from '../assets/deviceScreens';
 import { content } from '../content';
+import { HERO_SCREEN_SIZES } from '../heroMedia';
 import { links } from '../links';
 import s from '../landing.module.css';
-import { Lines } from '../ui/bits';
-import { LinkPill } from '../ui/LinkPill';
+import { DeviceFrame } from '../ui/DeviceFrame';
 import { useReducedMotion } from '../ui/motion';
-import { PhoneShot } from '../ui/PhoneShot';
 import h from './Hero.module.css';
+import { Mark, MarkPill } from './Marks';
 
 const c = content.hero;
 const STEP_MS = 2400;
+
+const PLATFORM_LOGOS: Record<(typeof c.platforms)[number]['id'], readonly Logo[]> = {
+  android: [androidLogo],
+  iphone: [appleLogo],
+  desktop: [windowsLogo, appleLogo],
+  telegram: [telegramLogo],
+};
 
 /** The HUD capsule cycling through three states; pauses while the tab is hidden; reduced motion shows the last. */
 function HudLoop() {
@@ -26,7 +45,8 @@ function HudLoop() {
     let timer: number | undefined;
     const start = () => {
       window.clearInterval(timer);
-      if (!document.hidden) timer = window.setInterval(() => setI((v) => (v + 1) % c.hud.length), STEP_MS);
+      if (!document.hidden)
+        timer = window.setInterval(() => setI((v) => (v + 1) % c.hud.length), STEP_MS);
     };
     start();
     document.addEventListener('visibilitychange', start);
@@ -40,7 +60,11 @@ function HudLoop() {
   return (
     <div className={h.hudWrap} aria-hidden="true">
       <div key={state.text} className={`${hudStyles.hud} ${h.hud}`}>
-        {state.tone === 'mark' ? <LogoMark size={14} /> : <span className={s.dot} data-tone={state.tone} />}
+        {state.tone === 'mark' ? (
+          <LogoMark size={15} />
+        ) : (
+          <span className={s.dot} data-tone={state.tone} />
+        )}
         <span>{state.text}</span>
       </div>
     </div>
@@ -50,54 +74,81 @@ function HudLoop() {
 export function Hero() {
   return (
     <section id="top" className={h.hero} aria-labelledby="hero-title">
-      <div className={h.wallpaper} style={{ backgroundImage: `url(${wallpaper})` }} aria-hidden="true" />
+      <div className={h.backdrop} aria-hidden="true" />
       <div className={`${s.container} ${h.grid}`}>
-        <div className={h.widget}>
-          <div className={h.brand}>
-            <LogoMark size={20} />
-            <span>{c.brand}</span>
-          </div>
-          <p className={`${s.eyebrow} ${h.eyebrow}`}>{c.eyebrow}</p>
+        <div className={h.copy}>
+          <p className={`${s.eyebrow} ${h.eyebrow}`}>
+            <span className={h.eyebrowDot} />
+            {c.eyebrow}
+          </p>
           <h1 id="hero-title" className={h.title}>
-            <Lines lines={c.title} />
+            <span className={h.line}>{c.title[0]}</span>
+            <span className={`${h.line} ${h.accent}`}>{c.title[1]}</span>
           </h1>
           <p className={h.lead}>{c.lead}</p>
           <div className={h.cta}>
-            <LinkPill href={links.apk}>{c.apk}</LinkPill>
-            <LinkPill href={links.app} variant="secondary">
+            <MarkPill href={links.apk} logos={[androidLogo]} variant="primary">
+              {c.apk}
+            </MarkPill>
+            <MarkPill href={links.app} logos={[chromeLogo, safariLogo]}>
               {c.app}
-            </LinkPill>
-            <LinkPill href={links.panel} variant="secondary">
+            </MarkPill>
+            <MarkPill href={links.panel} variant="quiet" className={h.panelLink}>
               {c.panel}
-            </LinkPill>
+            </MarkPill>
           </div>
+
+          <div className={h.platforms}>
+            <p className={h.platformsLabel}>{c.platformsLabel}</p>
+            <ul>
+              {c.platforms.map((p) => (
+                <li key={p.id}>
+                  <span className={h.platformMarks}>
+                    {PLATFORM_LOGOS[p.id].map((logo) => (
+                      <Mark key={logo.title} logo={logo} size={19} />
+                    ))}
+                  </span>
+                  <span className={h.platformText}>
+                    <span className={h.platformName}>{p.name}</span>
+                    <span className={h.platformNote}>{p.note}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <p className={h.note}>{c.note}</p>
         </div>
 
+        <ul className={h.stats}>
+          {c.stats.map((text) => (
+            <li key={text} className={s.pill}>
+              <span className={s.dot} />
+              {text}
+            </li>
+          ))}
+        </ul>
+
         <div className={h.stage}>
-          <PhoneShot
-            shot="emergency"
-            alt={c.shotEmergency}
-            width={280}
-            mobileWidth={176}
-            tilt={6}
-            priority
-            className={h.back}
-          />
-          <PhoneShot shot="masterShift" alt={c.shotMaster} width={300} mobileWidth={196} priority className={h.front} />
-          <HudLoop />
-          <p className={s.visuallyHidden}>{c.hud.map((x) => x.text.replace(/[.\s]+$/, '')).join('. ')}.</p>
+          <div className={h.bloom} aria-hidden="true" />
+          <div className={h.shot}>
+            <DeviceFrame
+              src={deviceScreens.emergency}
+              alt={c.shotEmergency}
+              width="var(--hero-phone)"
+              sizes={HERO_SCREEN_SIZES}
+              tilt={{ x: 4, y: -16, z: 1.5, perspective: 2200 }}
+              shadow="float"
+              priority
+              className={h.device}
+            />
+            <HudLoop />
+          </div>
+          <p className={s.visuallyHidden}>
+            {c.hud.map((x) => x.text.replace(/[.\s]+$/, '')).join('. ')}.
+          </p>
         </div>
       </div>
-
-      <ul className={`${s.container} ${h.stats}`}>
-        {c.stats.map((text) => (
-          <li key={text} className={s.pill}>
-            <span className={s.dot} />
-            {text}
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }

@@ -1,10 +1,12 @@
 // Sticky nav (§5.0): transparent over the hero, glass after 40 px of scroll. Under 1024 px: lockup, APK and a menu
-// button that opens a full screen sheet with the links.
+// button that opens a full screen sheet with the links. Every APK link carries the Android mark.
+import { androidLogo } from '@rota/design';
 import { useEffect, useState } from 'react';
 import { Lockup } from '@/components/rota/Logo/Logo';
 import { content } from '../content';
 import { links } from '../links';
 import { LinkPill } from '../ui/LinkPill';
+import { MarkPill } from './Marks';
 import n from './Nav.module.css';
 
 const c = content.nav;
@@ -52,12 +54,24 @@ export function Nav() {
           <LinkPill href={links.panel} variant="secondary" size="m" className={n.wide}>
             {c.panel}
           </LinkPill>
-          <LinkPill href={links.apk} size="m" className={n.wide}>
+          <MarkPill
+            href={links.apk}
+            logos={[androidLogo]}
+            variant="primary"
+            size="m"
+            className={n.wide}
+          >
             {c.apk}
-          </LinkPill>
-          <LinkPill href={links.apk} size="m" className={n.narrow}>
+          </MarkPill>
+          <MarkPill
+            href={links.apk}
+            logos={[androidLogo]}
+            variant="primary"
+            size="m"
+            className={n.narrow}
+          >
             {c.apkShort}
-          </LinkPill>
+          </MarkPill>
           <button
             type="button"
             className={n.menuButton}
@@ -79,7 +93,9 @@ export function Nav() {
           ))}
         </nav>
         <div className={n.sheetActions}>
-          <LinkPill href={links.apk}>{c.apk}</LinkPill>
+          <MarkPill href={links.apk} logos={[androidLogo]} variant="primary">
+            {c.apk}
+          </MarkPill>
           <LinkPill href={links.panel} variant="secondary">
             {c.panel}
           </LinkPill>
