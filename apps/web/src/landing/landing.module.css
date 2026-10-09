@@ -8,6 +8,7 @@
   --l-text-3: var(--rota-gray-500);
   --l-text-4: var(--rota-gray-600);
   --l-red: var(--rota-red-500);
+  --l-focus: var(--rota-red-400);
   --l-eyebrow: var(--rota-red-400);
   --l-soft-red: var(--rota-red-300);
   --l-glass: rgb(255 255 255 / 0.05);
@@ -33,9 +34,8 @@
 }
 
 .root :focus-visible {
-  outline: 2px solid var(--rota-red-400);
+  outline: 2px solid var(--l-focus);
   outline-offset: 2px;
-  border-radius: 6px;
 }
 
 .skip {
@@ -45,8 +45,9 @@
   z-index: 100;
   padding: 10px 16px;
   border-radius: var(--radius-full);
-  background: var(--color-bg-inverse);
-  color: var(--color-text-inverse) !important;
+  background: var(--rota-ink-950);
+  color: var(--rota-white) !important;
+  --l-focus: var(--rota-red-700);
   font-weight: 600;
   text-decoration: none;
   transform: translateY(-200%);
@@ -186,7 +187,6 @@
   border-radius: 28px;
   background: var(--l-glass);
   backdrop-filter: blur(24px) saturate(140%);
-  -webkit-backdrop-filter: blur(24px) saturate(140%);
 }
 
 .pill {
@@ -203,7 +203,6 @@
   line-height: 1.2;
   white-space: nowrap;
   backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
 }
 
 .dot {

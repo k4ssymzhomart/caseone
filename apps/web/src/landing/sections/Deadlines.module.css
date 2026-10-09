@@ -19,7 +19,6 @@
   background: rgb(0 0 0 / 0.45);
   list-style: none;
   backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
 }
 
 .timeline li {
@@ -95,7 +94,6 @@
   background: rgb(30 30 32 / 0.78);
   box-shadow: 0 30px 80px rgb(0 0 0 / 0.6);
   backdrop-filter: blur(30px) saturate(150%);
-  -webkit-backdrop-filter: blur(30px) saturate(150%);
 }
 
 .pushHead {

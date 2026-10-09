@@ -25,16 +25,16 @@ function heroBackdrop(): string {
   const fits = (query: string) => window.matchMedia(query).matches;
   const big = fits(HERO_BIG_BACKDROP);
   if (fits(HERO_PHONE_BACKDROP))
-    return new URL('./landing/assets/hero-light-phone.jpg', import.meta.url).href;
+    return new URL('./landing/assets/hero-light-phone.webp', import.meta.url).href;
   if (fits(HERO_TABLET_BACKDROP))
-    return new URL('./landing/assets/hero-light-tablet.jpg', import.meta.url).href;
+    return new URL('./landing/assets/hero-light-tablet.webp', import.meta.url).href;
   if (fits(HERO_NARROW_BACKDROP))
     return big
-      ? new URL('./landing/assets/hero-light-stage-narrow-2400.jpg', import.meta.url).href
-      : new URL('./landing/assets/hero-light-stage-narrow-1200.jpg', import.meta.url).href;
+      ? new URL('./landing/assets/hero-light-stage-narrow-2400.webp', import.meta.url).href
+      : new URL('./landing/assets/hero-light-stage-narrow-1200.webp', import.meta.url).href;
   return big
-    ? new URL('./landing/assets/hero-light-stage-3200.jpg', import.meta.url).href
-    : new URL('./landing/assets/hero-light-stage-1600.jpg', import.meta.url).href;
+    ? new URL('./landing/assets/hero-light-stage-3200.webp', import.meta.url).href
+    : new URL('./landing/assets/hero-light-stage-1600.webp', import.meta.url).href;
 }
 
 /**

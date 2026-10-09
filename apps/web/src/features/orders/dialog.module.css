@@ -23,7 +23,6 @@
 .dialog::backdrop {
   background: color-mix(in srgb, var(--rota-black) 60%, transparent);
   backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
 .dialog[open] {
@@ -53,7 +52,6 @@
   border-bottom: 1px solid var(--color-border-default);
   background: var(--color-glass-fill);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 .titles {

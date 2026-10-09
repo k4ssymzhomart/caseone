@@ -1,5 +1,5 @@
 /* The hero as a light stage above the black page (docs/LANDING.md §5.1): the satin backdrop, a centered column
-   (icon, badge, headline, lead, buttons, platforms) and one upright phone cut by the panel's rounded bottom edge,
+   (icon, badge, headline, lead, buttons) and one upright phone cut by the panel's rounded bottom edge,
    with four cards floating around it. The section carries data-theme="light", so the kit's tokens (buttons, status
    dots) resolve to their light values here; the hero's own colors are the --h-* tokens below. */
 
@@ -8,8 +8,9 @@
   --h-canvas: var(--rota-gray-50);
   --h-ink: var(--rota-ink-950);
   --h-text: var(--rota-ink-900);
-  --h-text-2: var(--rota-gray-600);
-  --h-text-3: var(--rota-gray-500);
+  --h-text-2: color-mix(in srgb, var(--rota-gray-600), var(--rota-gray-700));
+  --h-text-3: var(--rota-gray-600);
+  --l-focus: var(--rota-red-700);
   --h-card: var(--rota-white);
   --h-card-dark: var(--rota-ink-950);
   --h-pill-dark: var(--rota-gray-850);
@@ -33,7 +34,7 @@
   --hero-show: 1.22;
   --hero-icon: clamp(80px, 2.4vw + 62px, 108px);
   --hero-cards: clamp(12.5px, 0.66vw + 6px, 16.5px);
-  --hero-top: calc(64px + clamp(24px, 6svh, 64px));
+  --hero-top: calc(64px + clamp(16px, 4svh, 48px));
 
   position: relative;
   z-index: 1;
@@ -44,45 +45,52 @@
   color: var(--h-text);
 }
 
+/* Safari before 15.4 has no overflow: clip (the minifier keeps only the last of a pair, so no plain fallback). */
+@supports not (overflow: clip) {
+  .hero {
+    overflow: hidden;
+  }
+}
+
 /* The satin backdrop, rendered for this panel by tools/gen-hero-bg-light.ts: the 6 : 5 stage from 1200 px (the 3200
    file for retina and 1× screens wider than 1600), the 9 : 10 stage from 1024 px, the tablet and phone frames below
-   (their ribbon swings out past the right edge beside the copy and comes back in behind the phone).
+   (their ribbon swings out past the right edge beside the copy and comes back in beside the phone, red edge first).
    main.tsx preloads the right one with the queries of heroMedia.ts. Anchored top right: whatever the panel's
    proportions, the crop eats the left edge or the bottom, never the ribbon. */
 .backdrop {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: url('../assets/hero-light-stage-1600.jpg') 100% 0 / cover no-repeat;
+  background: url('../assets/hero-light-stage-1600.webp') 100% 0 / cover no-repeat;
 }
 
 @media (min-resolution: 1.5dppx), (min-width: 1601px) {
   .backdrop {
-    background-image: url('../assets/hero-light-stage-3200.jpg');
+    background-image: url('../assets/hero-light-stage-3200.webp');
   }
 }
 
 @media (min-width: 1024px) and (max-width: 1199px) {
   .backdrop {
-    background-image: url('../assets/hero-light-stage-narrow-1200.jpg');
+    background-image: url('../assets/hero-light-stage-narrow-1200.webp');
   }
 }
 
 @media (min-width: 1024px) and (max-width: 1199px) and (min-resolution: 1.5dppx) {
   .backdrop {
-    background-image: url('../assets/hero-light-stage-narrow-2400.jpg');
+    background-image: url('../assets/hero-light-stage-narrow-2400.webp');
   }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .backdrop {
-    background-image: url('../assets/hero-light-tablet.jpg');
+    background-image: url('../assets/hero-light-tablet.webp');
   }
 }
 
 @media (max-width: 767px) {
   .backdrop {
-    background-image: url('../assets/hero-light-phone.jpg');
+    background-image: url('../assets/hero-light-phone.webp');
   }
 }
 
@@ -127,14 +135,14 @@
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  height: 40px;
-  margin-top: clamp(24px, 3.6svh, 36px);
-  padding: 0 16px 0 14px;
+  height: 36px;
+  margin-top: clamp(20px, 3svh, 28px);
+  padding: 0 15px 0 13px;
   border: 1px solid var(--h-border);
   border-radius: var(--radius-full);
   background: var(--h-card);
   box-shadow: var(--h-shadow-pill);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 500;
   letter-spacing: -0.005em;
   text-decoration: none;
@@ -144,6 +152,20 @@
 
 .badge:hover {
   box-shadow: var(--h-shadow-card);
+}
+
+.badgeShort {
+  display: none;
+}
+
+@media (max-width: 389px) {
+  .badgeFull {
+    display: none;
+  }
+
+  .badgeShort {
+    display: inline;
+  }
 }
 
 .badgeArrow {
@@ -159,12 +181,12 @@
 /* Copy */
 
 .title {
-  margin: 22px 0 0;
+  margin: 20px 0 0;
   color: var(--h-ink);
-  font-size: clamp(44px, 3vw + 36px, 88px);
-  font-weight: 700;
-  line-height: 1.02;
-  letter-spacing: -0.042em;
+  font-size: clamp(52px, 3.6vw + 18px, 88px);
+  font-weight: 600;
+  line-height: 1.03;
+  letter-spacing: -0.034em;
   word-spacing: 0.06em;
 }
 
@@ -173,10 +195,10 @@
 }
 
 .lead {
-  max-width: 38em;
-  margin: 24px 0 0;
+  max-width: 34em;
+  margin: 20px 0 0;
   color: var(--h-text-2);
-  font-size: 19px;
+  font-size: 18px;
   line-height: 1.55;
   letter-spacing: -0.005em;
   text-wrap: balance;
@@ -187,7 +209,25 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  margin-top: clamp(28px, 4svh, 38px);
+  margin-top: clamp(24px, 3.4svh, 32px);
+}
+
+/* The reference's compact buttons, each with a trailing arrow that steps right on hover (the pill shape stays: it
+   is the Rota rule). [data-size] outranks the kit's size rule. */
+.cta > a[data-size] {
+  height: 48px;
+  padding: 0 22px;
+  font-size: 15.5px;
+}
+
+.cta > a::after {
+  content: '→' / '';
+  margin-left: 2px;
+  transition: translate 160ms ease;
+}
+
+.cta > a:hover::after {
+  translate: 3px 0;
 }
 
 .primary {
@@ -201,50 +241,10 @@
   box-shadow: var(--h-shadow-pill);
   color: var(--h-text) !important;
   backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
 }
 
 .secondary:hover {
   background: var(--h-tile) !important;
-}
-
-/* «Работает на»: one quiet line of real marks under the buttons. */
-.platforms {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px 18px;
-  margin-top: 22px;
-  color: var(--h-text-3);
-  font-size: 13px;
-  line-height: 20px;
-}
-
-.platformsLabel {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.platforms ul {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px 18px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.platforms li {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--h-text-2);
-  font-weight: 500;
 }
 
 /* The stage: the phone stands at the top of it and runs past the panel's bottom edge, which cuts it. */
@@ -253,7 +253,7 @@
   position: relative;
   width: 100%;
   height: calc(var(--hero-phone) * var(--hero-show));
-  margin-top: clamp(36px, 5.5svh, 56px);
+  margin-top: clamp(32px, 4.5svh, 44px);
 }
 
 .phone {
@@ -492,7 +492,7 @@
   white-space: nowrap;
 }
 
-/* 4. Right, low: a worker row, as on the master's shift screen. */
+/* 4. Right, low: a worker row, as on the master's shift screen: initials, name and status, time in work. */
 .worker {
   top: calc(var(--hero-phone) * 0.86);
   left: calc(var(--edge) + 3em);
@@ -503,17 +503,25 @@
   animation-delay: -5.3s;
 }
 
-.worker img {
+.initials {
+  display: grid;
   flex: none;
+  place-items: center;
   width: 3.25em;
   height: 3.25em;
+  border-radius: 50%;
+  background: var(--status-working-soft);
+  color: var(--h-ink);
+  font-size: 0.9375em;
+  font-weight: 650;
+  letter-spacing: 0.01em;
 }
 
 .workerText {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  margin-right: 1.6em;
+  margin-right: 2em;
 }
 
 .workerName {
@@ -528,19 +536,34 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45em;
-  margin-left: auto;
-  color: var(--h-ink);
-  font-size: 0.9375em;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 .status > span {
-  width: 0.6em;
-  height: 0.6em;
+  width: 0.55em;
+  height: 0.55em;
 }
 
-/* Wide screens: a bigger phone, the same cards a little larger. */
+.amount {
+  margin-left: auto;
+  color: var(--h-ink);
+  font-size: 1.125em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+}
+
+/* Wide screens: larger cards with the reference's bigger titles (below 1440 they would crowd the left edge). */
+@media (min-width: 1440px) {
+  .hero {
+    --hero-cards: clamp(13px, 0.5vw + 9px, 17px);
+  }
+
+  .cardTitle {
+    font-size: 1.375em;
+  }
+}
+
 @media (min-width: 1680px) {
   .hero {
     --hero-show: 1.2;
@@ -580,6 +603,13 @@
   }
 }
 
+/* 1024 to 1199 px: the worker row overlaps the phone's edge, or it runs into the screen's. */
+@media (max-width: 1199px) {
+  .worker {
+    left: calc(var(--edge) - 1.5em);
+  }
+}
+
 /* Tablets: two cards overlapping the phone's edges; the copy keeps clear of the ribbon at the right edge. */
 @media (max-width: 1023px) {
   .hero {
@@ -592,18 +622,15 @@
     max-width: 30em;
   }
 
-  .platforms {
-    max-width: 460px;
-  }
-
   .repeats,
   .worker {
     display: none;
   }
 
+  /* Overlapping the phone's left edge, a gutter's width from the screen edge at 768. */
   .review {
     top: calc(var(--hero-phone) * 0.72);
-    right: calc(var(--edge) - 6em);
+    right: calc(var(--edge) - 7em);
   }
 
   .emergency {
@@ -612,21 +639,33 @@
   }
 }
 
-/* Phones: the column, the stacked buttons, the phone; no cards. */
+/* Phones: the column, the stacked buttons, the phone with one card, the black emergency order, over its right edge. */
 @media (max-width: 767px) {
   .hero {
     --hero-phone: min(80vw, 340px);
     --hero-show: 1.12;
-    --hero-top: 104px;
+    --hero-top: 92px;
+    --hero-icon: 64px;
     --h-radius: 28px;
   }
 
   .cards {
+    font-size: 11.5px;
+  }
+
+  .review,
+  .repeats,
+  .worker {
     display: none;
   }
 
+  .emergency {
+    top: calc(var(--hero-phone) * 0.3);
+    right: 8px;
+    left: auto;
+  }
+
   .badge {
-    height: 36px;
     padding: 0 13px 0 12px;
     font-size: 13px;
   }
@@ -637,11 +676,11 @@
 
   .title {
     font-size: clamp(34px, 10.2vw, 46px);
-    letter-spacing: -0.038em;
+    letter-spacing: -0.032em;
   }
 
   .lead {
-    margin-top: 18px;
+    margin-top: 16px;
     font-size: 17px;
     text-wrap: pretty;
   }
@@ -656,16 +695,8 @@
     width: 100%;
   }
 
-  .platforms {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  /* Two by two: Android and iPhone, then Windows и Mac and Telegram. */
-  .platforms ul {
-    display: grid;
-    grid-template-columns: auto auto;
-    gap: 8px 20px;
+  .stage {
+    margin-top: 32px;
   }
 }
 

@@ -52,7 +52,6 @@
   box-shadow: 0 18px 40px rgb(0 0 0 / 0.4);
   transform: rotate(var(--tilt, 0deg));
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 .chipText {

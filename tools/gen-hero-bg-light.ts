@@ -1,12 +1,16 @@
-// The light hero background (apps/web/src/landing/assets/hero-light-*.jpg), art direction «satin»: a soft white and
+// The light hero background (apps/web/src/landing/assets/hero-light-*), art direction «satin»: a soft white and
 // pale silver satin field with broad folds (a height field under a soft key light), and one glossy white satin
-// ribbon sweeping down the right edge, its inner edge piped with two signal red lines that converge and thin out
-// into white and silver. The ribbon is an opaque sheet: the mesh from tools/lib/silk.ts (C2 B spline, so no crease
+// ribbon sweeping down the right edge, its inner edge lacquered signal red: one glossy red edge that softens and fades
+// into the white and silver sheet by mid height. The ribbon is an opaque sheet: the mesh from tools/lib/silk.ts (C2 B spline, so no crease
 // at the knots) is rasterised with a depth buffer at 4 × 4 samples per pixel, shaded against a small studio
 // environment, and casts a soft contact shadow on the field. Deterministic: seeded noise and dither, and sharp with
 // fixed encoder settings, so the same code always writes the same bytes.
 //
-//   npx tsx tools/gen-hero-bg-light.ts             renders the winning variant, writes the three JPEGs
+// What the landing loads (the stage, tablet and phone frames) is WebP at quality 96: about a quarter of the JPEG's
+// bytes, every pixel within a level or two of the render, so the near white gradients stay smooth. The 16 : 9 and
+// portrait frames stay JPEG (slides, share image): hero-light-3840.jpg is the 4K background still.
+//
+//   npx tsx tools/gen-hero-bg-light.ts             renders the winning variant, writes the WebPs and the JPEGs
 //   npx tsx tools/gen-hero-bg-light.ts --quick     desktop at 1920 × 1080, PNG only, for iteration
 //   --stage                                        with --quick: the two stage frames instead (1600 and 1024 wide)
 //   --edge                                         with --quick: the phone and tablet frames at half size
@@ -104,7 +108,8 @@ type LightRibbon = RibbonShape & {
   nv?: number;
   back: 'red' | 'face'; // what the other side of the sheet shows
   piping: [number[], number[]]; // red trim width over u at v = 0 and v = 1, fractions of the ribbon width
-  lines: 1 | 2; // a solid trim, or two red lines with a white gap between
+  /** Along u: the red is whole up to fade[0] and gone by fade[1] (no fade when absent). */
+  fade?: [number, number];
   gloss: number;
 };
 
@@ -334,10 +339,14 @@ function shadeRibbon(
     ny = -ny;
     nz = -nz;
   }
-  const pw0 = crScalar(r.piping[0], u);
-  const pw1 = crScalar(r.piping[1], u);
-  const trim = (d: number, w: number) => d < w && (r.lines === 1 || d < 0.38 * w || d > 0.66 * w);
-  const red = (back && r.back === 'red') || trim(v, pw0) || trim(1 - v, pw1);
+  // The red trim is a blend weight, not an on and off test: whole red within 45 % of the trim width, feathering into
+  // the satin at its edge, and faded out along the ribbon, so the red edge melts into white and silver instead of
+  // ending as a hard stripe or a hairline.
+  const pw0 = Math.max(0, crScalar(r.piping[0], u));
+  const pw1 = Math.max(0, crScalar(r.piping[1], u));
+  const soft = (d: number, w: number) => (w <= 1e-4 ? 0 : smoothstep(w, w * 0.45, d));
+  let redK = back && r.back === 'red' ? 1 : Math.max(soft(v, pw0), soft(1 - v, pw1));
+  if (r.fade) redK *= smoothstep(r.fade[1], r.fade[0], u);
   const ndl = dot3(nx, ny, nz, L);
   const diff = Math.max(0, (ndl + 0.35) / 1.35);
   // Reflection of the view ray about the normal.
@@ -347,15 +356,12 @@ function shadeRibbon(
   const env = studio(rx, ry, rz);
   const spec = Math.pow(Math.max(0, dot3(nx, ny, nz, HV)), 140);
   const grazing = Math.pow(1 - nz, 4);
-  if (red) {
-    // Lacquered red: the lit side lands on the brand red, the shade side deepens; the gloss stays narrow and warm.
-    const k = clamp(0.2 + 0.95 * diff, 0, 1.05);
-    const g = r.gloss * (0.5 * spec + 0.06 * grazing * env);
-    out[0] = mix(RED_DEEP[0], RED[0], k) + g;
-    out[1] = mix(RED_DEEP[1], RED[1], k) + g * 0.3;
-    out[2] = mix(RED_DEEP[2], RED[2], k) + g * 0.25;
-    return;
-  }
+  // Lacquered red: the lit side lands on the brand red, the shade side deepens; the gloss stays narrow and warm.
+  const kR = clamp(0.2 + 0.95 * diff, 0, 1.05);
+  const gR = r.gloss * (0.5 * spec + 0.06 * grazing * env);
+  const R0 = mix(RED_DEEP[0], RED[0], kR) + gR;
+  const R1 = mix(RED_DEEP[1], RED[1], kR) + gR * 0.3;
+  const R2 = mix(RED_DEEP[2], RED[2], kR) + gR * 0.25;
   // White satin face: mostly reflection (silver where the sheet turns away), a little diffuse body, crisp highlights.
   const F = 0.62 + 0.38 * grazing;
   const base = 0.3 + 0.7 * diff;
@@ -363,9 +369,9 @@ function shadeRibbon(
   const edge = Math.min(v, 1 - v);
   const glint = 0.22 * smoothstep(0.012, 0.002, edge);
   const c = (1 - F) * base + F * env + r.gloss * 0.7 * spec + glint;
-  out[0] = FACE[0] * c;
-  out[1] = FACE[1] * c;
-  out[2] = FACE[2] * c * 1.01;
+  out[0] = mix(FACE[0] * c, R0, redK);
+  out[1] = mix(FACE[1] * c, R1, redK);
+  out[2] = mix(FACE[2] * c * 1.01, R2, redK);
 }
 
 function renderRibbons(sc: Scene, W: number, H: number) {
@@ -568,8 +574,8 @@ function halve(img: { R: Float32Array; G: Float32Array; B: Float32Array }, W: nu
 const ASPECT = 16 / 9;
 
 const desktopFolds: Fold[] = [
-  // The soft pale fold across the left half: a pale crest facing the light, a long soft shade under it.
-  { from: [-0.06, 0.33], to: [0.98, 0.86], bow: 0.08, amp: 0.008, rise: 0.02, fall: 0.14 },
+  // The soft white fold across the left half: a pale crest facing the light, a long soft shade under it.
+  { from: [-0.06, 0.33], to: [0.98, 0.86], bow: 0.08, amp: 0.035, rise: 0.012, fall: 0.14 },
   // A broad shallow wave out of the top left corner.
   { from: [-0.12, 0.2], to: [0.42, -0.12], bow: -0.03, amp: 0.012, rise: 0.09, fall: 0.06 },
   // A low swell along the bottom left.
@@ -590,7 +596,6 @@ const sweep = (o: Partial<LightRibbon> & Pick<LightRibbon, 'pts' | 'width' | 'tw
   ({
     back: 'face',
     piping: [[0], [0]],
-    lines: 1,
     gloss: 1,
     spline: 'bspline', // C2: no shading crease or silhouette notch at the control points
     ...o,
@@ -610,7 +615,7 @@ const shifted = (dx: number, dz: number): V3[] => SWEEP.map(([x, y, z]) => [x + 
 
 /**
  * Variants, each a set of ribbons in desktop scene units (x in [0, 16 / 9]); the phone portrait gets the same
- * ribbons pressed against its right edge by `toMobile`. `broad` won: its two red lines converge and thin into the
+ * ribbons pressed against its right edge by `toMobile`. `broad` won: its red edge softens and fades into the
  * white and silver sheet like the reference; `twist` shows a heavy red band with a pinch where it flips, and
  * `pair` ends its red strip in a blade shaped tail.
  */
@@ -627,16 +632,16 @@ const VARIANTS: Record<string, LightRibbon[]> = {
       piping: [[0.1, 0.08, 0.05, 0.015, 0, 0, 0], [0]],
     }),
   ],
-  // One broad curling sheet, white on both sides, its inner edge piped with two red lines that converge and thin
-  // out by mid height (the reference's red edge fading into white and silver).
+  // One broad curling sheet, white on both sides, its inner edge lacquered red at the top, the red softening and
+  // fading out by mid height (the reference's red edge melting into white and silver).
   broad: [
     sweep({
       pts: SWEEP,
       width: [0.09, 0.15, 0.25, 0.38, 0.52, 0.68, 0.82],
       twist: [1.16, 1.02, 0.84, 0.62, 0.42, 0.26, 0.14],
       cup: [0.3, 0.29, 0.26, 0.22, 0.18, 0.15, 0.12],
-      piping: [[0.24, 0.19, 0.1, 0.02, 0, 0, 0], [0]],
-      lines: 2,
+      piping: [[0.17, 0.14, 0.09, 0.04, 0.01, 0, 0], [0]],
+      fade: [0.3, 0.58],
     }),
   ],
   // The same sheet without piping, and a narrow two tone ribbon riding its inner edge: red where it turns near the
@@ -736,24 +741,34 @@ type EdgeFrame = {
   /** Heights where the ribbon starts and ends its way back in. */
   back: [number, number];
   thin: number;
+  /**
+   * The red trim over u on the inner edge, replacing the variant's: red at the top right corner, and red again on the
+   * edge of the sheet where it comes back in behind the phone, so the ribbon reads on a narrow screen too (the soft
+   * fade of the stages would leave only a sliver at the top). No fade.
+   */
+  piping: number[];
 };
+
+const EDGE_PIPING = [0.2, 0.15, 0.07, 0.045, 0.05, 0.03, 0.006];
 
 const EDGES: Record<'phone' | 'tablet', EdgeFrame> = {
   phone: {
     name: 'phone',
     w: 1170,
     h: 3450,
-    press: [0.26, -0.7, 0.62],
-    back: [0.6, 0.96],
+    press: [0.45, -0.7, 0.62],
+    back: [0.42, 0.82],
     thin: 0.4,
+    piping: EDGE_PIPING,
   },
   tablet: {
     name: 'tablet',
     w: 1536,
     h: 2600,
-    press: [0.3, -0.5, 0.6],
-    back: [0.52, 0.92],
+    press: [0.45, -0.5, 0.6],
+    back: [0.45, 0.85],
     thin: 0.5,
+    piping: EDGE_PIPING,
   },
 };
 
@@ -774,6 +789,8 @@ function toEdge(r: LightRibbon, f: EdgeFrame): LightRibbon {
     ...r,
     pts: r.pts.map(([x, y, z]) => [aspect - (ASPECT - x) * press(y), y, z] as V3),
     width: r.width.map((w, i) => w * thin(yAt(r.width.length, i))),
+    piping: [f.piping, r.piping[1]],
+    fade: undefined,
   };
 }
 
@@ -839,13 +856,13 @@ const STAGES: Record<'wide' | 'narrow', StageFrame> = {
   wide: {
     name: 'stage',
     aspect: 1.2,
-    press: [0.5, 0.8],
-    thin: [0.7, 0.86],
+    press: [0.66, 1.3],
+    thin: [0.85, 1.4],
     calm: [0.26, 0.1, 0.78, 0.56],
     pools: [
       [0.6, 0.34, 0.36, 0.025], // the copy sits on the lightest satin
       [0.04, 0.05, 0.26, -0.035], // pale silver in the top left corner
-      [1.1, 0.7, 0.3, -0.05], // silver around the ribbon so its white face reads
+      [1.1, 0.7, 0.3, -0.08], // deeper silver around the ribbon so its white face reads
       [0.08, 1.02, 0.26, -0.03],
     ],
   },
@@ -912,6 +929,14 @@ async function writeJpeg(px: Uint8Array, w: number, h: number, file: string, qua
   await sharp(Buffer.from(px), { raw: { width: w, height: h, channels: 3 } })
     // Plain libjpeg (no trellis) at full chroma keeps the dither, so the near white gradients stay free of bands.
     .jpeg({ quality, chromaSubsampling: '4:4:4', progressive: true })
+    .toFile(file);
+  return fs.statSync(file).size;
+}
+
+/** The landing's frames: lossy WebP at 96 with sharp's smart chroma subsampling keeps the dither nearly whole. */
+async function writeWebp(px: Uint8Array, w: number, h: number, file: string) {
+  await sharp(Buffer.from(px), { raw: { width: w, height: h, channels: 3 } })
+    .webp({ quality: 96, effort: 6, smartSubsample: true })
     .toFile(file);
   return fs.statSync(file).size;
 }
@@ -992,22 +1017,18 @@ if (QUICK) {
     log(
       `hero-light-mobile.jpg ${kb(await writeJpeg(mobPx, mob.w, mob.h, path.join(ASSETS, 'hero-light-mobile.jpg'), qm))}`,
     );
-    log(
-      `hero-light-stage-3200.jpg ${kb(await writeJpeg(stBig, st.w, st.h, path.join(ASSETS, 'hero-light-stage-3200.jpg'), q4))}`,
-    );
-    log(
-      `hero-light-stage-1600.jpg ${kb(await writeJpeg(stSmall, st.w / 2, st.h / 2, path.join(ASSETS, 'hero-light-stage-1600.jpg'), q2))}`,
-    );
-    log(
-      `hero-light-stage-narrow-2400.jpg ${kb(await writeJpeg(nrBig, nr.w, nr.h, path.join(ASSETS, 'hero-light-stage-narrow-2400.jpg'), q4))}`,
-    );
-    log(
-      `hero-light-stage-narrow-1200.jpg ${kb(await writeJpeg(nrSmall, nr.w / 2, nr.h / 2, path.join(ASSETS, 'hero-light-stage-narrow-1200.jpg'), q2))}`,
-    );
-    for (const { sc, px } of edges) {
-      const file = `hero-light-${sc.name}.jpg`;
-      log(`${file} ${kb(await writeJpeg(px, sc.w, sc.h, path.join(ASSETS, file), qm))}`);
-    }
+    const webps: [Uint8Array, number, number, string][] = [
+      [stBig, st.w, st.h, 'hero-light-stage-3200.webp'],
+      [stSmall, st.w / 2, st.h / 2, 'hero-light-stage-1600.webp'],
+      [nrBig, nr.w, nr.h, 'hero-light-stage-narrow-2400.webp'],
+      [nrSmall, nr.w / 2, nr.h / 2, 'hero-light-stage-narrow-1200.webp'],
+      ...edges.map(
+        ({ sc, px }) =>
+          [px, sc.w, sc.h, `hero-light-${sc.name}.webp`] as [Uint8Array, number, number, string],
+      ),
+    ];
+    for (const [px, w, h, file] of webps)
+      log(`${file} ${kb(await writeWebp(px, w, h, path.join(ASSETS, file)))}`);
   }
 }
 log('done');

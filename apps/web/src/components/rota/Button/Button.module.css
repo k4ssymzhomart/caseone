@@ -42,7 +42,6 @@
   border-color: var(--color-glass-stroke);
   color: var(--color-text-primary);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
 }
 
 .button[data-variant='secondary']:hover {

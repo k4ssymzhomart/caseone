@@ -1,8 +1,10 @@
 /* The glass sits on a pseudo element: a backdrop filter on the header itself would make it the containing block
-   of the fixed menu sheet and collapse the sheet to nothing. Two looks from data-theme: frosted white over the hero,
-   dark glass after it; the colors cross fade. */
+   of the fixed menu sheet and collapse the sheet to nothing. Two looks from data-theme: white over the hero, like the
+   reference's bar (no saturation boost, which turned the red ribbon under it into a pink haze), dark glass after it;
+   the colors cross fade. */
 .nav {
   --n-glass: rgb(0 0 0 / 0.8);
+  --n-filter: blur(28px) saturate(160%);
   --n-hairline: rgb(255 255 255 / 0.08);
   --n-link: rgb(255 255 255 / 0.78);
   --n-link-hover: var(--rota-white);
@@ -15,9 +17,11 @@
 }
 
 .nav[data-theme='light'] {
-  --n-glass: rgb(248 248 250 / 0.86);
+  --l-focus: var(--rota-red-700);
+  --n-glass: rgb(255 255 255 / 0.95);
+  --n-filter: blur(28px);
   --n-hairline: rgb(10 10 10 / 0.07);
-  --n-link: rgb(10 10 10 / 0.7);
+  --n-link: rgb(10 10 10 / 0.84);
   --n-link-hover: var(--rota-ink-950);
   --n-control: rgb(255 255 255 / 0.72);
   --n-control-border: rgb(10 10 10 / 0.1);
@@ -35,12 +39,15 @@
   z-index: -1;
   border-bottom: 1px solid var(--n-hairline);
   background-color: var(--n-glass);
+  backdrop-filter: var(--n-filter);
+  pointer-events: none;
+}
+
+/* Cross fade only after the first frames: a page that opens past the hero starts dark, without a white flash. */
+.nav[data-ready]::before {
   transition:
     background-color 260ms ease,
     border-color 260ms ease;
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
-  pointer-events: none;
 }
 
 .inner {
@@ -60,7 +67,7 @@
   border-radius: 6px;
 }
 
-.brand path {
+.nav[data-ready] .brand path {
   transition: fill 260ms ease;
 }
 
@@ -76,6 +83,9 @@
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
+}
+
+.nav[data-ready] .links a {
   transition: color 200ms ease;
 }
 
@@ -166,7 +176,6 @@
   padding: 24px var(--l-gutter) 40px;
   background: rgb(0 0 0 / 0.94);
   backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
   overflow-y: auto;
 }
 

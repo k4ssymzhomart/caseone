@@ -1,22 +1,11 @@
 // Hero (§5.1) as a light stage above the black page, after the user's reference: the satin backdrop with the red
 // ribbon (tools/gen-hero-bg-light.ts), everything centered top to bottom: the app icon tile, a «Новое» pill to the
-// AI review, the headline, the lead, two buttons with their platform marks and a quiet «Работает на» row; then one
-// upright phone with the master's light «Смена» screen, cut by the panel's rounded bottom edge, and four floating
-// cards around it with real figures. The cards are decorative; their content is repeated once as text.
-import {
-  androidLogo,
-  appleLogo,
-  chromeLogo,
-  claudeLogo,
-  markPath,
-  safariLogo,
-  telegramLogo,
-  windowsLogo,
-  type PlatformLogo as Logo,
-} from '@rota/design';
+// AI review, the headline, a two line lead and two buttons with their platform marks; then one upright phone with
+// the master's light «Смена» screen, cut by the panel's rounded bottom edge, and four floating cards around it with
+// real figures. The cards are decorative; their content is repeated once as text.
+import { androidLogo, chromeLogo, claudeLogo, markPath, safariLogo } from '@rota/design';
 import checkMascot from '@rota/design/assets/mascots/check.svg';
 import { PlatformLogo } from '@/components/rota/PlatformLogo';
-import avatarWrench from '../assets/avatars/avatar-wrench.webp';
 import { deviceScreens } from '../assets/deviceScreens';
 import { content } from '../content';
 import { HERO_SCREEN_SIZES } from '../heroMedia';
@@ -29,13 +18,6 @@ import { MarkPill } from './Marks';
 
 const c = content.hero;
 const k = c.cards;
-
-const PLATFORM_LOGOS: Record<(typeof c.platforms)[number]['id'], readonly Logo[]> = {
-  android: [androidLogo],
-  iphone: [appleLogo],
-  desktop: [windowsLogo, appleLogo],
-  telegram: [telegramLogo],
-};
 
 /** The app icon's continuous corners (iOS proportions: radius 22.4 % of the side). */
 const TILE = squircle(0, 0, 100, 100, 22.4);
@@ -107,23 +89,15 @@ function Cards() {
       </div>
 
       <div className={`${h.card} ${h.worker}`}>
-        <img
-          src={avatarWrench}
-          width={52}
-          height={52}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          draggable={false}
-        />
+        <span className={h.initials}>{k.worker.initials}</span>
         <span className={h.workerText}>
           <span className={h.workerName}>{k.worker.name}</span>
-          <span className={h.cardNote}>{k.worker.note}</span>
+          <span className={`${h.cardNote} ${h.status}`}>
+            <span className={s.dot} data-tone="working" />
+            {k.worker.status} · {k.worker.unit}
+          </span>
         </span>
-        <span className={h.status}>
-          <span className={s.dot} data-tone="working" />
-          {k.worker.status}
-        </span>
+        <span className={h.amount}>{k.worker.time}</span>
       </div>
     </div>
   );
@@ -139,7 +113,8 @@ export function Hero() {
           <PlatformLogo logo={claudeLogo} size={16} tone="brand" />
           <span>
             <span className={h.badgeLead}>{c.badgeLead} </span>
-            {c.badge}
+            <span className={h.badgeFull}>{c.badge}</span>
+            <span className={h.badgeShort}>{c.badgeShort}</span>
           </span>
           <span className={h.badgeArrow} aria-hidden="true">
             →
@@ -157,19 +132,6 @@ export function Hero() {
           <MarkPill href={links.app} logos={[chromeLogo, safariLogo]} className={h.secondary}>
             {c.app}
           </MarkPill>
-        </div>
-        <div className={h.platforms}>
-          <span className={h.platformsLabel}>{c.platformsLabel}</span>
-          <ul>
-            {c.platforms.map((p) => (
-              <li key={p.id}>
-                {PLATFORM_LOGOS[p.id].map((logo) => (
-                  <PlatformLogo key={logo.title} logo={logo} size={15} tone="brand" />
-                ))}
-                {p.name}
-              </li>
-            ))}
-          </ul>
         </div>
 
         <div className={h.stage}>
