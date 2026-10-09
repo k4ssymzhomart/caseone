@@ -16,8 +16,18 @@ let wanted = false;
 
 const VIBRATION = [600, 200, 600];
 const VIBRATE_EVERY_MS = 1500;
-/** Events that count as a user activation (HTML spec), so resume() is allowed inside them. */
+/**
+ * Events that may carry a user activation (HTML spec). Not all of them do: a touch pointerdown does not, the
+ * pointerup or touchend after it does. unlock() checks the activation itself, so audio starts on the first one
+ * that counts and Chrome logs no «AudioContext was not allowed to start» warning.
+ */
 const UNLOCK_EVENTS = ['pointerdown', 'pointerup', 'mousedown', 'touchend', 'keydown', 'click'] as const;
+
+type UserActivation = { isActive: boolean; hasBeenActive: boolean };
+
+function userActivation(): UserActivation | undefined {
+  return (navigator as unknown as { userActivation?: UserActivation }).userActivation;
+}
 
 /** Siren: 2.0 s, 960 Hz and 770 Hz alternating every 250 ms, amplitude 0.7 with soft clipping (a whole loop). */
 function renderSiren(c: Ctx): AudioBuffer {
@@ -72,6 +82,8 @@ function playLoop(): void {
 
 function unlock(): void {
   if (running()) return;
+  // Browsers without navigator.userActivation (Safari before 16.4) are tried on every event, as before.
+  if (userActivation()?.isActive === false) return;
   try {
     if (!ctx) {
       const Ctor =
@@ -102,7 +114,7 @@ if (typeof window !== 'undefined') {
 function vibrate(pattern: number | number[]): void {
   try {
     // Chrome refuses (and logs) vibrate before the first tap; Safari has no vibrate at all.
-    const activation = (navigator as unknown as { userActivation?: { hasBeenActive: boolean } }).userActivation;
+    const activation = userActivation();
     if (activation && !activation.hasBeenActive) return;
     navigator.vibrate?.(pattern);
   } catch {
