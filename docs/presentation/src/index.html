@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Rota · презентация для жюри</title>
+<!--
+  The jury presentation, ten slides of 1920 × 1080. Render: npx tsx tools/gen-presentation.ts
+  Every number on a slide names the file that holds it (the source line at the bottom of the slide).
+  Paths are relative: fonts from node_modules (npm install), screens from docs/screenshots, brand from packages/design,
+  platform marks from logos/ (written by the render script from packages/design/src/brand/platforms.ts).
+  Russian copy follows the UI rule: no hyphens or dashes; fault codes and unit names keep theirs.
+-->
+<style>
+@font-face{font-family:Inter;font-weight:400;src:url(../../../node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf)}
+@font-face{font-family:Inter;font-weight:500;src:url(../../../node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf)}
+@font-face{font-family:Inter;font-weight:600;src:url(../../../node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf)}
+@font-face{font-family:Inter;font-weight:700;src:url(../../../node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf)}
+@font-face{font-family:Inter;font-weight:800;src:url(../../../node_modules/@expo-google-fonts/inter/800ExtraBold/Inter_800ExtraBold.ttf)}
+@font-face{font-family:'Geist Mono';font-weight:400;src:url(../../../node_modules/@expo-google-fonts/geist-mono/400Regular/GeistMono_400Regular.ttf)}
+@font-face{font-family:'Geist Mono';font-weight:500;src:url(../../../node_modules/@expo-google-fonts/geist-mono/500Medium/GeistMono_500Medium.ttf)}
+@font-face{font-family:'Geist Mono';font-weight:600;src:url(../../../node_modules/@expo-google-fonts/geist-mono/600SemiBold/GeistMono_600SemiBold.ttf)}
+
+@page{size:1920px 1080px;margin:0}
+
+/* Rota tokens (packages/design): dark canvas, red/500 the brand and critical color, Apple system status colors. */
+:root{
+  --red:#ff3b30;--red4:#ff6555;--red3:#ff9d8e;--red9:#3d0d06;
+  --t1:#ffffff;--t2:#aeaeb2;--t3:#86868b;--t4:#6e6e73;
+  --bg3:#1c1c1e;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);
+  --free:#30d158;--warning:#ff9f0a;--claude:#d97757;
+  --q:#3987e5;--t:#d95926;--f:#199e70;--v:#c98500;--d:#d55181;
+  --mono:'Geist Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000}
+body{font-family:Inter,system-ui,sans-serif;color:var(--t1);-webkit-font-smoothing:antialiased;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+img{display:block}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+.red{color:var(--red)}
+
+.slide{position:relative;width:1920px;height:1080px;overflow:hidden;background:#000;break-after:page;page-break-after:always}
+.slide:last-child{break-after:auto;page-break-after:auto}
+.glow{position:absolute;inset:0;background:radial-gradient(1100px 760px at 100% 0%,rgba(255,59,48,.16),rgba(255,59,48,0) 62%)}
+.glow.low{background:radial-gradient(1200px 700px at 0% 100%,rgba(255,59,48,.12),rgba(255,59,48,0) 60%)}
+
+.head{position:absolute;left:120px;top:92px;right:120px}
+.eyebrow{font-family:var(--mono);font-weight:500;font-size:22px;letter-spacing:.18em;text-transform:uppercase;color:var(--red4);
+  display:flex;align-items:center;gap:14px;height:30px}
+.eyebrow .dot{width:12px;height:12px;border-radius:50%;background:var(--red);box-shadow:0 0 0 6px rgba(255,59,48,.18)}
+h1{font-weight:800;font-size:84px;line-height:1.02;letter-spacing:-.035em;margin-top:22px}
+h1 .dim{color:var(--t4)}
+.lead{font-size:30px;line-height:1.42;color:var(--t2);margin-top:24px;max-width:1240px}
+.k{font-family:var(--mono);font-weight:500;font-size:17px;letter-spacing:.16em;text-transform:uppercase;color:var(--red4)}
+
+.foot{position:absolute;left:120px;right:120px;bottom:44px;display:flex;align-items:center;gap:24px;
+  font-family:var(--mono);font-size:16px;letter-spacing:.04em;color:var(--t4)}
+.foot .src{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.foot .src b{font-weight:500;color:var(--t3)}
+.foot .pg{display:flex;align-items:center;gap:12px;color:var(--t3)}
+.foot .pg img{width:22px;height:22px}
+
+.card{background:linear-gradient(180deg,#121213,#0b0b0c);border:1px solid var(--line);border-radius:28px}
+.tag{display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 18px;border-radius:999px;border:1px solid var(--line2);
+  font-family:var(--mono);font-size:17px;letter-spacing:.04em;color:var(--t2);white-space:nowrap}
+.tag .d{width:9px;height:9px;border-radius:50%;background:var(--red)}
+.tag img{width:22px;height:22px}
+
+/* The phone frame: titanium edge, black bezel, island, side buttons. Browser app shots get a status band. */
+.phone{--w:300px;position:relative;width:var(--w);border-radius:calc(var(--w)*.17);padding:calc(var(--w)*.012);
+  background:linear-gradient(140deg,#5a5a5e 0%,#1d1d1f 18%,#0b0b0c 50%,#232325 82%,#5a5a5e 100%);
+  box-shadow:0 calc(var(--w)*.1) calc(var(--w)*.2) calc(var(--w)*-.05) rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.07)}
+.phone .bezel{border-radius:calc(var(--w)*.158);padding:calc(var(--w)*.026);background:#030303}
+.phone .screen{position:relative;border-radius:calc(var(--w)*.13);overflow:hidden;background:#000}
+.phone .screen>img{width:100%}
+.phone .band{height:calc(var(--w)*.115);display:flex;align-items:center;justify-content:space-between;
+  padding:calc(var(--w)*.02) calc(var(--w)*.085) 0;font-weight:600;font-size:calc(var(--w)*.042);letter-spacing:-.01em}
+.phone .bat{width:calc(var(--w)*.07);height:calc(var(--w)*.034);border-radius:calc(var(--w)*.01);background:#fff;opacity:.95}
+.phone .island{position:absolute;left:50%;top:calc(var(--w)*.024);transform:translateX(-50%);width:calc(var(--w)*.3);
+  height:calc(var(--w)*.083);border-radius:999px;background:#000;z-index:3}
+.phone .glare{position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,0) 32%)}
+.phone .btn{position:absolute;width:calc(var(--w)*.012);border-radius:2px;background:linear-gradient(90deg,#2a2a2c,#6a6a6e,#2a2a2c)}
+.phone .b1{left:calc(var(--w)*-.009);top:18%;height:5%}
+.phone .b2{left:calc(var(--w)*-.009);top:26%;height:9%}
+.phone .b3{left:calc(var(--w)*-.009);top:37%;height:9%}
+.phone .b4{right:calc(var(--w)*-.009);top:29%;height:13%}
+
+/* 01 Title */
+.s1 .bg{position:absolute;inset:0;width:1920px;height:1080px;object-fit:cover}
+.s1 .shade{position:absolute;inset:0;background:linear-gradient(90deg,#000 0%,#000 30%,rgba(0,0,0,.55) 52%,rgba(0,0,0,0) 72%)}
+.s1 .lockup{position:absolute;left:120px;top:92px;height:60px;width:auto}
+.s1 .text{position:absolute;left:120px;top:318px;width:1100px}
+.s1 h1{font-size:128px;line-height:.98;letter-spacing:-.045em;margin-top:34px}
+.s1 .lead{font-size:32px;max-width:940px;margin-top:40px;white-space:nowrap}
+.s1 .team{position:absolute;left:120px;bottom:92px;display:flex;gap:64px;font-size:24px}
+.s1 .team b{display:block;font-family:var(--mono);font-weight:500;font-size:16px;letter-spacing:.18em;text-transform:uppercase;color:var(--t4);margin-bottom:10px}
+.s1 .team span{color:var(--t1);font-weight:600}
+.s1 .phone{position:absolute;left:1360px;top:92px}
+.s1 .hud{position:absolute;left:1104px;top:742px;z-index:5;display:flex;align-items:center;gap:16px;height:76px;padding:0 30px 0 22px;
+  border-radius:999px;background:rgba(24,24,26,.95);border:1px solid var(--line2);font-size:26px;font-weight:600;
+  box-shadow:0 30px 60px -10px rgba(0,0,0,.8)}
+.s1 .hud img{width:36px;height:36px}
+.s1 .hud .sep{color:var(--t4)}
+.s1 .hud .mono{font-weight:500;color:var(--t2)}
+
+/* 02 Problem */
+.s2 .mascot{position:absolute;right:120px;top:84px;width:230px;height:230px}
+.s2 .grid{position:absolute;left:120px;right:120px;top:540px;display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.s2 .item{padding:36px 34px;height:388px}
+.s2 .n{font-family:var(--mono);font-size:22px;letter-spacing:.14em;color:var(--red4)}
+.s2 .item h3{font-size:36px;line-height:1.12;font-weight:700;letter-spacing:-.02em;margin-top:30px}
+.s2 .item p{font-size:24px;line-height:1.45;color:var(--t2);margin-top:20px}
+
+/* 03 Solution */
+.s3 .plat{position:absolute;right:120px;top:92px;display:flex;gap:12px}
+.s3 .row{position:absolute;left:120px;right:120px;top:290px;height:536px;display:flex;justify-content:space-between;align-items:center}
+.s3 .phone{--w:244px}
+.s3 .arrow{font-size:36px;color:var(--red)}
+.s3 .caps{position:absolute;left:120px;right:120px;top:858px;display:flex;justify-content:space-between}
+.s3 .cap{width:244px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.s3 .cap .k{font-size:17px}
+.s3 .cap h3{font-size:26px;font-weight:700;letter-spacing:-.015em;margin-top:8px;white-space:nowrap}
+.s3 .cap p{font-size:19px;line-height:1.38;color:var(--t2);margin-top:6px;width:304px}
+
+/* 04 Live numbers */
+.s4 .stats{position:absolute;left:120px;right:120px;top:420px;display:grid;grid-template-columns:repeat(4,1fr)}
+.s4 .stat{padding:38px 40px 0 0;border-top:2px solid var(--line2)}
+.s4 .stat:first-child{border-top-color:var(--red)}
+.s4 .num{font-weight:800;font-size:132px;line-height:1;letter-spacing:-.05em;white-space:nowrap}
+.s4 .num small{font-size:54px;letter-spacing:-.02em;color:var(--red3);margin-left:10px;font-weight:700}
+.s4 .stat p{font-size:25px;line-height:1.4;color:var(--t1);margin-top:26px;height:70px}
+.s4 .stat .tag{margin-top:26px}
+.s4 .stat .from{font-family:var(--mono);font-size:16px;color:var(--t4);margin-top:20px;letter-spacing:.03em}
+.s4 .more{position:absolute;left:120px;right:120px;top:900px;font-size:23px;color:var(--t3)}
+.s4 .more b{color:var(--t1);font-weight:600}
+
+/* 05 AI modules */
+.s5 h1{font-size:68px}
+.s5 .grid{position:absolute;left:120px;right:120px;top:316px;display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.s5 .card{height:650px;padding:32px 32px 30px;position:relative;overflow:hidden}
+.s5 h3{font-size:30px;font-weight:700;letter-spacing:-.02em;margin-top:12px}
+.s5 .big{font-weight:800;font-size:96px;line-height:1;letter-spacing:-.05em;margin-top:26px;white-space:nowrap}
+.s5 .big small{font-size:40px;color:var(--red3);font-weight:700;letter-spacing:-.02em;margin-left:4px}
+.s5 .cap{font-size:19px;line-height:1.4;color:var(--t2);margin-top:12px}
+.s5 .pair{display:flex;align-items:flex-end;gap:22px}
+.s5 .pair .cap{margin:0 0 6px;flex:1}
+.s5 .rows{margin-top:24px;display:grid;gap:16px}
+.s5 .rows div{font-size:18px;line-height:1.35;color:var(--t2);padding-top:14px;border-top:1px solid var(--line)}
+.s5 .rows b{display:block;font-weight:600;font-size:19px;color:var(--t1);margin-bottom:2px}
+.s5 .bar{display:flex;gap:4px;margin-top:30px;height:38px}
+.s5 .bar i{display:flex;align-items:center;justify-content:center;border-radius:7px;background:#d2d2d7;color:#000;
+  font-style:normal;font-family:var(--mono);font-weight:600;font-size:13px}
+.s5 .bar i.l{background:var(--claude)}
+.s5 .groups{display:flex;gap:4px;margin-top:10px}
+.s5 .groups span{font-size:16px;line-height:1.3;color:var(--t3)}
+.s5 .groups b{display:block;font-family:var(--mono);font-weight:600;font-size:17px;color:var(--t1)}
+.s5 .rule{font-size:18px;line-height:1.4;color:var(--t2);margin-top:26px;padding-top:16px;border-top:1px solid var(--line)}
+.s5 .rule+.rule{margin-top:12px;padding-top:12px}
+.s5 .rule b{color:var(--t1);font-weight:600}
+.s5 .photos{position:relative;margin-top:24px;width:336px;height:184px;border-radius:14px;overflow:hidden;background:#000}
+.s5 .photos img{position:absolute;width:361px;left:-12px;top:-306px}
+.s5 .quote{font-size:18px;line-height:1.42;color:var(--t2);margin-top:22px;padding-left:16px;border-left:2px solid var(--claude)}
+.s5 .quote em{display:flex;align-items:center;gap:8px;font-style:normal;font-family:var(--mono);font-size:14px;color:var(--t4);margin-top:10px}
+.s5 .quote em img{width:16px;height:16px}
+.s5 .sugg{margin-top:24px;border-radius:18px;background:#1c1c1e;padding:18px 18px 18px;display:grid;grid-template-columns:52px 1fr;gap:14px}
+.s5 .av{position:relative;width:52px;height:52px;border-radius:50%;background:#2c2c2e;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:17px}
+.s5 .av i{position:absolute;right:-1px;bottom:-1px;width:15px;height:15px;border-radius:50%;background:var(--free);border:3px solid #1c1c1e}
+.s5 .sugg b{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:700}
+.s5 .sugg b span{font-size:13px;font-weight:700;background:var(--red);border-radius:999px;padding:3px 10px}
+.s5 .sugg p{font-size:16px;line-height:1.4;color:var(--t2);margin-top:6px}
+.s5 .weights{margin-top:24px;display:grid;gap:11px}
+.s5 .w{display:grid;grid-template-columns:150px 1fr 44px;align-items:center;gap:12px;font-size:16px;color:var(--t2)}
+.s5 .w .track{height:10px;border-radius:5px;background:#202022;overflow:hidden}
+.s5 .w .track i{display:block;height:100%;border-radius:5px;background:var(--red)}
+.s5 .w b{font-family:var(--mono);font-weight:500;font-size:16px;color:var(--t1);text-align:right}
+
+/* 06 Analytics */
+.s6 h1{font-size:72px}
+.s6 .left{position:absolute;left:120px;top:286px;width:780px}
+.s6 .big{font-weight:800;font-size:150px;line-height:.9;letter-spacing:-.055em;white-space:nowrap}
+.s6 .big small{font-size:64px;color:var(--red3);letter-spacing:-.02em;font-weight:700}
+.s6 .bigcap{font-size:24px;line-height:1.4;color:var(--t2);margin-top:22px;max-width:700px}
+.s6 .pats{margin-top:30px}
+.s6 .pat{display:grid;grid-template-columns:52px 250px 1fr;align-items:baseline;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.s6 .pat .p{font-family:var(--mono);font-size:18px;color:var(--red4)}
+.s6 .pat b{font-size:20px;font-weight:600;white-space:nowrap}
+.s6 .pat span{font-size:19px;color:var(--t2);white-space:nowrap}
+.s6 .right{position:absolute;left:980px;right:120px;top:292px}
+.s6 .label{font-family:var(--mono);font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3)}
+.s6 .ins{margin-top:16px;padding:28px 30px 28px;border-radius:24px;background:#161617;border:1px solid var(--line)}
+.s6 .ins .tags{display:flex;gap:10px}
+.s6 .ins .pill{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 14px;border-radius:999px;font-size:16px;font-weight:600}
+.s6 .ins .crit{background:#4a1310;color:#fff}
+.s6 .ins .crit i{width:9px;height:9px;border-radius:50%;background:var(--red)}
+.s6 .ins .out{border:1px solid var(--line2);font-family:var(--mono);font-weight:500;font-size:14px;letter-spacing:.08em;color:var(--t2)}
+.s6 .ins .out img{width:16px;height:16px}
+.s6 .ins h4{font-size:26px;font-weight:700;letter-spacing:-.01em;margin-top:18px}
+.s6 .ins p{font-size:20px;line-height:1.45;color:var(--t1);margin-top:10px;opacity:.92}
+.s6 .ins .rec{margin-top:16px;border-left:3px solid #48484a;background:#1f1f21;border-radius:10px;padding:12px 16px}
+.s6 .ins .rec b{display:block;font-family:var(--mono);font-weight:500;font-size:13px;letter-spacing:.12em;color:var(--t3)}
+.s6 .ins .rec span{display:block;font-size:18px;line-height:1.4;margin-top:4px}
+.s6 .rating{margin-top:38px}
+.s6 .rbar{display:flex;gap:6px;height:52px;margin-top:16px}
+.s6 .rbar i{display:flex;align-items:center;justify-content:center;border-radius:10px;font-style:normal;font-family:var(--mono);font-weight:600;font-size:20px;color:#000}
+.s6 .rlab{display:flex;gap:6px;margin-top:10px}
+.s6 .rlab span{font-size:17px;color:var(--t2);line-height:1.3;white-space:nowrap}
+.s6 .note{font-size:20px;line-height:1.45;color:var(--t2);margin-top:22px}
+.s6 .note b{color:var(--t1);font-weight:600}
+
+/* 07 Architecture */
+.s7 .dia{position:absolute;left:120px;top:300px;width:1680px;height:590px}
+.s7 .wires{position:absolute;left:0;top:0}
+.s7 .col{position:absolute;font-family:var(--mono);font-size:16px;letter-spacing:.16em;text-transform:uppercase;color:var(--t4);top:-34px}
+.s7 .node{position:absolute;border-radius:22px;padding:22px 26px;background:linear-gradient(180deg,#141415,#0c0c0d);border:1px solid var(--line2)}
+.s7 .node h4{display:flex;align-items:center;gap:12px;font-size:24px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.s7 .node h4 img{width:28px;height:28px}
+.s7 .node p{font-size:18px;line-height:1.38;color:var(--t2);margin-top:8px}
+.s7 .node.gw{border-color:rgba(255,59,48,.55);background:linear-gradient(180deg,#1d0d0b,#0d0707)}
+.s7 .node.thin{display:flex;flex-direction:column;justify-content:center;padding-top:0;padding-bottom:0}
+.s7 .node.thin p{margin-top:4px}
+.s7 .sb{position:absolute;left:540px;top:0;width:640px;height:590px;border-radius:30px;border:1px solid rgba(63,207,142,.35);
+  background:linear-gradient(180deg,rgba(63,207,142,.06),rgba(63,207,142,.015));padding:22px 24px}
+.s7 .sb>h4{display:flex;align-items:center;gap:12px;font-size:28px;font-weight:700}
+.s7 .sb>h4 img{width:30px;height:30px}
+.s7 .sb>h4 .r{margin-left:auto;font-family:var(--mono);font-weight:400;font-size:15px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
+.s7 .chips{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.s7 .chip{border-radius:16px;background:#121314;border:1px solid var(--line);padding:13px 18px}
+.s7 .chips .chip{height:94px}
+.s7 .chip b{display:block;font-size:20px;font-weight:700}
+.s7 .chip span{display:block;font-size:16px;line-height:1.35;color:var(--t2);margin-top:4px}
+.s7 .wide{margin-top:12px}
+.s7 .fns i{font-style:normal;white-space:nowrap}
+.s7 .core{margin-top:12px;border-radius:18px;background:#121314;border:1px solid var(--line2);padding:14px 18px 16px}
+.s7 .core b{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:700}
+.s7 .core b img{width:24px;height:24px}
+.s7 .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.s7 .pills span{font-family:var(--mono);font-size:15px;color:var(--t2);padding:6px 12px;border-radius:999px;background:#1c1c1e}
+.s7 .bottom{position:absolute;left:120px;right:120px;top:928px;display:flex;gap:48px;font-size:19px;color:var(--t3)}
+.s7 .bottom b{color:var(--t1);font-weight:600}
+.s7 .bottom img{width:20px;height:20px;display:inline-block;vertical-align:-4px;margin:0 6px 0 2px}
+
+/* 08 Security */
+.s8 .redact{position:absolute;left:120px;top:316px;width:800px;height:620px;padding:42px 44px}
+.s8 .redact .mascot{position:absolute;right:34px;top:28px;width:150px;height:150px}
+.s8 .lbl{font-family:var(--mono);font-size:16px;letter-spacing:.16em;text-transform:uppercase;color:var(--t4)}
+.s8 .msg{font-size:38px;font-weight:600;letter-spacing:-.015em;line-height:1.3;margin-top:14px}
+.s8 .msg .pn{font-family:var(--mono);font-weight:600;font-size:33px;color:#000;background:var(--t1);border-radius:10px;padding:2px 12px}
+.s8 .msg .nm{color:var(--red3)}
+.s8 .gate{display:flex;align-items:center;gap:16px;margin:36px 0}
+.s8 .gate i{display:block;flex:1;height:1px;background:linear-gradient(90deg,var(--red),rgba(255,59,48,0))}
+.s8 .gate b{font-family:var(--mono);font-weight:500;font-size:17px;letter-spacing:.12em;text-transform:uppercase;color:var(--red4)}
+.s8 .redact .cap{font-size:21px;line-height:1.45;color:var(--t2);margin-top:42px}
+.s8 .redact .cap b{color:var(--t1);font-weight:600}
+.s8 .list{position:absolute;left:984px;right:120px;top:312px}
+.s8 .it{display:grid;grid-template-columns:44px 1fr;gap:6px;padding:20px 0;border-top:1px solid var(--line)}
+.s8 .it:first-child{border-top:0;padding-top:4px}
+.s8 .it .g{font-size:22px;color:var(--red);line-height:1.4}
+.s8 .it h4{font-size:24px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.s8 .it h4 img{width:24px;height:24px}
+.s8 .it p{font-size:19px;line-height:1.4;color:var(--t2);margin-top:5px}
+
+/* 09 Effect */
+.s9 .est{display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 18px;border-radius:999px;border:1.5px solid var(--warning);
+  color:var(--warning);font-family:var(--mono);font-weight:600;font-size:18px;letter-spacing:.14em;text-transform:uppercase;margin-left:8px}
+.s9 .est i{width:9px;height:9px;border-radius:50%;background:var(--warning)}
+.s9 h1{font-size:76px}
+.s9 .rows{position:absolute;left:120px;right:120px;top:318px}
+.s9 .row{display:grid;grid-template-columns:360px 1fr 360px;gap:48px;align-items:start;padding:28px 0 30px;border-top:1px solid var(--line)}
+.s9 .row:last-child{border-bottom:1px solid var(--line)}
+.s9 .val{font-weight:800;font-size:88px;line-height:.95;letter-spacing:-.05em;white-space:nowrap}
+.s9 .val small{font-size:40px;font-weight:700;color:var(--red3);letter-spacing:-.02em;margin-left:8px}
+.s9 .what{font-size:19px;color:var(--t3);margin-top:12px}
+.s9 .why h4{font-size:27px;font-weight:700;letter-spacing:-.01em}
+.s9 .why p{font-size:20px;line-height:1.45;color:var(--t2);margin-top:8px}
+.s9 .why p b{color:var(--t1);font-weight:600}
+.s9 .math{font-family:var(--mono);font-size:19px;line-height:1.65;color:var(--t2);padding-top:6px;white-space:nowrap}
+.s9 .math b{color:var(--t1);font-weight:600}
+.s9 .na{position:absolute;left:120px;right:120px;top:900px;display:flex;gap:16px;align-items:baseline;font-size:21px;color:var(--t2)}
+.s9 .na b{font-family:var(--mono);font-weight:500;font-size:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--t4);flex:none}
+.s9 .na strong{color:var(--t1);font-weight:600}
+
+/* 10 Rollout and links */
+.s10 h1{font-size:76px}
+.s10 .steps{position:absolute;left:120px;right:120px;top:308px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.s10 .st{padding:34px 36px;height:300px;position:relative}
+.s10 .st .k{font-size:18px}
+.s10 .st h3{font-size:34px;font-weight:700;letter-spacing:-.02em;margin-top:18px}
+.s10 .st p{font-size:22px;line-height:1.45;color:var(--t2);margin-top:14px}
+.s10 .st .logos{position:absolute;right:30px;top:28px;display:flex;gap:10px}
+.s10 .st .logos img{width:28px;height:28px}
+.s10 .links{position:absolute;left:120px;top:676px;width:1060px;display:grid;grid-template-columns:440px 1fr;gap:0 40px}
+.s10 .ln{display:flex;align-items:center;gap:16px;padding:16px 0;border-top:1px solid var(--line)}
+.s10 .ln img{width:28px;height:28px;flex:none}
+.s10 .ln .t{font-size:17px;color:var(--t3)}
+.s10 .ln .u{font-family:var(--mono);font-size:20px;color:var(--t1);margin-top:3px;white-space:nowrap}
+.s10 .acc{position:absolute;left:1224px;right:120px;top:676px;padding:26px 30px 24px}
+.s10 .acc h4{font-family:var(--mono);font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--t4);font-weight:500;white-space:nowrap}
+.s10 .acc .a{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:14px;font-size:22px;color:var(--t2)}
+.s10 .acc .a b{font-family:var(--mono);font-weight:500;color:var(--t1)}
+.s10 .wave{position:absolute;right:112px;top:76px;width:156px;height:156px}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ 01 Title -->
+<section class="slide s1">
+  <img class="bg bleed" src="../../screenshots/presentation/hero/background-3840x2160.jpg" alt="">
+  <div class="shade"></div>
+  <img class="lockup" src="../../../packages/design/assets/logo/rota-lockup-white.svg" alt="Rota">
+  <div class="text">
+    <div class="eyebrow"><span class="dot"></span>Qostanai Industry Hackathon 2026 · Кейс 1 «НарядAI»</div>
+    <h1>Наряд выдан,<br>ИИ на контроле<span class="red">.</span></h1>
+    <p class="lead">Наряды на телефоне для АО «Костанайские Минералы».<br>ИИ следит за сроками и проверяет работу по фото.</p>
+  </div>
+  <div class="team">
+    <div><b>Команда</b><span>k4ssymzhomart</span></div>
+    <div><b>Demo Day</b><span>16.10.2026, Костанай</span></div>
+  </div>
+  <div class="phone" style="--w:440px">
+    <i class="btn b1"></i><i class="btn b2"></i><i class="btn b3"></i><i class="btn b4"></i>
+    <div class="bezel"><div class="screen"><div class="island"></div>
+      <div class="band" style="background:#ff3b30"><span>05:09</span><span class="bat"></span></div>
+      <img src="../../screenshots/presentation/pwa/06-B-emergency-red-screen.png" alt="Красный экран аварийного наряда №661">
+      <div class="glare"></div></div></div>
+  </div>
+  <div class="hud"><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt=""><span>ИИ проверил №661</span><span class="sep">·</span><span class="mono">87 из 100</span></div>
+</section>
+
+<!-- ============================================================ 02 Problem -->
+<section class="slide s2">
+  <div class="glow"></div>
+  <div class="head">
+    <div class="eyebrow">Проблема</div>
+    <h1>Сегодня наряд живёт<br>в рации и на бумаге.</h1>
+    <p class="lead">Карьер и фабрика, около 2&nbsp;000 человек в две смены. Мастер не видит в реальном времени, кто свободен, что выполняется и что просрочено.</p>
+  </div>
+  <img class="mascot" src="../../../packages/design/assets/mascots/dark/dizzy.svg" alt="">
+  <div class="grid">
+    <div class="card item"><div class="n">01</div><h3>Наряд<br>по рации</h3><p>Наряды теряются, срочные работы ждут, свободного исполнителя ищут по телефону.</p></div>
+    <div class="card item"><div class="n">02</div><h3>Сроки<br>без контроля</h3><p>Просрочку замечают поздно. Простои оборудования и их причины никто не считает.</p></div>
+    <div class="card item"><div class="n">03</div><h3>Работу нечем<br>подтвердить</h3><p>Нет фото, перечня работ и списанных материалов. Исполнителя оценивают на глаз.</p></div>
+    <div class="card item"><div class="n">04</div><h3>Повторные<br>поломки не видны</h3><p>История не анализируется: узел ломается снова и снова, пока не станет аварией.</p></div>
+  </div>
+  <div class="foot"><span class="src">Источник: <b>кейс 1, раздел 2 «Проблема и цель»</b> · численность по описанию заказчика в <b>CLAUDE.md</b></span><span class="pg"><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt="">02 / 10</span></div>
+</section>
+
+<!-- ============================================================ 03 Solution -->
+<section class="slide s3">
+  <div class="glow low"></div>
+  <div class="head">
+    <div class="eyebrow">Решение</div>
+    <h1>Весь цикл наряда в телефоне.</h1>
+  </div>
+  <div class="plat">
+    <span class="tag"><img src="logos/android.svg" alt="">Android APK</span>
+    <span class="tag"><img src="logos/safari.svg" alt="">iPhone в браузере</span>
+    <span class="tag"><img src="logos/chrome.svg" alt="">Веб панель</span>
+  </div>
+  <div class="row">
+    <div class="phone"><i class="btn b1"></i><i class="btn b2"></i><i class="btn b3"></i><i class="btn b4"></i>
+      <div class="bezel"><div class="screen"><div class="island"></div><img src="../../screenshots/presentation/mobile/08-master-create-ai-suggestion.png" alt="Мастер выдаёт наряд, ИИ предлагает исполнителя"><div class="glare"></div></div></div></div>
+    <div class="arrow">→</div>
+    <div class="phone"><i class="btn b1"></i><i class="btn b2"></i><i class="btn b3"></i><i class="btn b4"></i>
+      <div class="bezel"><div class="screen"><div class="island"></div><div class="band" style="background:#ff3b30"><span>05:09</span><span class="bat"></span></div><img src="../../screenshots/presentation/pwa/06-B-emergency-red-screen.png" alt="Красный экран у исполнителя"><div class="glare"></div></div></div></div>
+    <div class="arrow">→</div>
+    <div class="phone"><i class="btn b1"></i><i class="btn b2"></i><i class="btn b3"></i><i class="btn b4"></i>
+      <div class="bezel"><div class="screen"><div class="island"></div><div class="band" style="background:#000"><span>05:11</span><span class="bat"></span></div><img src="../../screenshots/presentation/pwa/15-B-close-after-photo.png" alt="Отчёт о работе с фото после"><div class="glare"></div></div></div></div>
+    <div class="arrow">→</div>
+    <div class="phone"><i class="btn b1"></i><i class="btn b2"></i><i class="btn b3"></i><i class="btn b4"></i>
+      <div class="bezel"><div class="screen"><div class="island"></div><div class="band" style="background:#000"><span>05:12</span><span class="bat"></span></div><img src="../../screenshots/presentation/pwa/17-B-ai-verdict.png" alt="Вердикт ИИ у исполнителя"><div class="glare"></div></div></div></div>
+    <div class="arrow">→</div>
+    <div class="phone"><i class="btn b1"></i><i class="btn b2"></i><i class="btn b3"></i><i class="btn b4"></i>
+      <div class="bezel"><div class="screen"><div class="island"></div><div class="band" style="background:#000"><span>05:12</span><span class="bat"></span></div><img src="../../screenshots/presentation/pwa/19-A-ai-report.png" alt="Отчёт ИИ у мастера"><div class="glare"></div></div></div></div>
+  </div>
+  <div class="caps">
+    <div class="cap"><div class="k">01 · мастер</div><h3>Выдаёт наряд</h3><p>Аварийный, насос, течь масла. ИИ предложил Ахметова.</p></div>
+    <div class="cap"><div class="k">02 · исполнитель</div><h3>Красный экран</h3><p>Сирена, пока не ответит: принять или отклонить.</p></div>
+    <div class="cap"><div class="k">03 · исполнитель</div><h3>Исполнено</h3><p>Работы, шифр Г-01, материалы по норме, фото после.</p></div>
+    <div class="cap"><div class="k">04 · ИИ</div><h3>Проверка</h3><p>Правила и Claude Sonnet 5.5: 87&nbsp;из&nbsp;100, принято.</p></div>
+    <div class="cap"><div class="k">05 · мастер</div><h3>Решение</h3><p>Согласен и закрыть, изменить оценку или вернуть.</p></div>
+  </div>
+  <div class="foot"><span class="src">Экраны с живой базы, наряд №661, Насос НШ-32 маслостанции: <b>docs/screenshots/presentation</b></span><span class="pg"><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt="">03 / 10</span></div>
+</section>
+
+<!-- ============================================================ 04 Live numbers -->
+<section class="slide s4">
+  <div class="glow"></div>
+  <div class="head">
+    <div class="eyebrow">Живое демо</div>
+    <h1>Измерено, а не обещано.</h1>
+    <p class="lead">Живая база Supabase и два браузера: мастер выдаёт аварийный наряд, исполнитель принимает и закрывает его, ИИ проверяет.</p>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <div class="num">1,9<small>с</small></div>
+      <p>от «Выдать» до красного экрана у исполнителя</p>
+      <span class="tag"><span class="d"></span>кейс: не дольше 5 с</span>
+      <div class="from">docs/progress.md · P7</div>
+    </div>
+    <div class="stat">
+      <div class="num">0,97<small>с</small></div>
+      <p>от «Принять» до статуса на телефоне мастера</p>
+      <span class="tag"><span class="d"></span>кейс: не дольше 5 с</span>
+      <div class="from">docs/progress.md · P7</div>
+    </div>
+    <div class="stat">
+      <div class="num">9,5<small>с</small></div>
+      <p>от «Отправить на проверку» до вердикта ИИ</p>
+      <span class="tag"><img src="logos/claude.svg" alt="">Claude Sonnet 5.5</span>
+      <div class="from">docs/progress.md · P7</div>
+    </div>
+    <div class="stat">
+      <div class="num">5<small>нажатий</small></div>
+      <p>на обязательные поля наряда, если узел среди недавних</p>
+      <span class="tag"><span class="d"></span>кейс: не больше 6</span>
+      <div class="from">CLAUDE.md §10b · README</div>
+    </div>
+  </div>
+  <p class="more">В том же прогоне статус <b>«В работе»</b> дошёл до мастера за <b>1,1 с</b>, а <b>«Закрыт»</b> до исполнителя за <b>0,8 с</b> после решения мастера.</p>
+  <div class="foot"><span class="src">Прогон в двух браузерах на rota-naryad.netlify.app/app/, 09.10.2026: <b>docs/progress.md</b>, строка P7</span><span class="pg"><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt="">04 / 10</span></div>
+</section>
+
+<!-- ============================================================ 05 AI modules -->
+<section class="slide s5">
+  <div class="glow"></div>
+  <div class="head">
+    <div class="eyebrow">Модули ИИ</div>
+    <h1>Правила решают, Claude оценивает,<br><span class="dim">мастер подписывает.</span></h1>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <div class="k">01 · Контроль сроков</div>
+      <h3>Наблюдатель</h3>
+      <div class="pair"><div class="big">5<small>с</small></div><p class="cap">Postgres сам проверяет каждый активный наряд, телефону не нужно быть в сети</p></div>
+      <div class="rows">
+        <div><b>За 30 мин до срока</b>напоминание исполнителю</div>
+        <div><b>Срок вышел</b>исполнителю и мастеру, повтор каждые 15 мин</div>
+        <div><b>Не принят за 10 мин</b>мастеру с готовой заменой, аварийный за 3 мин</div>
+        <div><b>Просрочка больше часа</b>руководителю</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="k">02 · Проверка работы</div>
+      <h3>Вердикт с причинами</h3>
+      <div class="big">10<small>из 10</small></div>
+      <p class="cap">эталонных случаев верно на Claude Sonnet 5.5, 0,16 USD за все десять</p>
+      <div class="bar"><i style="flex:20">R1</i><i style="flex:10">R2</i><i style="flex:15">R3</i><i style="flex:20">R4</i><i class="l" style="flex:20">L1</i><i class="l" style="flex:15">L2</i></div>
+      <div class="groups"><span style="flex:65"><b>65 баллов</b>правила в SQL</span><span style="flex:35"><b>35</b>Claude</span></div>
+      <p class="rule"><b>Провал правила</b> отправляет на доработку, что бы ни сказала модель.</p>
+      <p class="rule"><b>Уверенность ниже 0,6:</b> решает мастер.</p>
+    </div>
+    <div class="card">
+      <div class="k">03 · Анализ фото</div>
+      <h3>До и после</h3>
+      <div class="photos"><img class="bleed" src="../../screenshots/presentation/pwa/20-A-ai-report-photos.png" alt="Фото до и после, наряд №661"></div>
+      <p class="cap">dHash и sha256 ловят чужие и старые фото, время съёмки сверяется с работой.</p>
+      <p class="quote">«На фото после тот же насос с табличкой НШ-32… пол чистый, потёков на корпусе нет.»<em><img src="logos/claude.svg" alt="">Claude Sonnet 5.5 · №661</em></p>
+      <p class="rule"><b>Оценка фото от 1 до 5.</b> Не уверен: «нужна проверка мастером».</p>
+    </div>
+    <div class="card">
+      <div class="k">04 · Подбор исполнителя</div>
+      <h3>Лучший кандидат</h3>
+      <div class="sugg"><div class="av">АЕ<i></i></div><div><b>Ахметов Е.<span>ИИ</span></b><p>Свободен · Слесарь 5 разряда · 6 нарядов по насосам, средняя оценка 4,4 · Сегодня работал на этом участке</p></div></div>
+      <div class="weights">
+        <div class="w"><span>Свободен</span><span class="track"><i style="width:100%"></i></span><b>0,40</b></div>
+        <div class="w"><span>Опыт на типе</span><span class="track"><i style="width:75%"></i></span><b>0,30</b></div>
+        <div class="w"><span>Разряд</span><span class="track"><i style="width:37.5%"></i></span><b>0,15</b></div>
+        <div class="w"><span>Уже на участке</span><span class="track"><i style="width:25%"></i></span><b>0,10</b></div>
+        <div class="w"><span>Загрузка</span><span class="track"><i style="width:12.5%"></i></span><b>0,05</b></div>
+      </div>
+      <p class="rule">Чужая специальность умножает балл на 0,3. Мастер видит три кандидата.</p>
+    </div>
+  </div>
+  <div class="foot"><span class="src">Источники: <b>docs/golden-results.md</b> · CLAUDE.md §9, §10, §11 · экраны: pwa/20, mobile/08</span><span class="pg"><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt="">05 / 10</span></div>
+</section>
+
+<!-- ============================================================ 06 Analytics -->
+<section class="slide s6">
+  <div class="glow low"></div>
+  <div class="head">
+    <div class="eyebrow">Аналитика и рейтинг</div>
+    <h1>История за 92 дня выдаёт слабые места.</h1>
+  </div>
+  <div class="left">
+    <div class="big">22<small> из 22</small></div>
+    <p class="bigcap">измерений шести заложенных закономерностей найдены в пределах ±20&nbsp;% от ключа ответов</p>
+    <div class="pats">
+      <div class="pat"><span class="p">P1</span><b>Конвейер К-3</b><span>21 отказ за 92 дня, втрое выше медианы</span></div>
+      <div class="pat"><span class="p">P2</span><b>Сериков Д.</b><span>41&nbsp;% ремонтов с повтором, у команды 14&nbsp;%</span></div>
+      <div class="pat"><span class="p">P3</span><b>КМД-1750 №2</b><span>8 из 13 ППР с отказом в течение 5 дней</span></div>
+      <div class="pat"><span class="p">P4</span><b>Обогащение ночью</b><span>электрика в 2,6 раза чаще, чем днём</span></div>
+      <div class="pat"><span class="p">P5</span><b>Бригада 1</b><span>Литол-24 на С-01 в 2,2 раза выше нормы</span></div>
+      <div class="pat"><span class="p">P6</span><b>ЦНС-300 №2</b><span>0, 1, 1, 1, 2, 3 отказа за 6 недель</span></div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="label">Вывод ИИ в веб панели: пример из кейса</div>
+    <div class="ins">
+      <div class="tags"><span class="pill crit"><i></i>Критично</span><span class="pill out">ПОВТОРНЫЕ ОТКАЗЫ</span><span class="pill out"><img src="logos/claude.svg" alt="">ИИ</span></div>
+      <h4>Конвейер К-3: повторяющиеся отказы подшипника</h4>
+      <p>Конвейер К-3 остановился 7 раз за 30 дней, 5 из них шифр М-02 (подшипник), повторы в среднем через 6,3 дня, ремонтировали 4 разных исполнителя. Простой составил 32,3 часа.</p>
+      <div class="rec"><b>РЕКОМЕНДАЦИЯ</b><span>Проверить соосность привода и условия смазки подшипниковых узлов, включить узел в план ППР.</span></div>
+    </div>
+    <div class="rating">
+      <div class="label">Рейтинг исполнителя: веса компонентов</div>
+      <div class="rbar">
+        <i style="flex:35;background:var(--q)">35</i><i style="flex:25;background:var(--t)">25</i><i style="flex:20;background:var(--f)">20</i><i style="flex:10;background:var(--v)">10</i><i style="flex:10;background:var(--d)">10</i>
+      </div>
+      <div class="rlab"><span style="flex:35">Качество</span><span style="flex:25">В срок</span><span style="flex:20">С первого раза</span><span style="flex:10">Объём</span><span style="flex:10">Отказы</span></div>
+      <p class="note">Сглаживание по Байесу: два удачных наряда не выводят в лидеры. <b>Сериков Д.</b> последний из 15 за 92 дня: с первого раза <b>64,7&nbsp;%</b> при медиане команды <b>91,3&nbsp;%</b>.</p>
+    </div>
+  </div>
+  <div class="foot"><span class="src">Источники: <b>docs/phase6-acceptance.md</b> §1 · <b>docs/phase5-acceptance.md</b> (a) · tools/seed/PATTERNS.md · карточка: brand-marks/panel/p06c</span><span class="pg"><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt="">06 / 10</span></div>
+</section>
+
+<!-- ============================================================ 07 Architecture -->
+<section class="slide s7">
+  <div class="glow"></div>
+  <div class="head">
+    <div class="eyebrow">Архитектура</div>
+    <h1>Один источник правды: Postgres.</h1>
+  </div>
+  <div class="dia">
+    <svg class="wires" viewBox="0 0 1680 590" width="1680" height="590" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#86868b"/></marker>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ff3b30"/></marker>
+      </defs>
+      <g stroke="#86868b" stroke-width="2" fill="none">
+        <path d="M446 100H534" marker-start="url(#ah)" marker-end="url(#ah)"/>
+        <path d="M446 295H534" marker-start="url(#ah)" marker-end="url(#ah)"/>
+        <path d="M446 490H534" marker-start="url(#ah)" marker-end="url(#ah)"/>
+        <path d="M1186 359H1254" marker-end="url(#ah)"/>
+        <path d="M1186 448H1254" marker-end="url(#ah)"/>
+        <path d="M1186 543H1254" marker-end="url(#ah)"/>
+      </g>
+      <g stroke="#ff3b30" stroke-width="2" fill="none" stroke-dasharray="7 6">
+        <path d="M1186 64H1254" marker-end="url(#ar)"/>
+        <path d="M1470 130V164" marker-end="url(#ar)"/>
+      </g>
+    </svg>
+
+    <div class="col" style="left:0">Клиенты</div>
+    <div class="node" style="left:0;top:20px;width:440px;height:160px">
+      <h4><img src="logos/android.svg" alt=""><img src="logos/expo.svg" alt="">Android приложение</h4>
+      <p>Expo SDK 57 для мастера, исполнителя и руководителя: сирена, камера, сжатие фото.</p>
+    </div>
+    <div class="node" style="left:0;top:215px;width:440px;height:160px">
+      <h4><img src="logos/safari.svg" alt=""><img src="logos/chrome.svg" alt="">Приложение в браузере</h4>
+      <p>Тот же код Expo на /app/: iPhone, ноутбук, любой браузер.</p>
+    </div>
+    <div class="node" style="left:0;top:410px;width:440px;height:160px">
+      <h4><img src="logos/react.svg" alt="">Веб панель</h4>
+      <p>Смена, доска, отчёты с PDF и Excel, рейтинг, аналитика ИИ, справочники.</p>
+    </div>
+
+    <div class="col" style="left:540px">Сервер</div>
+    <div class="sb">
+      <h4><img src="logos/supabase.svg" alt="">Supabase<span class="r">открытый код</span></h4>
+      <div class="chips">
+        <div class="chip"><b>PostgREST RPC</b><span>create_order, order_action, отчёты, рейтинг</span></div>
+        <div class="chip"><b>Realtime</b><span>статусы на всех экранах, канал на пользователя</span></div>
+        <div class="chip"><b>Auth и Storage</b><span>табельный номер и ПИН, фото по подписанным ссылкам</span></div>
+        <div class="chip"><b>pg_cron и pg_net</b><span>наблюдатель сроков каждые 5 с, повтор проверки ИИ</span></div>
+      </div>
+      <div class="chip wide"><b>Edge Functions</b><span class="fns"><i>ai-verify</i> · <i>ai-insights</i> · <i>ai-shift-summary</i> · <i>ai-explain-rating</i> · <i>notify-dispatch</i> · <i>telegram-webhook</i></span></div>
+      <div class="core"><b><img src="logos/postgresql.svg" alt="">Postgres 17</b>
+        <div class="pills"><span>машина состояний</span><span>RLS по ролям</span><span>правила R1…R4</span><span>детекторы</span><span>Vault</span><span>integration_outbox</span></div>
+      </div>
+    </div>
+
+    <div class="col" style="left:1260px">Снаружи</div>
+    <div class="node gw" style="left:1260px;top:0;width:420px;height:130px;padding-top:20px">
+      <h4><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt="">Шлюз приватности</h4>
+      <p>Фамилии, табельные номера, телефоны: E01…E15, M01, R01. Журнал llm_audit.</p>
+    </div>
+    <div class="node" style="left:1260px;top:166px;width:420px;height:130px;padding-top:20px">
+      <h4><img src="logos/claude.svg" alt="">Claude Sonnet и Haiku 5.5</h4>
+      <p>Или локальная модель на серверах комбината: openai_compatible.</p>
+    </div>
+    <div class="node thin" style="left:1260px;top:318px;width:420px;height:82px">
+      <h4><img src="logos/expo.svg" alt=""><img src="logos/android.svg" alt="">Expo push и FCM</h4>
+      <p>сирена для аварийных нарядов</p>
+    </div>
+    <div class="node thin" style="left:1260px;top:412px;width:420px;height:72px">
+      <h4><img src="logos/telegram.svg" alt="">Бот Telegram без имён</h4>
+    </div>
+    <div class="node thin" style="left:1260px;top:496px;width:420px;height:94px">
+      <h4><img src="logos/onec.svg" alt="">1С:ТОиР</h4>
+      <p>order.created и order.closed</p>
+    </div>
+  </div>
+  <div class="bottom">
+    <span><b>Хакатон:</b> <img src="logos/supabase.svg" alt="">Supabase Cloud, <img src="logos/netlify.svg" alt="">веб на Netlify, <img src="logos/expo.svg" alt="">APK из EAS</span>
+    <span><b>Комбинат:</b> свой Supabase на серверах или в облаке Казахстана</span>
+  </div>
+  <div class="foot"><span class="src">Подробно: <b>docs/architecture.md</b> · CLAUDE.md §2, §8, §16</span><span class="pg"><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt="">07 / 10</span></div>
+</section>
+
+<!-- ============================================================ 08 Security and enterprise fit -->
+<section class="slide s8">
+  <div class="glow low"></div>
+  <div class="head">
+    <div class="eyebrow">Безопасность и применимость</div>
+    <h1>Имена не покидают комбинат.</h1>
+  </div>
+  <div class="card redact">
+    <img class="mascot" src="../../../packages/design/assets/mascots/dark/shield.svg" alt="">
+    <div class="lbl">Внутри комбината</div>
+    <p class="msg"><span class="nm">Ахметов Е.</span> и <span class="nm">Иванов С.</span><br>заменили ролик</p>
+    <div class="gate"><b>Шлюз приватности</b><i></i></div>
+    <div class="lbl">Уходит к модели</div>
+    <p class="msg"><span class="pn">E01</span> и <span class="pn">E02</span><br>заменили ролик</p>
+    <p class="cap">Фамилии с русскими и казахскими окончаниями, «Фамилия И.», табельные номера и телефоны. Имена возвращаются только в ответе. Каждый запрос виден админу на экране <b>«Что видит ИИ»</b>.</p>
+  </div>
+  <div class="list">
+    <div class="it"><span class="g">●</span><div><h4>Закон РК № 94-V</h4><p>Supabase с открытым кодом на серверах комбината или в облаке Казахстана, модель локально за тем же шлюзом.</p></div></div>
+    <div class="it"><span class="g">●</span><div><h4>Роли и RLS</h4><p>Роль из JWT, каждая таблица под row level security. Без входа нельзя вызвать ни одну функцию.</p></div></div>
+    <div class="it"><span class="g">●</span><div><h4>Часы сервера, повтор без дублей</h4><p>Статусы ставит только сервер. Каждое действие несёт client_action_id, журнал order_events только дополняется.</p></div></div>
+    <div class="it"><span class="g">●</span><div><h4><img src="logos/onec.svg" alt="">1С:ТОиР</h4><p>integration_outbox: заявка на ремонт, акт выполненных работ, требование накладная на материалы.</p></div></div>
+    <div class="it"><span class="g">●</span><div><h4>2&nbsp;000 человек в две смены</h4><p>Один канал Realtime на пользователя, отчёты считает SQL рядом с данными, фото сжаты на телефоне до 1600 px.</p></div></div>
+  </div>
+  <div class="foot"><span class="src">Источники: <b>supabase/functions/_shared/privacy.test.ts</b> · supabase/tests/transitions.sql · CLAUDE.md §1, §5, §16, §18</span><span class="pg"><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt="">08 / 10</span></div>
+</section>
+
+<!-- ============================================================ 09 Effect -->
+<section class="slide s9">
+  <div class="glow"></div>
+  <div class="head">
+    <div class="eyebrow">Эффект для предприятия<span class="est"><i></i>Оценка</span></div>
+    <h1>Время мастеров и часы простоя.</h1>
+    <p class="lead">Допущения наши и стоят рядом с каждым числом. Подставьте данные комбината.</p>
+  </div>
+  <div class="rows">
+    <div class="row">
+      <div><div class="val">≈180<small>ч</small></div><div class="what">мастеров в месяц</div></div>
+      <div class="why"><h4>Поиск исполнителя</h4><p><b>3&nbsp;600 нарядов в месяц:</b> 60 за смену по комбинату, 2 смены, 30 дней. Свободного слесаря по рации ищут <b>4 мин</b>, с экраном смены и подсказкой ИИ <b>1 мин</b>.</p></div>
+      <div class="math">3 мин × 3&nbsp;600<br>= 10&nbsp;800 мин = <b>180 ч</b></div>
+    </div>
+    <div class="row">
+      <div><div class="val">≈360<small>ч</small></div><div class="what">в месяц на бумагах</div></div>
+      <div class="why"><h4>Бумаги и 1С</h4><p>Бумажный наряд, акт и перенос в 1С занимают <b>8 мин</b> на наряд. Закрытие с телефона и выгрузка в 1С оставляют <b>2 мин</b>.</p></div>
+      <div class="math">6 мин × 3&nbsp;600<br>= 21&nbsp;600 мин = <b>360 ч</b></div>
+    </div>
+    <div class="row">
+      <div><div class="val">≈29<small>ч</small></div><div class="what">простоя за квартал, один К-3</div></div>
+      <div class="why"><h4>Повторные отказы</h4><p>Из истории: К-3 простоял <b>87 ч</b> на 21 отказе за 92 дня, 15 из них один шифр подшипника. Допущение: карточка ИИ убирает половину повторов.</p></div>
+      <div class="math">87 ч / 21 ≈ 4,1 ч на отказ<br>7 отказов × 4,1 ч ≈ <b>29 ч</b><br>× стоимость часа простоя</div>
+    </div>
+  </div>
+  <p class="na"><b>Не оценено</b><span>Реакция на аварию: непринятый аварийный наряд через <strong>3 мин</strong> уходит мастеру с готовой заменой, а не когда его случайно заметят.</span></p>
+  <div class="foot"><span class="src">Основа: <b>README.md</b>, раздел «Estimated effect» · история К-3: docs/phase6-acceptance.md §1</span><span class="pg"><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt="">09 / 10</span></div>
+</section>
+
+<!-- ============================================================ 10 Rollout and links -->
+<section class="slide s10">
+  <div class="glow low"></div>
+  <div class="head">
+    <div class="eyebrow">План внедрения</div>
+    <h1>От одного участка до всего комбината.</h1>
+  </div>
+  <img class="wave" src="../../../packages/design/assets/mascots/dark/wave.svg" alt="">
+  <div class="steps">
+    <div class="card st"><div class="logos"><img src="logos/android.svg" alt=""></div><div class="k">01 · Пилот</div><h3>Один участок</h3><p>Например, дробление: реальные справочники оборудования и людей, обе смены, APK на телефонах мастеров и исполнителей.</p></div>
+    <div class="card st"><div class="logos"><img src="logos/telegram.svg" alt=""><img src="logos/chrome.svg" alt=""></div><div class="k">02 · Комбинат</div><h3>Все участки и роли</h3><p>Push и Telegram, отчёты смены, рейтинг и еженедельная сводка ИИ для мастеров и руководителя.</p></div>
+    <div class="card st"><div class="logos"><img src="logos/onec.svg" alt=""><img src="logos/postgresql.svg" alt=""></div><div class="k">03 · Интеграция</div><h3>1С:ТОиР и своя модель</h3><p>Заявки, акты и списания через integration_outbox. Supabase и модель на серверах комбината, шлюз остаётся.</p></div>
+  </div>
+  <div class="links">
+    <a class="ln" href="https://rota-naryad.netlify.app"><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt=""><div><div class="t">Сайт</div><div class="u">rota-naryad.netlify.app</div></div></a>
+    <a class="ln" href="https://rota-naryad.netlify.app/login"><img src="logos/chrome.svg" alt=""><div><div class="t">Веб панель</div><div class="u">rota-naryad.netlify.app/login</div></div></a>
+    <a class="ln" href="https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk"><img src="logos/android.svg" alt=""><div><div class="t">Android APK, кнопка и на сайте</div><div class="u">expo.dev/artifacts/eas/TlD9ou…</div></div></a>
+    <a class="ln" href="https://rota-naryad.netlify.app/app/"><img src="logos/safari.svg" alt=""><div><div class="t">Приложение в браузере</div><div class="u">rota-naryad.netlify.app/app/</div></div></a>
+    <a class="ln" href="https://github.com/k4ssymzhomart/caseone"><img src="logos/github.svg" alt=""><div><div class="t">Код и инструкция запуска</div><div class="u">github.com/k4ssymzhomart/caseone</div></div></a>
+    <a class="ln" href="https://rota-naryad.netlify.app/rota-presentation.pdf"><img src="logos/pdf.svg" alt=""><div><div class="t">Эта презентация</div><div class="u">rota-naryad.netlify.app/rota-presentation.pdf</div></div></a>
+  </div>
+  <div class="card acc">
+    <h4>Аккаунты · табельный номер · ПИН</h4>
+    <div class="a"><span>Мастер</span><b>1001 · 1111</b></div>
+    <div class="a"><span>Исполнитель</span><b>2001 · 1234</b></div>
+    <div class="a"><span>Руководитель</span><b>3001 · 3333</b></div>
+    <div class="a"><span>Администратор</span><b>9001 · 9999</b></div>
+  </div>
+  <div class="foot"><span class="src">Rota · Наряд выдан, ИИ на контроле · команда k4ssymzhomart</span><span class="pg"><img src="../../../packages/design/assets/logo/rota-mark-red.svg" alt="">10 / 10</span></div>
+</section>
+
+</body>
+</html>
