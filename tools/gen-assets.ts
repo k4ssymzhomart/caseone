@@ -43,6 +43,22 @@ function scaledPng(file: string, width: number): Uint8Array {
   return render(svg, width);
 }
 
+/**
+ * A full bleed square for masks the platform cuts itself (maskable PWA icon, apple-touch-icon): the app icon
+ * scaled 1.45 × on black, so its rounded body covers every corner and the mark (64 % wide) stays inside the
+ * 80 % safe zone.
+ */
+function fullBleedPng(file: string, width: number): Uint8Array {
+  const b64 = readFileSync(file).toString('base64');
+  const side = 1024 * 1.45;
+  const offset = (1024 - side) / 2;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024">
+  <rect width="1024" height="1024" fill="#000000"/>
+  <image x="${offset}" y="${offset}" width="${side}" height="${side}" xlink:href="data:image/png;base64,${b64}"/>
+</svg>`;
+  return render(svg, width);
+}
+
 // ---------- images ----------
 write(mobile('icon.png'), readFileSync(design('app-icon/app-icon-1024.png')));
 // Android adaptive icon: the red mark at 60% of a transparent 1024 canvas, inside the 66% safe zone.
@@ -50,6 +66,13 @@ write(mobile('adaptive-icon.png'), render(placed(design('logo/rota-mark-red.svg'
 write(mobile('notification-icon.png'), render(readFileSync(design('logo/rota-mark-white.svg'), 'utf8'), 96));
 write(mobile('splash-icon.png'), render(readFileSync(design('logo/rota-mark-red.svg'), 'utf8'), 512));
 write(design('app-icon/app-icon-256.png'), scaledPng(design('app-icon/app-icon-1024.png'), 256));
+
+// PWA icons (DEPLOY_VM.md §4), served from apps/mobile/public at /app/.
+const pwa = (p: string) => resolve(root, 'apps/mobile/public', p);
+write(pwa('icon-192.png'), scaledPng(design('app-icon/app-icon-1024.png'), 192));
+write(pwa('icon-512.png'), scaledPng(design('app-icon/app-icon-1024.png'), 512));
+write(pwa('icon-maskable-512.png'), fullBleedPng(design('app-icon/app-icon-1024.png'), 512));
+write(pwa('apple-touch-icon.png'), fullBleedPng(design('app-icon/app-icon-1024.png'), 180));
 
 // ---------- sounds ----------
 const RATE = 44_100;

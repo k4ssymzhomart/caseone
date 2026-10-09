@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>%WEB_TITLE%</title>
+    <meta name="description" content="Rota: наряды с контролем ИИ. Мастер и исполнитель в браузере." />
+    <meta name="theme-color" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Rota" />
+    <link rel="manifest" href="/app/manifest.json" />
+    <link rel="apple-touch-icon" href="/app/apple-touch-icon.png" />
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      /* These styles make the body full-height */
+      html,
+      body {
+        height: 100%;
+      }
+      /* These styles disable body scrolling if you are using <ScrollView> */
+      body {
+        overflow: hidden;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+    <style id="rota-shell">
+      /* Black around and behind the app; no browser pull to refresh or tap flash in the middle of a flow. */
+      html {
+        background: #000000;
+        -webkit-text-size-adjust: 100%;
+      }
+      html,
+      body {
+        overscroll-behavior: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        margin: 0;
+        background: #000000;
+      }
+      /* Desktop: the app reads as a phone, a centered 430 px column on black. The transform makes the body the
+         containing block of fixed overlays (toasts, sheets, modals), so they stay inside the column too. */
+      @media (min-width: 601px) {
+        body {
+          max-width: 430px;
+          margin: 0 auto;
+          transform: translateZ(0);
+          box-shadow: 0 0 0 1px #1c1c1e;
+        }
+      }
+    </style>
+    <script>
+      if ('serviceWorker' in navigator && location.pathname.indexOf('/app') === 0) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/app/sw.js', { scope: '/app/' }).catch(function () {});
+        });
+      }
+    </script>
+  </head>
+
+  <body>
+    <noscript>Включите JavaScript, чтобы открыть Rota.</noscript>
+    <!-- The root element for your Expo app. -->
+    <div id="root"></div>
+  </body>
+</html>

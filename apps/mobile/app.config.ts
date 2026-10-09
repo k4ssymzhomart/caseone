@@ -4,6 +4,8 @@ import fs from 'node:fs';
 
 const googleServicesFile = process.env.GOOGLE_SERVICES_JSON ?? './google-services.json';
 const hasGoogleServices = fs.existsSync(googleServicesFile);
+// The PWA export sets EXPO_BASE_URL=/app (DEPLOY_VM.md §4); native builds and the dev server stay at the root.
+const baseUrl = process.env.EXPO_BASE_URL;
 
 const config: ExpoConfig = {
   name: 'Rota',
@@ -22,6 +24,7 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
   },
   ios: { bundleIdentifier: 'kz.rota.app', supportsTablet: false },
+  web: { output: 'single', bundler: 'metro', favicon: './assets/icon.png' },
   plugins: [
     'expo-router',
     'expo-font',
@@ -44,7 +47,7 @@ const config: ExpoConfig = {
       },
     ],
   ],
-  experiments: { typedRoutes: true, reactCompiler: true },
+  experiments: { typedRoutes: true, reactCompiler: true, ...(baseUrl ? { baseUrl } : {}) },
   extra: { eas: { projectId: 'de6b8e43-4d09-49ad-baa3-897694e7b4be' } },
   owner: 'k4ssym',
 };

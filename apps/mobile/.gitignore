@@ -41,3 +41,6 @@ example
 # generated native folders
 /ios
 /android
+
+# PWA export (npm run export:web)
+dist-web/
