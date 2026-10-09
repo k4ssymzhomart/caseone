@@ -51,3 +51,6 @@ deploy/vm/*.generated.ps1
 
 # Vercel static upload folder (built locally)
 deploy/vercel/dist/
+
+# Netlify static upload folder (built locally)
+deploy/netlify/dist/

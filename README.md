@@ -11,6 +11,9 @@ anomalies in the history. Built for the Qostanai Industry Hackathon 2026, Case 1
   and anomaly detectors in SQL
 - Claude (Sonnet 5.5 and Haiku 5.5) behind a privacy gateway that pseudonymizes every employee before a call
 
+**Live:** https://rota-naryad.netlify.app (landing, web panel at [/login](https://rota-naryad.netlify.app/login)) ·
+[Android APK](https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk) · test accounts below.
+
 The spec is [`CLAUDE.md`](CLAUDE.md); phase briefs are in `docs/PHASE_*.md`, status in
 [`docs/progress.md`](docs/progress.md), decisions in [`docs/decisions.md`](docs/decisions.md), the design system in
 [`docs/design.md`](docs/design.md).
@@ -270,7 +273,7 @@ rebuilds the start state: 9 workers on shift, Ахметов the only free сл�
 - This repository with run instructions, env, seed, test accounts and the demo script
 - Android APK: [download](https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk) (EAS preview
   build of 2026-10-09; rebuild with `cd apps/mobile && npx eas-cli build -p android --profile preview`)
-- Web panel link and test accounts: мастер 1001/1111, исполнитель 2001/1234, руководитель 3001/3333
+- Web panel: https://rota-naryad.netlify.app/login · test accounts: мастер 1001/1111, исполнитель 2001/1234, руководитель 3001/3333, админ 9001/9999
 - Test dataset: `supabase/seed/` and `tools/seed/PATTERNS.md`
 - Screenshots for the slides: [`docs/screenshots/presentation/`](docs/screenshots/presentation/README.md)
 - Presentation of at most 10 slides: problem, solution, architecture, AI modules, effect for the enterprise, rollout plan

@@ -27,6 +27,7 @@ Checked 2026-10-09, 01:50, project «rota» `wcjklkpkuhxgfdtbwbuk`.
 - `RUN_SUPABASE=1` contract suite: 7 of 7 against the live project (each scenario starts with `demo.reset()`).
 - `npm run ai-verify:check`: Sonnet 5.5 judged the after photo, 200 in 9 s, idempotent, 401/403 as expected. `tools/ai-insights-check.ts --deployed`: 8 model cards for 92 days, the demo question parsed by Haiku as участок дробления, 30 days; the К-3 card has 7 stops, 5 of them М-02.
 - LLM ledger: about 0.42 USD of the 4 USD cap.
+- Web (Netlify, 2026-10-09): https://rota-naryad.netlify.app (`deploy/netlify/deploy.sh`; the Vercel account was out of free daily deployments). Checked signed in as master, manager and admin.
 - APK (EAS preview, 2026-10-09): https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk
 
 ## Branches
@@ -100,3 +101,4 @@ screenshots (lane A); live sync wiring and the Phase 2 audit fixes, Telegram lin
 - Phase 5 and Phase 6 built in worktrees, deployed, accepted, merged. Landing merged.
 - EAS project linked (`de6b8e43-…`), preview APK built in the cloud.
 - 02:30. Owner applied the SQL bundle and set the Edge secrets. Telegram webhook set; live checks pass on the real models; contract suite 7 of 7.
+- 03:10. Web panel and landing live on Netlify: https://rota-naryad.netlify.app.

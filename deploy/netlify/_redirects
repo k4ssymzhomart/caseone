@@ -1,0 +1,4 @@
+# Existing files are served first; everything else falls back to the right single page app.
+/app    /app/index.html  200
+/app/*  /app/index.html  200
+/*      /index.html      200
