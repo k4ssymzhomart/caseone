@@ -24,6 +24,7 @@
     "landing:assets": "node apps/web/scripts/landing-shots.mjs",
     "landing:screens": "node apps/web/scripts/landing-screens.mjs",
     "landing:device": "node apps/web/scripts/landing-device.mjs",
+    "landing:avatars": "tsx apps/web/scripts/landing-avatars.mjs",
     "landing:hero-bg": "tsx tools/gen-hero-bg.ts",
     "tokens": "node packages/design/scripts/build-tokens.mjs",
     "assets": "tsx tools/gen-assets.ts",

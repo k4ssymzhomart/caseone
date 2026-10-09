@@ -9,6 +9,8 @@ import workerReport600 from './device/worker-report-600.webp';
 import workerReport900 from './device/worker-report-900.webp';
 import aiReport600 from './device/ai-report-600.webp';
 import aiReport900 from './device/ai-report-900.webp';
+import masterShiftLight600 from './device/master-shift-light-600.webp';
+import masterShiftLight900 from './device/master-shift-light-900.webp';
 
 /** A real app screen fitted to the 1206 × 2622 display, at two widths for srcset. */
 export interface DeviceScreen {
@@ -46,6 +48,12 @@ export const deviceScreens = {
   aiReport: {
     src: aiReport900,
     srcSet: `${aiReport600} 600w, ${aiReport900} 900w`,
+    width: 900,
+    height: 1957,
+  },
+  masterShiftLight: {
+    src: masterShiftLight900,
+    srcSet: `${masterShiftLight600} 600w, ${masterShiftLight900} 900w`,
     width: 900,
     height: 1957,
   },

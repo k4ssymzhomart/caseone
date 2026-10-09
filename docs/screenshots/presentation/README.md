@@ -46,6 +46,7 @@ The landing hero for the title slide, captured from the production build of `/` 
 | `27-master-demo.png` | Демо режим, ускорение, сброс демо |
 | `28-master-ai-report-sonnet.png` | Отчёт ИИ от Claude Sonnet 5.5: вывод модели, 87 из 100, уверенность 80% |
 | `29-master-ai-checks-sonnet.png` | Проверки ИИ по пунктам: правила и оценка модели по фото |
+| `30-master-shift-light.png` | Мастер: смена в светлой теме (для светлого героя лендинга), статус бар 9:41 |
 
 ## Web panel (`web/`)
 

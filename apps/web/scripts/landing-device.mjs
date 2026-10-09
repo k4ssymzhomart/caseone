@@ -2,7 +2,8 @@
 // display of the 6.3 inch Pro, with the Dynamic Island the simulator baked in painted over (the frame draws its own,
 // crisp at any density) and the simulator's «no service» dots turned into four signal bars (what
 // `xcrun simctl status_bar booted override --cellularMode active --cellularBars 4` shows), as WebP at two widths for
-// srcset, plus deviceScreens.ts with the URLs and sizes.
+// srcset, plus deviceScreens.ts with the URLs and sizes. A screen captured in the Russian locale prints the clock as
+// «09:41»; `dropClockZero` takes the leading zero off and recentres «9:41» the way iOS lays out the shorter time.
 //   npm run landing:device   (node apps/web/scripts/landing-device.mjs)
 // Sources: docs/screenshots/presentation/mobile (release build on real data). The other landing images come from
 // landing-shots.mjs; this script touches only src/landing/assets/device/ and deviceScreens.ts.
@@ -29,13 +30,17 @@ const screens = {
   emergency: '09-worker-emergency.png',
   workerReport: '15-worker-ai-report.png',
   aiReport: '28-master-ai-report-sonnet.png',
+  // Light theme for the light hero: the 17 Pro simulator with `rota.theme` set to light and
+  // `xcrun simctl status_bar booted override --time 9:41 --cellularMode active --cellularBars 4 --wifiBars 3
+  // --batteryState discharging --batteryLevel 100` (real signal bars, so nothing to redraw).
+  masterShiftLight: { file: '30-master-shift-light.png', dropClockZero: true },
 };
 
 /**
  * Paints over the island the simulator draws into the status bar. It is found as the near black box in the top
  * band; on a black status bar it is invisible and the box fills the whole band, so nothing is painted.
  */
-async function withoutIsland(file) {
+async function withoutIsland(file, { dropClockZero = false } = {}) {
   const { data, info } = await sharp(file)
     .removeAlpha()
     .raw()
@@ -72,6 +77,7 @@ async function withoutIsland(file) {
       }
     }
   }
+  const clock = dropClockZero && withoutClockZero(data, info);
   const bars = signalBars(data, info);
   let image = sharp(data, { raw: info });
   if (bars)
@@ -81,7 +87,52 @@ async function withoutIsland(file) {
         .png()
         .toBuffer(),
     );
-  return { image, island: found, bars: Boolean(bars) };
+  return { image, island: found, bars: Boolean(bars), clock: Boolean(clock) };
+}
+
+/**
+ * «09:41» → «9:41»: finds the clock's glyphs (columns that differ from the status bar in its left third), paints the
+ * first one out and moves the rest left by half its advance, so the time stays centred where iOS centres it.
+ */
+function withoutClockZero(data, info) {
+  const { width, channels } = info;
+  const at = (x, y) => (y * width + x) * channels;
+  const bg = data.slice(at(8, 100), at(8, 100) + 3);
+  const differs = (x, y) => {
+    const i = at(x, y);
+    return (
+      Math.abs(data[i] - bg[0]) + Math.abs(data[i + 1] - bg[1]) + Math.abs(data[i + 2] - bg[2]) > 40
+    );
+  };
+  const runs = [];
+  let y0 = Infinity;
+  let y1 = -1;
+  for (let x = 0, start = -1; x < width * 0.3; x++) {
+    let ink = false;
+    for (let y = 40; y < 160; y++) {
+      if (!differs(x, y)) continue;
+      ink = true;
+      y0 = Math.min(y0, y);
+      y1 = Math.max(y1, y);
+    }
+    if (ink && start < 0) start = x;
+    if (!ink && start >= 0) {
+      runs.push([start, x - 1]);
+      start = -1;
+    }
+  }
+  if (runs.length !== 5) return false; // d d : d d
+  const shift = Math.round((runs[1][0] - runs[0][0]) / 2);
+  const [left, right, top, bottom] = [runs[0][0] - 2, runs[4][1] + 2, y0 - 2, y1 + 2];
+  const from = runs[1][0] - 2;
+  const copy = [];
+  for (let y = top; y <= bottom; y++)
+    copy.push(Buffer.from(data.subarray(at(from, y), at(right + 1, y))));
+  for (let y = top; y <= bottom; y++) {
+    for (let x = left; x <= right; x++) data.set(bg, at(x, y));
+    data.set(copy[y - top], at(from - shift, y));
+  }
+  return true;
 }
 
 /**
@@ -165,9 +216,11 @@ function signalBars(data, info) {
 const kebab = (s) => s.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 const entries = [];
 
-for (const [name, file] of Object.entries(screens)) {
-  const { image, island, bars } = await withoutIsland(
+for (const [name, screen] of Object.entries(screens)) {
+  const { file, ...options } = typeof screen === 'string' ? { file: screen } : screen;
+  const { image, island, bars, clock } = await withoutIsland(
     join(repo, 'docs/screenshots/presentation/mobile', file),
+    options,
   );
   const fitted = await image
     .resize(DISPLAY.width, DISPLAY.height, { fit: 'cover', position: 'top', kernel: 'lanczos3' })
@@ -189,7 +242,7 @@ for (const [name, file] of Object.entries(screens)) {
       id: `${name}${w}`,
     });
     console.log(
-      `device/${kebab(name)}-${w}.webp ${info.width}×${info.height} ${Math.round(bytes / 1024)} KB${island ? ' (island painted over)' : ''}${bars ? ' (signal bars)' : ''}`,
+      `device/${kebab(name)}-${w}.webp ${info.width}×${info.height} ${Math.round(bytes / 1024)} KB${island ? ' (island painted over)' : ''}${bars ? ' (signal bars)' : ''}${clock ? ' (clock 9:41)' : ''}`,
     );
   }
   entries.push({ name, files });
