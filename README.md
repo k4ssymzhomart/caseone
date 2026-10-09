@@ -22,6 +22,7 @@
   <a href="https://rota-naryad.netlify.app/login"><b>Web panel</b></a> ·
   <a href="https://rota-naryad.netlify.app/app/"><b>Phone app in the browser</b></a> ·
   <a href="https://expo.dev/artifacts/eas/fnTA-JZAfTHP7Ota0PJ5E7Omk77HNJRTzcGDBrhChUw.apk"><b>Android APK</b></a> ·
+  <a href="#demo-video"><b>▶ Demo film</b></a> ·
   <a href="docs/case/case1-kostanai-minerals-ru.pdf">Case PDF</a> ·
   <a href="docs/development.md">Run it locally</a>
 </p>
