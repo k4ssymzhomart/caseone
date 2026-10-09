@@ -2,6 +2,17 @@
 
 Real data: Supabase project «rota» with 3 months of history (559 orders). Release build on iPhone 17 Pro (master, 1001) and iPhone 16 (workers 2001, 2002); web panel at 1440 × 900.
 
+## Hero (`hero/`)
+
+The landing hero for the title slide, captured from the production build of `/` in headless Chrome: signed out, dark scheme, reduced motion (the HUD capsule shows its static last state, «ИИ проверил №661 · 84 из 100»). Lossless PNG; the 4K capture is four 1920 × 1080 tiles stitched pixel exact.
+
+| File | What it shows |
+| --- | --- |
+| `hero-3840x2160.png` | Первый экран лендинга, 1920 × 1080 при 2× (4K, 16:9) |
+| `hero-2880x1800.png` | Первый экран лендинга, 1440 × 900 при 2× (16:10) |
+| `hero-mobile-1170x2532.png` | Первый экран на телефоне, 390 × 844 при 3× |
+| `background-3840x2160.jpg` | Фон героя без текста и телефона: красный шёлк, 4K (`npm run landing:hero-bg`) |
+
 ## Mobile (`mobile/`)
 
 | File | What it shows |
