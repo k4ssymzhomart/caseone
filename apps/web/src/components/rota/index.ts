@@ -5,3 +5,4 @@ export { Hud, type HudProps, type HudTone } from './Hud/Hud';
 export { Keycap } from './Keycap/Keycap';
 export { Lockup, LogoMark } from './Logo/Logo';
 export { Mascot, mascotNames, type MascotName } from './Mascot/Mascot';
+export { PlatformLogo } from './PlatformLogo';

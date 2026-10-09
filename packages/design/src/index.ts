@@ -22,3 +22,4 @@ export {
   type MascotLayerRole,
 } from './brand/mascots';
 export { mascotColors } from './brand/mascotColors';
+export * from './brand/platforms';
