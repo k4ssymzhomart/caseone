@@ -34,6 +34,10 @@ export const mobileRu = {
   'common.addPhoto': 'Добавить фото',
   'common.ai': 'ИИ',
 
+  'notFound.title': 'Такой страницы нет',
+  'notFound.body': 'Ссылка устарела или набрана с ошибкой',
+  'notFound.home': 'На главную',
+
   'tabs.orders': 'Наряды',
   'tabs.closed': 'Закрытые',
   'tabs.profile': 'Профиль',

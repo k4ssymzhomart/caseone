@@ -26,7 +26,8 @@ const config: ExpoConfig = {
   ios: { bundleIdentifier: 'kz.rota.app', supportsTablet: false },
   web: { output: 'single', bundler: 'metro', favicon: './assets/icon.png' },
   plugins: [
-    'expo-router',
+    // The PWA drops Expo Router's generated /_sitemap, a developer page that lists every route file.
+    baseUrl ? ['expo-router', { sitemap: false }] : 'expo-router',
     'expo-font',
     ['expo-audio', { microphonePermission: false, recordAudioAndroid: false }],
     ['expo-splash-screen', { image: './assets/splash-icon.png', imageWidth: 160, backgroundColor: '#000000' }],
