@@ -4,14 +4,14 @@ Real data: Supabase project «rota» with 3 months of history (540 orders, plus 
 
 ## Hero (`hero/`)
 
-The landing hero for the title slide, captured from the production build of `/` in headless Chrome: signed out, dark scheme, reduced motion (the HUD capsule shows its static last state, «ИИ проверил №661 · 84 из 100»). Lossless PNG; the 4K capture is four 1920 × 1080 tiles stitched pixel exact.
+The landing hero for the title slide: the light centered stage after the reference (app icon, «Новое» pill, headline, lead, two buttons, the phone with the master's light «Смена» screen cut by the panel's edge, four floating cards around it), captured from the production build of `/` in headless Chrome: signed out, reduced motion (the cards hold still). Lossless PNG, one capture per file at the device pixel ratio named below.
 
 | File | What it shows |
 | --- | --- |
 | `hero-3840x2160.png` | Первый экран лендинга, 1920 × 1080 при 2× (4K, 16:9) |
 | `hero-2880x1800.png` | Первый экран лендинга, 1440 × 900 при 2× (16:10) |
-| `hero-mobile-1170x2532.png` | Первый экран на телефоне, 390 × 844 при 3× |
-| `background-3840x2160.jpg` | Фон героя без текста и телефона: красный шёлк, 4K (`npm run landing:hero-bg`) |
+| `hero-mobile-1170x2532.png` | Первый экран на телефоне, 390 × 844 при 3×: карточка аварийного наряда над телефоном |
+| `background-3840x2160.jpg` | Фон героя без текста и телефона: белый атлас, лента с красной кромкой, 4K 16:9 (`hero-light-3840.jpg` из `npm run landing:hero-bg-light`) |
 
 ## Mobile (`mobile/`)
 
