@@ -10,13 +10,14 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Redirect, router, useFocusEffect, useLocalSearchParams, type Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef } from 'react';
-import { BackHandler, Image, ScrollView, View } from 'react-native';
+import { Image, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { registerEmergencyScreen } from '@/features/notifications/emergencyGate';
 import { goBack } from '@/features/orders/BackBar';
 import { isOrderGone, useOrderAction } from '@/features/orders/useOrderAction';
 import { useApi, useSession } from '@/lib/api';
+import { onHardwareBack } from '@/lib/hardwareBack';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
 import { startSiren, stopSiren } from '@/lib/siren';
@@ -119,10 +120,10 @@ function EmergencyBody({ idParam, demo }: { idParam: string; demo: boolean }) {
       leaveIfAnswered();
       if (!leaving.current && !accepted.current) arm();
       // Never dismissed by the Android back button: it needs an answer. The load error state has «Закрыть».
-      const back = BackHandler.addEventListener('hardwareBackPress', () => true);
+      const offBack = onHardwareBack(() => true);
       return () => {
         focused.current = false;
-        back.remove();
+        offBack();
         silence();
       };
     }, [arm, leaveIfAnswered, silence]),

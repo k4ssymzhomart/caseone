@@ -17,6 +17,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LiveBridge, LiveHudProvider } from '@/features/live/LiveBridge';
 import { NotificationBridge } from '@/features/notifications/NotificationBridge';
 import { ApiProvider, useSession, useSessionReady } from '@/lib/api';
+import { useNavigatorHold } from '@/lib/navigatorHold';
 import { queryClient } from '@/lib/query';
 import { ThemeProvider, useTheme } from '@/lib/theme';
 import { ConfirmProvider } from '@/ui/ConfirmSheet';
@@ -69,6 +70,8 @@ function SplashGate() {
 
 function RootStack() {
   const theme = useTheme();
+  const hold = useNavigatorHold();
+  if (hold) return null;
 
   return (
     <Stack

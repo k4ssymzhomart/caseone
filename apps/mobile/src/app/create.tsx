@@ -12,7 +12,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, Stack, type Href } from 'expo-router';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ActivityIndicator, BackHandler, Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AssigneeCard } from '@/features/create/AssigneeCard';
@@ -32,6 +32,7 @@ import { formatTaps, useTapCounter } from '@/features/create/useTapCounter';
 import { errorText } from '@/features/orders/useOrderAction';
 import { newActionId, useApi } from '@/lib/api';
 import { indexDirectories, useDirectories } from '@/lib/directories';
+import { onHardwareBack } from '@/lib/hardwareBack';
 import { haptic } from '@/lib/haptics';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
@@ -320,11 +321,10 @@ function CreateScreen() {
   askCloseRef.current = askClose;
   useEffect(() => {
     if (!dirty) return;
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+    return onHardwareBack(() => {
       void askCloseRef.current();
       return true;
     });
-    return () => sub.remove();
   }, [dirty]);
 
   const submit = async () => {

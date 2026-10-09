@@ -4,10 +4,11 @@
 // gutters, so full bleed rows (ActionList) fit.
 import { primitives, withAlpha } from '@rota/design';
 import { useEffect, type ReactNode } from 'react';
-import { BackHandler, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { onHardwareBack } from '@/lib/hardwareBack';
 import { t } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
 import { SheetHeader } from '@/ui/SheetHeader';
@@ -25,11 +26,10 @@ export function OverlaySheet({ title, subtitle, onClose, children, testID }: Ove
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+    return onHardwareBack(() => {
       onClose();
       return true;
     });
-    return () => sub.remove();
   }, [onClose]);
 
   return (
