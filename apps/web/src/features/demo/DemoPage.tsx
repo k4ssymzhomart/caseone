@@ -138,7 +138,7 @@ export function DemoPage() {
             ))}
           </ol>
           <p className={styles.footnote}>
-            <WithMark logo={androidLogo} size={14}>
+            <WithMark logo={androidLogo} size={14} wrap>
               {t('demo.script_note')}
             </WithMark>
           </p>

@@ -246,7 +246,7 @@ function ProviderLine({ rows }: { rows: readonly LlmAuditRow[] }) {
   if (models.length === 0) return null;
   return (
     <p className={styles.provider}>
-      <WithMark logo={anthropicLogo} size={16}>
+      <WithMark logo={anthropicLogo} size={16} wrap>
         {t(models.length === 1 ? 'admin.ai.provider_one' : 'admin.ai.provider_many', { models: models.join(', ') })}
       </WithMark>
     </p>

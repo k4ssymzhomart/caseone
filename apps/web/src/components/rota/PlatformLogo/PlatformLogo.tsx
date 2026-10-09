@@ -8,6 +8,7 @@ interface Props {
   /**
    * 'dark' (default): the brand color, white where the brand is near black, for Rota's dark canvas.
    * 'brand': the owner's exact brand color. 'mono': currentColor, to sit inside a button or a line of text.
+   * A logo with full color artwork (Chrome, Telegram, Safari) paints it in both colored tones.
    */
   tone?: 'dark' | 'brand' | 'mono';
   /** Spoken name; omit when a visible label already names the platform (the mark is then decorative). */
@@ -30,9 +31,9 @@ export function PlatformLogo({ logo, size = 20, tone = 'dark', title, className 
       style={{ flex: 'none', display: 'inline-block', verticalAlign: 'middle' }}
     >
       {title ? <title>{title}</title> : null}
-      {logo.paths.map((d) => (
-        <path key={d.slice(0, 24)} d={d} fill={fill} fillRule="evenodd" />
-      ))}
+      {logo.art && tone !== 'mono'
+        ? logo.art.map((part) => <path key={part.d.slice(0, 24)} d={part.d} fill={part.color} fillRule="evenodd" />)
+        : logo.paths.map((d) => <path key={d.slice(0, 24)} d={d} fill={fill} fillRule="evenodd" />)}
       {logo.detail?.paths.map((d) => (
         <path key={d.slice(0, 24)} d={d} fill={tone === 'mono' ? 'var(--color-bg-canvas, #000)' : logo.detail!.color} />
       ))}

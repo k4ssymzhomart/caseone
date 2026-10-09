@@ -31,13 +31,21 @@ interface WithMarkProps extends BrandMarkProps {
   children: ReactNode;
   /** 'tight' (6 px) inside a small capsule such as a Tag; 8 px everywhere else. */
   gap?: 'tight';
+  /** The text may run over several lines: the mark then stays centered on the first line instead of the block. */
+  wrap?: boolean;
 }
 
 /** Text led by a brand mark, both centered on one line; the text truncates when its parent clips. */
-export function WithMark({ children, gap, ...mark }: WithMarkProps) {
+export function WithMark({ children, gap, wrap = false, ...mark }: WithMarkProps) {
   return (
-    <span className={styles.withMark} data-gap={gap}>
-      <BrandMark {...mark} />
+    <span className={styles.withMark} data-gap={gap} data-wrap={wrap || undefined}>
+      {wrap ? (
+        <span className={styles.markLine}>
+          <BrandMark {...mark} />
+        </span>
+      ) : (
+        <BrandMark {...mark} />
+      )}
       <span className={styles.withMarkText}>{children}</span>
     </span>
   );

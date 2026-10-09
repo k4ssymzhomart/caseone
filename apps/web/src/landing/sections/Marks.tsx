@@ -27,14 +27,10 @@ interface MarkProps {
   className?: string;
 }
 
-/** Optical size: a mark that fills its whole square (the Windows panes) reads larger than the round or tall ones. */
-const OPTICAL: Record<string, number> = { Windows: 0.84 };
-
-/** One decorative mark: the text beside it always names the platform. */
+/** One decorative mark: the text beside it always names the platform. The Windows panes carry their own optical size. */
 export function Mark({ logo, size = 20, mono = false, className }: MarkProps) {
-  const px = Math.round(size * (OPTICAL[logo.title] ?? 1));
   const classes = [m.mark, className].filter(Boolean).join(' ');
-  return <PlatformLogo logo={logo} size={px} tone={mono ? 'mono' : 'dark'} className={classes} />;
+  return <PlatformLogo logo={logo} size={size} tone={mono ? 'mono' : 'dark'} className={classes} />;
 }
 
 interface WithMarkProps {

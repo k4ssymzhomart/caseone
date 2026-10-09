@@ -204,6 +204,22 @@
   text-overflow: ellipsis;
 }
 
+/* Several lines of text: the mark sits in a box one line tall, so it centers on the first line. */
+.withMark[data-wrap] {
+  align-items: flex-start;
+}
+
+.withMark[data-wrap] .withMarkText {
+  overflow: visible;
+}
+
+.markLine {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: 1lh;
+}
+
 [data-tone='free'] { --tone: var(--status-free); --tone-soft: var(--status-free-soft); }
 [data-tone='working'] { --tone: var(--status-working); --tone-soft: var(--status-working-soft); }
 [data-tone='queue'] { --tone: var(--status-queue); --tone-soft: var(--status-queue-soft); }

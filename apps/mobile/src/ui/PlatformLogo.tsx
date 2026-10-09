@@ -13,7 +13,10 @@ export interface PlatformLogoProps {
   /** A single logo from @rota/design, e.g. telegramLogo. */
   logo: Logo;
   size?: number;
-  /** 'theme' (default): the brand color, white on dark where the brand is near black. 'brand': exact brand color. */
+  /**
+   * 'theme' (default): the brand color, white on dark where the brand is near black. 'brand': exact brand color.
+   * A logo with full color artwork (Chrome, Telegram, Safari) paints it in either tone.
+   */
   tone?: 'theme' | 'brand';
   /** Spoken name; omit when a visible label already names the platform. */
   accessibilityLabel?: string;
@@ -31,9 +34,9 @@ export function PlatformLogo({ logo, size = 24, tone = 'theme', accessibilityLab
       accessible={Boolean(accessibilityLabel)}
       accessibilityLabel={accessibilityLabel}
     >
-      {logo.paths.map((d) => (
-        <Path key={d.slice(0, 24)} d={d} fill={fill} fillRule="evenodd" />
-      ))}
+      {logo.art
+        ? logo.art.map((part) => <Path key={part.d.slice(0, 24)} d={part.d} fill={part.color} fillRule="evenodd" />)
+        : logo.paths.map((d) => <Path key={d.slice(0, 24)} d={d} fill={fill} fillRule="evenodd" />)}
       {logo.detail?.paths.map((d) => <Path key={d.slice(0, 24)} d={d} fill={logo.detail!.color} />)}
       {logo.label ? (
         <SvgText x="12" y="16" textAnchor="middle" fontWeight="700" fontSize="11" fill={logo.label.color}>
