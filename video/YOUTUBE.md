@@ -1,5 +1,7 @@
 # YouTube upload
 
+Published 9 October 2026, public: https://youtu.be/qu7YrDZdqXI (channel Kassymzhomart Shubay). Thumbnail: the outro frame (logo and slogan); a custom thumbnail and clickable description links need the channel's one time verification.
+
 File: `video/out/rota-demo.mp4` (2:58, 1920 × 1080, rendered by `cd video && npm run render`). Thumbnail: `docs/readme/youtube-thumb.jpg`. Visibility: Public. Category: Science & Technology. Not made for kids.
 
 ## Title

@@ -22,7 +22,7 @@
   <a href="https://rota-naryad.netlify.app/login"><b>Web panel</b></a> ·
   <a href="https://rota-naryad.netlify.app/app/"><b>Phone app in the browser</b></a> ·
   <a href="https://expo.dev/artifacts/eas/fnTA-JZAfTHP7Ota0PJ5E7Omk77HNJRTzcGDBrhChUw.apk"><b>Android APK</b></a> ·
-  <a href="#demo-video"><b>▶ Demo film</b></a> ·
+  <a href="https://youtu.be/qu7YrDZdqXI"><b>▶ Demo film</b></a> ·
   <a href="docs/case/case1-kostanai-minerals-ru.pdf">Case PDF</a> ·
   <a href="docs/development.md">Run it locally</a>
 </p>
@@ -327,10 +327,8 @@ falls back to rules only when the model is off or over budget.
 
 ## Demo video
 
-<a href="https://github.com/k4ssymzhomart/caseone/releases/download/demo-day/rota-demo.mp4"><img src="docs/readme/film.png" width="100%" alt="The Rota demo film, 2:58. Poster: the red emergency screen of order №660 for Насос НШ-32 маслостанции, the order Claude scores 84 из 100 later in the film."></a>
-<!-- YOUTUBE -->
-
-**▶ [Watch the film (MP4, 2:58, 35 MB)](https://github.com/k4ssymzhomart/caseone/releases/download/demo-day/rota-demo.mp4)** · [Demo Day release](https://github.com/k4ssymzhomart/caseone/releases/tag/demo-day) with the film and the slides
+<a href="https://youtu.be/qu7YrDZdqXI"><img src="docs/readme/film.png" width="100%" alt="The Rota demo film, 2:58. Poster: the red emergency screen of order №660 for Насос НШ-32 маслостанции, the order Claude scores 84 из 100 later in the film."></a>
+<p align="center"><a href="https://youtu.be/qu7YrDZdqXI"><img src="docs/readme/logos/youtube.svg" height="20" alt="YouTube"></a>&nbsp; <b><a href="https://youtu.be/qu7YrDZdqXI">Watch on YouTube</a></b> · 2:58 · 1080p &nbsp;·&nbsp; <a href="https://github.com/k4ssymzhomart/caseone/releases/download/demo-day/rota-demo.mp4">MP4 download</a> · <a href="https://github.com/k4ssymzhomart/caseone/releases/tag/demo-day">Demo Day release</a></p>
 
 The final cut runs 2:58 at 1920 × 1080, with Russian captions and no voice. It is cut from the recordings of
 9 October 2026: the Release build of the app on two iPhone simulators (мастер 1001, исполнитель 2001, then 2002 for the
@@ -396,7 +394,7 @@ shows the web panel and mirrors A and B.
 | ✓ | Test dataset | [`supabase/seed/`](supabase/seed) and [`tools/seed/PATTERNS.md`](tools/seed/PATTERNS.md) |
 | ✓ | Architecture | [`docs/architecture.md`](docs/architecture.md) |
 | ✓ | Presentation of at most 10 slides | 10 slides: [`docs/presentation/rota-presentation.pdf`](docs/presentation/rota-presentation.pdf) · [rota-naryad.netlify.app/rota-presentation.pdf](https://rota-naryad.netlify.app/rota-presentation.pdf) |
-| ✓ | Demo video of at most 3 minutes | the final cut, 2:58, from the footage recorded on 9 October 2026: [MP4 in the Demo Day release](https://github.com/k4ssymzhomart/caseone/releases/tag/demo-day), see [Demo video](#demo-video) |
+| ✓ | Demo video of at most 3 minutes | the final cut, 2:58, from the footage recorded on 9 October 2026: [YouTube](https://youtu.be/qu7YrDZdqXI), [MP4 in the Demo Day release](https://github.com/k4ssymzhomart/caseone/releases/tag/demo-day) |
 
 ## Credits and license
 

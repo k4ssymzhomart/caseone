@@ -7,10 +7,10 @@ export const links = {
   panel: '/login',
   /** The mobile app as a PWA in any browser, iPhone included (the APK stays the full experience). */
   app: '/app/',
-  /** Demo video ≤ 3 min (YouTube unlisted or Drive). */
-  video: '',
-  /** Pitch PDF, for example '/rota-pitch.pdf' in public/. */
-  pitch: '',
+  /** Demo film, 2:58, public on YouTube (video/YOUTUBE.md). */
+  video: 'https://youtu.be/qu7YrDZdqXI',
+  /** The 10 slide deck, served from public/ (docs/presentation/rota-presentation.pdf). */
+  pitch: '/rota-presentation.pdf',
   repo: 'https://github.com/k4ssymzhomart/caseone',
 } as const;
 

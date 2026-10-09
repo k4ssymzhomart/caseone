@@ -1,7 +1,15 @@
 // Footer (§5.13): lockup and slogan, three columns, the disclaimer. The jury links carry one platform mark each, the
 // first of the call to action's marks for the same link, in a fixed 16 px slot, so every label starts on the same line
 // whether it has a mark or not.
-import { androidLogo, chromeLogo, githubLogo, pdfLogo, windowsLogo, type PlatformLogo as Logo } from '@rota/design';
+import {
+  androidLogo,
+  chromeLogo,
+  githubLogo,
+  pdfLogo,
+  windowsLogo,
+  youtubeLogo,
+  type PlatformLogo as Logo,
+} from '@rota/design';
 import { Lockup } from '@/components/rota/Logo/Logo';
 import { content } from '../content';
 import { links } from '../links';
@@ -17,7 +25,7 @@ export function Footer() {
     { href: links.apk, label: c.jury.apk, logo: androidLogo },
     { href: links.app, label: c.jury.app, logo: chromeLogo },
     { href: links.panel, label: c.jury.panel, logo: windowsLogo },
-    { href: links.video, label: c.jury.video },
+    { href: links.video, label: c.jury.video, logo: youtubeLogo },
     { href: links.pitch, label: c.jury.pitch, logo: pdfLogo },
     { href: links.repo, label: c.jury.repo, logo: githubLogo },
   ];

@@ -68,6 +68,7 @@ const LOGOS: PlatformLogoName[] = [
   'xlsx',
   'onec',
   'googlePlay',
+  'youtube',
 ];
 
 function logoInner(logo: PlatformLogo): string {

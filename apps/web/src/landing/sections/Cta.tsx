@@ -1,7 +1,16 @@
 // Final CTA, the submission hub (§5.12): every link for the jury and the test accounts. Each link that names a
 // platform carries its mark: Android for the APK, Chrome and Safari for the app in the browser (the label names the
-// browser, and the FAQ says iPhone), Windows and Apple for the desktop panel, the PDF badge, GitHub.
-import { androidLogo, appleLogo, chromeLogo, githubLogo, pdfLogo, safariLogo, windowsLogo } from '@rota/design';
+// browser, and the FAQ says iPhone), Windows and Apple for the desktop panel, YouTube for the film, the PDF badge, GitHub.
+import {
+  androidLogo,
+  appleLogo,
+  chromeLogo,
+  githubLogo,
+  pdfLogo,
+  safariLogo,
+  windowsLogo,
+  youtubeLogo,
+} from '@rota/design';
 import { content } from '../content';
 import { links } from '../links';
 import s from '../landing.module.css';
@@ -36,7 +45,9 @@ export function Cta() {
               <MarkPill href={links.panel} logos={[windowsLogo, appleLogo]}>
                 {c.panel}
               </MarkPill>
-              <MarkPill href={links.video}>{c.video}</MarkPill>
+              <MarkPill href={links.video} logos={[youtubeLogo]}>
+                {c.video}
+              </MarkPill>
               <MarkPill href={links.pitch} logos={[pdfLogo]}>
                 {c.pitch}
               </MarkPill>
