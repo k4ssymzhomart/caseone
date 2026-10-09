@@ -96,9 +96,13 @@ npm run build:web           # production build into apps/web/dist
 ```
 
 After sign in a master lands on `/shift`, the руководитель on `/dashboard`, the admin on `/admin/directories`. Workers
-use the mobile app; the panel tells them so and signs them out. `/kit` shows the Rota web components. Hosting is
-Vercel with `apps/web` as the root (`apps/web/vercel.json` rewrites every path to `index.html`); set `VITE_API_MODE`,
-`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` as project variables.
+use the mobile app; the panel tells them so and signs them out. `/kit` shows the Rota web components. Hosting: the
+Vercel project `caseone` (https://caseone-one.vercel.app) builds every push to `main` from the repository root: the
+root `vercel.json` runs `deploy/vercel/ci-build.sh` (landing and panel at `/`, the phone app at `/app/`). Its project
+variables hold the public values only: `VITE_API_MODE=supabase`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`,
+`VITE_DEMO_ACCOUNTS`, `EXPO_PUBLIC_API_MODE=supabase`, `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+`EXPO_PUBLIC_DEMO_ACCOUNTS`, `EXPO_PUBLIC_TELEGRAM_BOT`. Netlify (`deploy/netlify/deploy.sh`) ships the same build
+from a local checkout to https://rota-naryad.netlify.app.
 
 ## Database
 
