@@ -28,7 +28,7 @@ Checked 2026-10-09, 01:50, project «rota» `wcjklkpkuhxgfdtbwbuk`.
 - `npm run ai-verify:check`: Sonnet 5.5 judged the after photo, 200 in 9 s, idempotent, 401/403 as expected. `tools/ai-insights-check.ts --deployed`: 8 model cards for 92 days, the demo question parsed by Haiku as участок дробления, 30 days; the К-3 card has 7 stops, 5 of them М-02.
 - LLM ledger: about 0.42 USD of the 4 USD cap.
 - Web (Netlify, 2026-10-09): https://rota-naryad.netlify.app (`deploy/netlify/deploy.sh`; the Vercel account was out of free daily deployments). Checked signed in as master, manager and admin.
-- APK (EAS preview, 2026-10-09): https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk
+- APK (EAS preview, 2026-10-09): https://expo.dev/artifacts/eas/fnTA-JZAfTHP7Ota0PJ5E7Omk77HNJRTzcGDBrhChUw.apk
 
 ## Branches
 

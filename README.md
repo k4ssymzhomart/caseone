@@ -9,7 +9,7 @@
 
 <p align="center">
   <img src="docs/readme/badges/hackathon.svg" height="28" alt="Qostanai Industry Hackathon 2026, Кейс 1 «НарядAI»">
-  <a href="https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk"><img src="docs/readme/badges/android.svg" height="28" alt="Android APK"></a>
+  <a href="https://expo.dev/artifacts/eas/fnTA-JZAfTHP7Ota0PJ5E7Omk77HNJRTzcGDBrhChUw.apk"><img src="docs/readme/badges/android.svg" height="28" alt="Android APK"></a>
   <a href="https://rota-naryad.netlify.app/login"><img src="docs/readme/badges/web.svg" height="28" alt="Web panel and PWA"></a>
   <a href="docs/golden-results.md"><img src="docs/readme/badges/golden.svg" height="28" alt="AI check: 10 из 10 on the golden set"></a>
   <a href="vitest.config.ts"><img src="docs/readme/badges/tests.svg" height="28" alt="660 tests passing"></a>
@@ -21,7 +21,7 @@
   <a href="https://rota-naryad.netlify.app"><b>Landing</b></a> ·
   <a href="https://rota-naryad.netlify.app/login"><b>Web panel</b></a> ·
   <a href="https://rota-naryad.netlify.app/app/"><b>Phone app in the browser</b></a> ·
-  <a href="https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk"><b>Android APK</b></a> ·
+  <a href="https://expo.dev/artifacts/eas/fnTA-JZAfTHP7Ota0PJ5E7Omk77HNJRTzcGDBrhChUw.apk"><b>Android APK</b></a> ·
   <a href="docs/case/case1-kostanai-minerals-ru.pdf">Case PDF</a> ·
   <a href="docs/development.md">Run it locally</a>
 </p>
@@ -33,7 +33,7 @@ Built for **АО «Костанайские Минералы»** (chrysotile ope
 
 | | Where | Sign in (табельный номер / ПИН) |
 | --- | --- | --- |
-| <img src="docs/readme/logos/android.svg" height="20" align="top"> **Android app** | [APK, EAS preview build](https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk) | worker `2001/1234`, master `1001/1111` |
+| <img src="docs/readme/logos/android.svg" height="20" align="top"> **Android app** | [APK, EAS preview build](https://expo.dev/artifacts/eas/fnTA-JZAfTHP7Ota0PJ5E7Omk77HNJRTzcGDBrhChUw.apk) | worker `2001/1234`, master `1001/1111` |
 | <img src="docs/readme/logos/chrome.svg" height="20" align="top"> **Web panel** | [rota-naryad.netlify.app/login](https://rota-naryad.netlify.app/login) | master `1001/1111`, руководитель `3001/3333`, admin `9001/9999` |
 | <img src="docs/readme/logos/safari.svg" height="20" align="top"> **Phone app in the browser** (iPhone too) | [rota-naryad.netlify.app/app/](https://rota-naryad.netlify.app/app/) | the same accounts as the Android app |
 | <img src="docs/readme/logos/rota.svg" height="20" align="top"> **Landing** | [rota-naryad.netlify.app](https://rota-naryad.netlify.app) | |
@@ -313,7 +313,7 @@ falls back to rules only when the model is off or over budget.
 1. Open the [phone app](https://rota-naryad.netlify.app/app/) in one browser window and sign in as мастер
    `1001 / 1111`. «Смена» shows who is free, who works, who is off shift.
 2. Open it again in a second browser (or on a phone, or install the
-   [APK](https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk)) and sign in as исполнитель
+   [APK](https://expo.dev/artifacts/eas/fnTA-JZAfTHP7Ota0PJ5E7Omk77HNJRTzcGDBrhChUw.apk)) and sign in as исполнитель
    `2001 / 1234`.
 3. As the мастер, issue an emergency наряд: «Выдать», «Аварийный», the unit «Насос НШ-32 маслостанции» (the area chip
    «Участок обогащения» narrows the list), the problem «Течь масла», «Выдать». The worker's screen turns red.
@@ -388,7 +388,7 @@ shows the web panel and mirrors A and B.
 | | Deliverable | Where |
 | :---: | --- | --- |
 | ✓ | Repository with run instructions | this README and [`docs/development.md`](docs/development.md) |
-| ✓ | Android APK, and a PWA link | [APK](https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk) · [rota-naryad.netlify.app/app/](https://rota-naryad.netlify.app/app/) |
+| ✓ | Android APK, and a PWA link | [APK](https://expo.dev/artifacts/eas/fnTA-JZAfTHP7Ota0PJ5E7Omk77HNJRTzcGDBrhChUw.apk) · [rota-naryad.netlify.app/app/](https://rota-naryad.netlify.app/app/) |
 | ✓ | Web panel and test accounts (мастер, исполнитель, руководитель) | [rota-naryad.netlify.app/login](https://rota-naryad.netlify.app/login) · 1001/1111, 2001/1234, 3001/3333 |
 | ✓ | Test dataset | [`supabase/seed/`](supabase/seed) and [`tools/seed/PATTERNS.md`](tools/seed/PATTERNS.md) |
 | ✓ | Architecture | [`docs/architecture.md`](docs/architecture.md) |
