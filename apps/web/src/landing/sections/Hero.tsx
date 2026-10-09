@@ -84,17 +84,9 @@ export function Hero() {
       <div className={h.backdrop} aria-hidden="true" />
       <div className={`${s.container} ${h.grid}`}>
         <div className={h.copy}>
-          <p className={`${s.eyebrow} ${h.eyebrow}`}>
-            <span className={h.eyebrowDot} />
-            <span className={h.eyebrowText}>
-              {c.eyebrow[0]}
-              <span className={h.eyebrowSep}> · </span>
-              <span className={h.eyebrowPart}>{c.eyebrow[1]}</span>
-            </span>
-          </p>
           <h1 id="hero-title" className={h.title}>
             <span className={h.line}>{c.title[0]}</span>
-            <span className={`${h.line} ${h.accent}`}>{c.title[1]}</span>
+            <span className={h.line}>{c.title[1]}</span>
           </h1>
           <p className={h.lead}>{c.lead}</p>
           <div className={h.cta}>

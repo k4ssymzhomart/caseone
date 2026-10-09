@@ -99,8 +99,8 @@ Anchors in brackets. Copy is final: put it in `content.ts` verbatim.
 Backdrop: the 4K silk render from `tools/gen-hero-bg.ts` (`assets/hero-bg-3840.jpg` for retina screens from 1024 px and wide screens, `hero-bg-1920.jpg` for phones, tablets and 1× screens; `main.tsx` preloads the one the same media query picks), black while it loads, a light left shade and a 200 px fade into the page. Min-height `100svh` capped at 1120; the hero clips its overflow. Two columns: copy (664 px) and the stage; rows: copy, platforms, figures.
 
 Left, set editorially (no glass box), top to bottom:
-- Eyebrow with a red dot: «QOSTANAI INDUSTRY HACKATHON 2026 · КЕЙС 1 «НАРЯДAI»» (two parts; under 768 px the « · » hides and the case goes on its own line)
-- H1: «Наряд выдан,<br>ИИ на контроле.», the second line a white to soft red gradient
+- No eyebrow: the hero opens with the headline (the case is named in the footer and the page meta)
+- H1: «Наряд выдан,<br>ИИ на контроле.», both lines plain white
 - Lead: «Мастер выдаёт наряд с телефона за 6 нажатий. Исполнитель принимает его в один тап. ИИ следит за сроками, проверяет работу по фото и находит оборудование, которое ломается чаще других.»
 - Buttons: primary «Скачать APK» (Android mark), glass «Открыть в браузере» (Chrome and Safari marks), quiet link «Открыть веб панель →»
 - «Работает на» row, 56 px below the buttons, each real mark on a 44 px app icon tile (the Windows and Apple pair on a wider one) with two lines: Android · APK; iPhone · браузер; Windows и Mac · веб панель; Telegram · уведомления. Under 768 px a 2 × 2 grid, each tile above its words.

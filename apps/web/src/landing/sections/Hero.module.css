@@ -83,32 +83,8 @@
   grid-area: 2 / 1;
 }
 
-.eyebrow {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 11.5px;
-  letter-spacing: 0.16em;
-}
-
-.eyebrowDot {
-  flex: none;
-  width: 7px;
-  height: 7px;
-  margin-top: 0.35em;
-  border-radius: 50%;
-  background: var(--l-red);
-  box-shadow:
-    0 0 0 4px rgb(255 59 48 / 0.16),
-    0 0 14px rgb(255 59 48 / 0.7);
-}
-
-.eyebrowPart {
-  white-space: nowrap;
-}
-
 .title {
-  margin: 26px 0 0;
+  margin: 0;
   color: var(--color-text-heading);
   font-size: clamp(44px, 5vw, 76px);
   font-weight: 700;
@@ -119,21 +95,6 @@
 
 .line {
   display: block;
-}
-
-/* The second line reads as one stroke of light: white into the soft brand red. */
-.accent {
-  padding-bottom: 0.06em;
-  background: linear-gradient(
-    100deg,
-    #fff 0%,
-    #ffd0c9 38%,
-    var(--rota-red-300) 66%,
-    var(--rota-red-400) 100%
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
 }
 
 .lead {
@@ -468,15 +429,6 @@
   .hero {
     --hero-phone: min(72vw, 300px);
     --hero-pad-bottom: 48px;
-  }
-
-  .eyebrowSep {
-    display: none;
-  }
-
-  .eyebrowPart {
-    display: block;
-    margin-top: 0.5em;
   }
 
   .title {
