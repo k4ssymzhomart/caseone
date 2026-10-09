@@ -133,6 +133,26 @@ node scripts/record-web.mjs https://rota-naryad.netlify.app/reports/shift public
 | s11 rating | `s11-rating-web.mp4` | 1001 / 1111 | `/reports/rating`, period «Месяц»; hold on the chart 2 s; scroll to the last row «Сериков Д.» |
 | s12 analytics | `s12-analytics-web.mp4` | 1001 / 1111 | `/analytics`, period «Месяц»; type «покажи проблемы участка дробления за месяц»; «Спросить»; wait for the cards (up to 30 s; cut the wait out as in the deadline scene); hold on the К-3 card |
 
+### Scripted takes (the committed web clips)
+
+The web clips in `public/footage/` were not driven by hand: `scripts/web-takes/` plays each one as a script against
+the local panel on the live database, frame by frame, so scrolling, pointer moves and typing are smooth at 30 fps. The
+page is 1440 × 810 CSS px at device scale 2, downscaled to 1920 × 1080 (16:9). The pointer and its click ring are drawn
+by the script; waits for the network are cut. Recorded on 09.10.2026:
+
+```sh
+cd apps/web && npx vite --port 5288 --strictPort   # VITE_API_MODE=supabase
+node video/scripts/web-takes/take-shift.mjs        # or take-rating, take-analytics, take-dashboard, take-privacy
+```
+
+| Slot file | Account | What it shows |
+| --- | --- | --- |
+| `s10-shift-report-web.mp4` | 1001 | «Смена» for the night shift 08.10 20:00 to 08:00: counters, the Sonnet summary, workload and downtime, then «Скачать PDF» and «Скачать Excel». The take ran at 08:09 with the page clock pinned to 07:59, because the day shift was then minutes old and empty; the numbers are the database's for that window |
+| `s11-rating-web.mp4` | 1001 | «Месяц», workers: the stacked bars, the tooltip of Сериков Д., the column «С первого раза» down to his row |
+| `s12-analytics-web.mp4` | 3001 | the month's cards, the question typed, «Спросить» (the wait is cut), the answer with the К-3 card first, «Доказательства · 7 нарядов» |
+| `s12-dashboard-web.mp4` | 3001 | the manager dashboard for «Месяц»: tiles, top 5 problem units, best workers |
+| `s13-privacy-web.mp4` | 9001 | «Что видит ИИ»: filter «Проверка наряда», the check of №660 (Течь масла), the request naming the worker only as E01 |
+
 The first second of every take is the page loading; `trimBefore` in `src/data/footage.ts` skips it.
 
 ## Render
