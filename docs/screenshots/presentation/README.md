@@ -1,6 +1,6 @@
 # Rota screenshots for the presentation
 
-Real data: Supabase project «rota» with 3 months of history (559 orders). Release build on iPhone 17 Pro (master, 1001) and iPhone 16 (workers 2001, 2002); web panel at 1440 × 900.
+Real data: Supabase project «rota» with 3 months of history (540 orders, plus the 19 orders of the Demo Day start state). Release build on iPhone 17 Pro (master, 1001) and iPhone 16 (workers 2001, 2002); web panel at 1440 × 900.
 
 ## Hero (`hero/`)
 

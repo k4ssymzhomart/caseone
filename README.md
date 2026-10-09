@@ -46,8 +46,8 @@ suite. Click a card for the file that holds it. Estimates live in their own sect
 
 <table>
   <tr>
-    <td align="center"><a href="docs/progress.md"><img src="docs/readme/stats/issue-to-red.png" width="250" alt="1.9 s from «Выдать» to the worker's red screen on the live database"></a><br><sub><a href="docs/progress.md">progress.md</a>, P7 check in two browsers</sub></td>
-    <td align="center"><a href="docs/progress.md"><img src="docs/readme/stats/ai-verdict.png" width="250" alt="9.5 s from sending the report to Claude's verdict"></a><br><sub><a href="docs/progress.md">progress.md</a>, the same check</sub></td>
+    <td align="center"><a href="docs/live-loop-timings.md"><img src="docs/readme/stats/issue-to-red.png" width="250" alt="0.72 s from «Выдать» on the master's phone to the worker's red screen, Release build on two iPhone simulators against the live database"></a><br><sub><a href="docs/live-loop-timings.md">live-loop-timings.md</a>, the film's take, interval 1</sub></td>
+    <td align="center"><a href="docs/live-loop-timings.md"><img src="docs/readme/stats/ai-verdict.png" width="250" alt="8.49 s from sending the report to Claude's verdict on the worker's phone, the same take"></a><br><sub><a href="docs/live-loop-timings.md">live-loop-timings.md</a>, the same take, interval 6</sub></td>
     <td align="center"><a href="docs/golden-results.md"><img src="docs/readme/stats/golden.png" width="250" alt="10 из 10 golden set verdicts right with Claude Sonnet 5.5"></a><br><sub><a href="docs/golden-results.md">golden-results.md</a></sub></td>
   </tr>
   <tr>
@@ -56,11 +56,15 @@ suite. Click a card for the file that holds it. Estimates live in their own sect
     <td align="center"><a href="docs/phase5-acceptance.md"><img src="docs/readme/stats/shift-report.png" width="250" alt="5 of 5 shift report windows equal to a manual SQL count"></a><br><sub><a href="docs/phase5-acceptance.md">phase5-acceptance.md</a> (b)</sub></td>
   </tr>
   <tr>
-    <td align="center"><a href="tools/seed/PATTERNS.md"><img src="docs/readme/stats/history.png" width="250" alt="559 orders of history over 92 days with 6 planted patterns"></a><br><sub><a href="docs/progress.md">progress.md</a>, <a href="tools/seed/PATTERNS.md">PATTERNS.md</a></sub></td>
+    <td align="center"><a href="tools/seed/PATTERNS.md"><img src="docs/readme/stats/history.png" width="250" alt="540 history orders over 92 days with 6 planted patterns"></a><br><sub><a href="docs/progress.md">progress.md</a>, <a href="tools/seed/PATTERNS.md">PATTERNS.md</a></sub></td>
     <td align="center"><a href="vitest.config.ts"><img src="docs/readme/stats/tests.png" width="250" alt="660 automated tests pass, plus 7 of 7 live contract scenarios"></a><br><sub><code>npx vitest run</code>, 09.10.2026; <a href="docs/progress.md">progress.md</a></sub></td>
     <td align="center"><a href="docs/golden-results.md"><img src="docs/readme/stats/cost.png" width="250" alt="0.016 USD mean cost of one check in the live golden run"></a><br><sub><a href="docs/golden-results.md">golden-results.md</a>, 0.16 USD for 10</sub></td>
   </tr>
 </table>
+
+The two timings are the take the film plays: the Release build on two iPhone simulators against the live database, read
+frame by frame off the screen recordings of 9 October 2026. An earlier run of the same loop between two browsers on the
+phone app in the browser measured 1.9 s to the red screen and 9.5 s to the verdict ([`docs/progress.md`](docs/progress.md), P7).
 
 ## How it works: one наряд, six steps
 
@@ -76,8 +80,9 @@ suite. Click a card for the file that holds it. Estimates live in their own sect
 | 6 | мастер | The full report; «Согласен, закрыть», «Изменить оценку» or «Вернуть на доработку». The master has the final word. | «Закрыт» |
 
 Every status change is one `order_events` row with the server's clock, and reaches the other devices through
-<img src="docs/readme/logos/supabase.svg" height="18" align="top"> Supabase Realtime: the case asks for 5 s, the live
-check in two browsers measured 1.9 s from «Выдать» to the red screen.
+<img src="docs/readme/logos/supabase.svg" height="18" align="top"> Supabase Realtime: the case asks for 5 s, the Release
+build on two iPhone simulators measured 0.72 s from «Выдать» to the red screen, and 0.7 to 1.4 s for «Принят в работу»,
+«В работе» and «Закрыт» to reach the other phone ([timings](docs/live-loop-timings.md)).
 
 ## Screens
 
@@ -172,7 +177,7 @@ project, and the bot's webhook is set; remote push on Android waits for the Fire
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="packages/design/assets/mascots/dark/read.svg"><img src="packages/design/assets/mascots/read.svg" width="96" align="right" alt=""></picture>
 
-The synthetic history (559 orders over 92 days, generated inside the database) carries six planted patterns with an
+The synthetic history (540 orders over 92 days, generated inside the database) carries six planted patterns with an
 answer key ([`tools/seed/PATTERNS.md`](tools/seed/PATTERNS.md)). SQL detectors find them; Claude writes the cards from
 those numbers only, and a checker drops any card with a number that is not in the data.
 
@@ -275,7 +280,8 @@ gateway.
 
 **Integration with 1С and ТОиР.** Every table is a REST endpoint through PostgREST. A trigger writes `order.created`
 and `order.closed` (with the material lines) to `integration_outbox`, the seam for 1С:ТОИР documents: заявка на
-ремонт, акт выполненных работ, требование накладная на материалы.
+ремонт, акт выполненных работ, требование накладная на материалы. The exchange, the real payloads, the field mapping
+and the directory sync back from 1С: [`docs/integration-1c.md`](docs/integration-1c.md).
 
 **Security by construction.** Login by табельный номер and ПИН; the role comes from the JWT (`app_metadata.app_role`)
 and every table has row level security. The client never updates `orders`: every change goes through the security
@@ -320,16 +326,23 @@ falls back to rules only when the model is off or over budget.
 
 ## Demo video
 
-<a href="video/README.md"><img src="docs/readme/film.png" width="100%" alt="The Rota demo film, 2:55: the red emergency screen, the two phones, the AI verdict 87 из 100 and the analytics card for Конвейер К-3."></a>
+<a href="video/README.md"><img src="docs/readme/film.png" width="100%" alt="The Rota demo film, 2:58. Poster: the red emergency screen of order №660 for Насос НШ-32 маслостанции, the order Claude scores 84 из 100 later in the film."></a>
+<!-- YOUTUBE -->
 
-The film is code: a Remotion project in [`video/`](video/README.md) that cuts the Demo Day script to 2:55 at
-1920 × 1080 with Russian captions, every number on screen listed with its source in
-[`video/src/data/numbers.ts`](video/src/data/numbers.ts). The draft runs on the real presentation screens of the live
-project; the recorded takes of the phones and the web panel go to `video/public/footage/`
-([RECORDING.md](video/RECORDING.md)) and replace the stills scene by scene. The final cut gets its link here.
+The final cut runs 2:58 at 1920 × 1080, with Russian captions and no voice. It is cut from the recordings of
+9 October 2026: the Release build of the app on two iPhone simulators (мастер 1001, исполнитель 2001, then 2002 for the
+rework) and the web panel, all on the live database. Emergency order №660 reaches the red screen, is accepted, started,
+closed with the after photo and checked by Claude: 84 из 100, «Принято», and the мастер closes it; №641, sent without a
+photo and with 6 bearings, comes back for rework. Waits are cut: the cuts in the deadline and rework scenes say so on
+screen («ожидание вырезано»), and the web clips are scripted takes played up to 2× faster. Every number in the film is
+read off the recording beside it or listed with its source in [`video/src/data/numbers.ts`](video/src/data/numbers.ts);
+the phone timings are in [`docs/live-loop-timings.md`](docs/live-loop-timings.md).
+
+The film is code: a Remotion project in [`video/`](video/README.md) with its [storyboard](video/STORYBOARD.md) and
+[recording guide](video/RECORDING.md).
 
 ```sh
-cd video && npm install && npm run render     # out/rota-demo.mp4, 2:55, 1920 × 1080
+cd video && npm install && npm run render     # out/rota-demo.mp4, 2:58, 1920 × 1080
 ```
 
 <details>
@@ -340,7 +353,8 @@ shows the web panel and mirrors A and B.
 
 1. A: the shift panel shows who is free, busy, queued and off shift; the board shows the active orders.
 2. A: photographs the oil leak on «Насос НШ-32 маслостанции» and issues an emergency order; the AI preselects Ахметов
-   with reasons; the tap counter stays at the required five.
+   with reasons; the app's own counter shows 6 taps in 15 s with the optional before photo (the film's take: «Выдан за
+   6 нажатий · 0:15»; the case allows 6 taps and one minute).
 3. B: siren and the red screen; «Принять», «Начать исполнение». A sees «Выполняет наряд №…» within seconds.
 4. A: a second order to Ахметов with the «1 мин» deadline; B puts it in the queue. The reminder fires at 30 s left,
    the overdue message reaches both phones within 5 s of the deadline.
@@ -366,7 +380,7 @@ shows the web panel and mirrors A and B.
 | [`supabase/tests`](supabase/tests) | SQL acceptance scripts and `transitions.json` |
 | [`tools`](tools) | Node scripts: golden set, LLM smoke test, push test, database check, acceptance checks, README assets |
 | [`video`](video/README.md) | the demo film: Remotion project, [storyboard](video/STORYBOARD.md), recording guide |
-| [`docs`](docs) | [development guide](docs/development.md), [architecture](docs/architecture.md), [decisions](docs/decisions.md), [design](docs/design.md), [progress](docs/progress.md), acceptance reports, the case PDF |
+| [`docs`](docs) | [development guide](docs/development.md), [architecture](docs/architecture.md), [1С integration](docs/integration-1c.md), [decisions](docs/decisions.md), [design](docs/design.md), [progress](docs/progress.md), [live loop timings](docs/live-loop-timings.md), acceptance reports, the [slides](docs/presentation/rota-presentation.pdf), the case PDF |
 | [`CLAUDE.md`](CLAUDE.md) | the engineering spec every phase was built against |
 
 ## Deliverables (case §12)
@@ -378,8 +392,8 @@ shows the web panel and mirrors A and B.
 | ✓ | Web panel and test accounts (мастер, исполнитель, руководитель) | [rota-naryad.netlify.app/login](https://rota-naryad.netlify.app/login) · 1001/1111, 2001/1234, 3001/3333 |
 | ✓ | Test dataset | [`supabase/seed/`](supabase/seed) and [`tools/seed/PATTERNS.md`](tools/seed/PATTERNS.md) |
 | ✓ | Architecture | [`docs/architecture.md`](docs/architecture.md) |
-| ○ | Presentation of at most 10 slides | in progress; screens ready in [`docs/screenshots/presentation/`](docs/screenshots/presentation/README.md) |
-| ○ | Demo video of at most 3 minutes | draft cut of 2:55 from [`video/`](video/README.md) on the real screens; the final cut after the phone recording, see [Demo video](#demo-video) |
+| ✓ | Presentation of at most 10 slides | 10 slides: [`docs/presentation/rota-presentation.pdf`](docs/presentation/rota-presentation.pdf) · [rota-naryad.netlify.app/rota-presentation.pdf](https://rota-naryad.netlify.app/rota-presentation.pdf) |
+| ✓ | Demo video of at most 3 minutes | the final cut, 2:58, from the footage recorded on 9 October 2026; the YouTube link is under the poster in [Demo video](#demo-video) |
 
 ## Credits and license
 
@@ -389,7 +403,7 @@ Geist Mono (SIL Open Font License). Platform marks come from Simple Icons (CC0) 
 say where Rota runs and what it connects to.
 
 No open source license is granted yet: all rights reserved by the author. The case materials belong to the organizers
-and АО «Костанайские Минералы». Every person in the data is synthetic. The README assets are rebuilt with
-`npx tsx tools/gen-readme-assets.ts`.
+and АО «Костанайские Минералы». Every person in the data is synthetic. The README pictures are rebuilt from the real
+screenshots with `npx tsx tools/gen-readme-assets.ts`; the film poster is a frame of the final cut.
 
 <p align="center"><img src="docs/readme/logos/rota.svg" height="28" alt="Rota"><br><sub>Наряд выдан, ИИ на контроле</sub></p>

@@ -1,7 +1,7 @@
 # Phase 5 acceptance
 
 Reports and rating (CLAUDE.md §13, §14, §21 P5) on the live project «rota» `wcjklkpkuhxgfdtbwbuk`, run on
-2026-10-09 between 00:58 and 01:45 Asia/Qostanay (night shift of 08.10, 559 history orders plus the demo state).
+2026-10-09 between 00:58 and 01:45 Asia/Qostanay (night shift of 08.10, 540 history orders plus the 19 demo state orders).
 
 Reproduce: `ROTA_SECRETS_DIR=<main checkout>/.secrets npx tsx tools/phase5-check.ts [--live] [--deployed]`
 (signed in as master 1001 with the publishable key; `--live` costs about 0.01 USD, `--deployed` is free while the

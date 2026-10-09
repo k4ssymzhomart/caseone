@@ -1,8 +1,8 @@
 # Phase 6 acceptance: analytics and anomalies
 
 CLAUDE.md §15 and §21 P6: «P1 to P5 found with magnitudes within ±20% of PATTERNS.md». Checked on 2026-10-09 between
-00:56 and 02:00 Asia/Qostanay on the live project «rota» (`wcjklkpkuhxgfdtbwbuk`, 559 orders, the history
-generated on 2026-10-08, demo state loaded). Branch `worktree-wf_cb013a97-1a7-3`.
+00:56 and 02:00 Asia/Qostanay on the live project «rota» (`wcjklkpkuhxgfdtbwbuk`, 559 orders: 540 of history
+generated on 2026-10-08 plus the 19 of the demo state). Branch `worktree-wf_cb013a97-1a7-3`.
 
 Repeat it with `npx tsx tools/ai-insights-check.ts` (`--patterns` and `--deployed`, free) and
 `npx tsx tools/ai-insights-check.ts --live` (paid, about 0.045 USD).

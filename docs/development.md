@@ -129,7 +129,9 @@ npx tsx tools/db-check.ts
 # ok   insight    7 cards for 92 days, first: Конвейер К-3 ломается чаще всех
 ```
 
-Exit code 2 means the accounts are not there yet (run steps 1 to 3); 1 means a count or the connection failed.
+The orders count is the whole table: 540 history orders plus the 19 orders of the Demo Day start state make 559, and
+every order created since adds one until the next «Сбросить демо». Exit code 2 means the accounts are not there yet
+(run steps 1 to 3); 1 means a count or the connection failed.
 
 On a fresh project (a new cloud project or self-hosted Supabase on the plant's servers) run the 13 migrations in order
 instead of step 1, then steps 2 and 3, and store `project_url` and `secret_key` in Vault for the cron and pg_net calls.

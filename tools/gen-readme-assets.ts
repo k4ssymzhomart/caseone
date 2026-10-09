@@ -4,7 +4,9 @@
 // presentation screenshots in docs/screenshots/presentation/; nothing is redrawn.
 //   npx tsx tools/gen-readme-assets.ts                       everything
 //   npx tsx tools/gen-readme-assets.ts --only logos,badges   some parts: logos, badges, banner, loop, stats, screens,
-//                                                            arch, film (film needs the frames named at writeFilm)
+//                                                            arch, film
+// film runs only when named: docs/readme/film.png is now a frame of the final cut, and this part draws the old poster
+// of the 2:55 draft over it (it also needs the frames named at writeFilm).
 // CHROME=/path/to/chrome overrides the browser. Output PNGs are palette compressed with sharp.
 import { spawn } from 'node:child_process';
 import {
@@ -490,22 +492,24 @@ async function writeLoop(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// Number cards: 260 × 150 at 2×. Every number is measured; the README links each card to its source file.
+// Number cards: 260 × 150 at 2×. Every number is measured; the README links each card to its source file. The two
+// live loop cards are the film's take (docs/live-loop-timings.md); the history card counts history orders only (the
+// database also holds the 19 orders of the Demo Day start state).
 
 const STATS: { file: string; eyebrow: string; value: string; unit?: string; label: string }[] = [
   {
     file: 'issue-to-red',
     eyebrow: 'Live loop',
-    value: '1.9',
+    value: '0.72',
     unit: 's',
-    label: '«Выдать» to the worker’s red screen on the live database',
+    label: '«Выдать» to the red screen, Release build on two simulators',
   },
   {
     file: 'ai-verdict',
     eyebrow: 'Live loop',
-    value: '9.5',
+    value: '8.49',
     unit: 's',
-    label: 'from sending the report to Claude’s verdict, the same live run',
+    label: 'from sending the report to Claude’s verdict on the worker’s phone',
   },
   {
     file: 'golden',
@@ -534,8 +538,8 @@ const STATS: { file: string; eyebrow: string; value: string; unit?: string; labe
   {
     file: 'history',
     eyebrow: 'Data',
-    value: '559',
-    label: 'orders of history over 92 days, 6 planted patterns',
+    value: '540',
+    label: 'history orders over 92 days, 6 planted patterns',
   },
   {
     file: 'tests',
@@ -830,4 +834,4 @@ if (want('loop')) await writeLoop();
 if (want('stats')) await writeStats();
 if (want('screens')) await writeScreens();
 if (want('arch')) await writeArchitecture();
-if (want('film')) await writeFilm();
+if (only.has('film')) await writeFilm();
