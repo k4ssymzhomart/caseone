@@ -3,6 +3,8 @@ import { Text, type TextProps, type TextStyle } from 'react-native';
 
 import { useTheme } from '@/lib/theme';
 
+import { useFitText } from './fitText';
+
 export type TextTone = 'primary' | 'secondary' | 'disabled' | 'critical' | 'inverse' | 'onAccent' | 'accent';
 
 export interface TProps extends TextProps {
@@ -31,11 +33,19 @@ export function T({ variant = 'body', tone = 'primary', color, align, weight, st
   // Android ignores fontWeight on custom fonts, so a weight picks the face: Geist Mono has one heavier cut.
   const mono = v.fontFamily === fontFamily.mono || v.fontFamily === fontFamily.monoMedium;
   const family = weight ? (mono ? fontFamily.monoMedium : emphasis[weight]) : v.fontFamily;
+  const fit = useFitText(rest.adjustsFontSizeToFit === true && rest.numberOfLines === 1, rest.minimumFontScale, v.fontSize);
   return (
     <Text
       maxFontSizeMultiplier={1.4}
       {...rest}
-      style={[v, { fontFamily: family, color: color ?? toneColor[tone] }, align ? { textAlign: align } : null, style]}
+      {...(fit.ref ? { ref: fit.ref as never } : {})}
+      style={[
+        v,
+        { fontFamily: family, color: color ?? toneColor[tone] },
+        align ? { textAlign: align } : null,
+        style,
+        fit.style,
+      ]}
     />
   );
 }
