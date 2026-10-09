@@ -11,7 +11,6 @@ import {
 } from 'react';
 import {
   AccessibilityInfo,
-  Platform,
   StyleSheet,
   View,
   type StyleProp,
@@ -30,6 +29,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/lib/theme';
 
+import { GLASS_BLUR } from './glass';
 import { LogoMark } from './LogoMark';
 import { PressableScale } from './PressableScale';
 import { T } from './T';
@@ -75,7 +75,6 @@ export interface HudToastProps {
 export function HudToast({ message, detail, monoPrefix, actionLabel, onAction, tone = 'default', style }: HudToastProps) {
   const theme = useTheme();
   const critical = tone === 'critical';
-  const ios = Platform.OS === 'ios';
   const inset = (theme.size.tapMin - theme.size.hud) / 2;
   // With a detail line the capsule becomes a rounded card that grows with its text.
   const tall = !!detail;
@@ -133,11 +132,11 @@ export function HudToast({ message, detail, monoPrefix, actionLabel, onAction, t
               overflow: 'hidden',
               borderWidth: StyleSheet.hairlineWidth,
               borderColor: critical ? theme.status.critical : theme.glass.stroke,
-              backgroundColor: ios ? undefined : theme.glass.fillStrong,
+              backgroundColor: GLASS_BLUR ? undefined : theme.glass.fillStrong,
             },
           ]}
         >
-          {ios ? (
+          {GLASS_BLUR ? (
             <>
               <BlurView
                 intensity={theme.glass.blurIntensity}
@@ -150,7 +149,9 @@ export function HudToast({ message, detail, monoPrefix, actionLabel, onAction, t
         </View>
       </View>
 
-      <LogoMark size={MARK_SIZE} />
+      {/* Positioned like every other child, so the browser paints the mark above the absolute glass layer
+          (an unpositioned <svg> goes under it and the web blur smears it). Relative is the native default. */}
+      <LogoMark size={MARK_SIZE} style={{ position: 'relative' }} />
       {monoPrefix ? (
         <>
           <T variant="monoM" color={critical ? theme.color.textAccent : undefined} numberOfLines={1}>

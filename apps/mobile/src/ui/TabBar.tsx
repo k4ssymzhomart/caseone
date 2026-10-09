@@ -5,12 +5,13 @@ import {
   type BottomTabNavigationOptions,
 } from 'expo-router/js-tabs';
 import { useContext } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { haptic } from '@/lib/haptics';
 import { useTheme } from '@/lib/theme';
 
+import { GLASS_BLUR } from './glass';
 import { PressableScale } from './PressableScale';
 import { T } from './T';
 
@@ -58,7 +59,6 @@ export function TabBar({
   const theme = useTheme();
   const reportHeight = useContext(BottomTabBarHeightCallbackContext);
   const height = theme.size.tabBar + insets.bottom;
-  const ios = Platform.OS === 'ios';
   // glass.stroke is white; in light mode it vanishes against light glass, so the hairline uses borderDefault there.
   const hairline = theme.mode === 'dark' ? theme.glass.stroke : theme.color.borderDefault;
 
@@ -73,12 +73,12 @@ export function TabBar({
           paddingBottom: insets.bottom,
           paddingHorizontal: Math.max(insets.left, insets.right, theme.space[2]),
           borderTopColor: hairline,
-          backgroundColor: ios ? 'transparent' : theme.glass.fillStrong,
+          backgroundColor: GLASS_BLUR ? 'transparent' : theme.glass.fillStrong,
         },
         theme.mode === 'light' ? theme.shadow.soft : null,
       ]}
     >
-      {ios ? (
+      {GLASS_BLUR ? (
         <>
           <BlurView
             intensity={theme.glass.blurIntensity}
