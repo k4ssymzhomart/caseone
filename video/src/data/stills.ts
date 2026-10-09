@@ -1,0 +1,36 @@
+// Pixel sizes of the stills the scenes use (paths under public/stills, copied from docs/screenshots/presentation).
+// scripts/sync-assets.mjs checks this table against the files and warns when a screenshot was retaken at another size.
+export const STILLS = {
+  "mobile/02-master-shift.png": [1206, 2622],
+  "mobile/03-master-board.png": [1206, 2622],
+  "mobile/04-master-board-done.png": [1206, 2622],
+  "mobile/07-master-create.png": [1206, 2622],
+  "mobile/08-master-create-ai-suggestion.png": [1206, 2622],
+  "mobile/09-worker-emergency.png": [1179, 2556],
+  "mobile/18-worker-home.png": [1179, 2556],
+  "mobile/20-worker-close-overuse.png": [1179, 2556],
+  "mobile/21-worker-ai-rework.png": [1179, 2556],
+  "mobile/22-worker-ai-rework-feedback.png": [1179, 2556],
+  "mobile/23-master-rework-reasons.png": [1206, 2622],
+  "pwa/05-A-after-issue.png": [1170, 2532],
+  "pwa/06-B-emergency-red-screen.png": [1170, 2532],
+  "pwa/07-A-board.png": [1170, 2532],
+  "pwa/09-A-order-accepted.png": [1170, 2532],
+  "pwa/10-B-order-accepted.png": [1170, 2532],
+  "pwa/11-A-order-in-progress.png": [1170, 2532],
+  "pwa/12-B-order-in-progress.png": [1170, 2532],
+  "pwa/14-B-close-materials.png": [1170, 2532],
+  "pwa/15-B-close-after-photo.png": [1170, 2532],
+  "pwa/16-B-sent-for-review.png": [1170, 2532],
+  "pwa/17-B-ai-verdict.png": [1170, 2532],
+  "pwa/19-A-ai-report.png": [1170, 2532],
+  "pwa/20-A-ai-report-photos.png": [1170, 2532],
+  "pwa/21-A-closed.png": [1170, 2532],
+  "pwa/22-B-closed-notice.png": [1170, 2532],
+  "pwa/23-B-order-closed.png": [1170, 2532],
+  "web-live/w04-shift-report.png": [2880, 3816],
+  "web-live/w05-rating.png": [2880, 3882],
+  "web-live/w06-analytics.png": [2880, 1800],
+} as const satisfies Record<string, readonly [number, number]>;
+
+export type StillName = keyof typeof STILLS;

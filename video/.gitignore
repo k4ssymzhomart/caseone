@@ -1,0 +1,19 @@
+node_modules
+dist
+.DS_Store
+.env
+
+# Renders
+out
+
+# Copies made by scripts/sync-assets.mjs (sources: packages/design, docs/screenshots/presentation, root node_modules)
+public/brand
+public/fonts
+public/stills
+
+# Screen recordings are large: keep them on the recording machine (RECORDING.md), not in git
+public/footage/*
+!public/footage/README.md
+
+# Chrome profile of scripts/record-web.mjs (holds a signed in session)
+.rec-profile

@@ -1,0 +1,35 @@
+{
+  "name": "rota-demo-film",
+  "version": "1.0.0",
+  "description": "Rota demo film for Demo Day (Remotion 4). Not an npm workspace: install inside video/.",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@remotion/bundler": "4.0.534",
+    "@remotion/cli": "4.0.534",
+    "@remotion/fonts": "4.0.534",
+    "@remotion/media": "4.0.534",
+    "@remotion/renderer": "4.0.534",
+    "@remotion/transitions": "4.0.534",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.534"
+  },
+  "devDependencies": {
+    "@remotion/eslint-config-flat": "4.0.534",
+    "@types/react": "19.2.7",
+    "@types/web": "0.0.166",
+    "eslint": "9.39.5",
+    "prettier": "3.8.1",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "sync": "node scripts/sync-assets.mjs",
+    "dev": "npm run sync && remotion studio",
+    "stills": "npm run sync && node scripts/stills.mjs",
+    "render:draft": "npm run sync && remotion render RotaDemoDraft out/rota-demo-draft.mp4",
+    "render": "npm run sync && remotion render RotaDemo out/rota-demo.mp4",
+    "typecheck": "tsc",
+    "lint": "eslint src && tsc"
+  }
+}
