@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { groupHeader, specialtyLine } from '@/features/master/format';
 import { LoadError, Loading } from '@/features/master/QueryStates';
 import { useNow } from '@/features/master/useNow';
+import { goBack } from '@/features/orders/BackBar';
 import { orderCardProps, pillTone } from '@/features/orders/present';
 import { errorText } from '@/features/orders/useOrderAction';
 import { useApi } from '@/lib/api';
@@ -26,6 +27,7 @@ import { useDirectories } from '@/lib/directories';
 import { haptic } from '@/lib/haptics';
 import { t } from '@/lib/i18n';
 import { qk } from '@/lib/keys';
+import { RoleGate } from '@/lib/roleGate';
 import { useTheme } from '@/lib/theme';
 import { Banner } from '@/ui/Banner';
 import { EmptyState } from '@/ui/EmptyState';
@@ -37,8 +39,20 @@ import { SheetHeader } from '@/ui/SheetHeader';
 import { Switch } from '@/ui/Switch';
 import { T } from '@/ui/T';
 
-export default function WorkerSheet() {
+/** Employee ids are uuids; anything else in the URL is not found without asking the server. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export default function WorkerRoute() {
+  return (
+    <RoleGate allow={['master']}>
+      <WorkerSheet />
+    </RoleGate>
+  );
+}
+
+function WorkerSheet() {
   const { id = '' } = useLocalSearchParams<{ id: string }>();
+  const valid = UUID_RE.test(id);
   const api = useApi();
   const theme = useTheme();
   const qc = useQueryClient();
@@ -53,7 +67,7 @@ export default function WorkerSheet() {
   const orders = useQuery({
     queryKey: qk.ordersList(filter),
     queryFn: () => api.orders.list(filter),
-    enabled: id !== '',
+    enabled: valid,
   });
 
   // The switch flips at once; the server value takes over after the refetch.
@@ -197,7 +211,7 @@ export default function WorkerSheet() {
         title={w?.short_name ?? ''}
         {...(w ? { subtitle: specialtyLine(w, brigadeName) } : {})}
         closeLabel={t('common.close')}
-        onClose={() => router.back()}
+        onClose={goBack}
         showHandle={Platform.OS === 'ios'}
       />
       <View style={{ paddingHorizontal: theme.size.gutter, paddingTop: theme.space[3], gap: theme.space[5] }}>

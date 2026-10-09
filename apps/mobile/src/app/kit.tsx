@@ -4,9 +4,11 @@ import { mascotNames, type StatusTone, type TypeVariant } from '@rota/design';
 import { useRouter } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Image, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 
+import { KIT_PHOTO_URIS } from '@/features/kit/photos';
 import { t } from '@/lib/i18n';
+import { RoleGate } from '@/lib/roleGate';
 import { useTheme, useThemePreference, type ThemePreference } from '@/lib/theme';
 import {
   ActionList,
@@ -57,11 +59,7 @@ import {
 } from '@/ui';
 
 // Placeholder photos from the app's own assets.
-const PHOTO_URIS = [
-  Image.resolveAssetSource(require('../../assets/icon.png')).uri,
-  Image.resolveAssetSource(require('../../assets/splash-icon.png')).uri,
-  Image.resolveAssetSource(require('../../assets/adaptive-icon.png')).uri,
-] as const;
+const PHOTO_URIS = KIT_PHOTO_URIS;
 
 /** Mascot tiles stay at the smallest screen size of PHASE_0 §6.11 (96) or less on narrow phones. */
 const MASCOT_MAX = 96;
@@ -74,7 +72,12 @@ const LOADING_DEMO_MS = 1500;
 
 export default function KitScreen() {
   // The root layout hosts the HudProvider (toasts at the top), so the kit uses it directly.
-  return <KitContent />;
+  // Linked from the master, manager and admin tools.
+  return (
+    <RoleGate allow={['master', 'manager', 'admin']}>
+      <KitContent />
+    </RoleGate>
+  );
 }
 
 function KitContent() {
