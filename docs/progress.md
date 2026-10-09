@@ -15,7 +15,7 @@ As of 2026-10-09, 02:45.
 | P4 AI control | done, live on Sonnet 5.5 | `ai-verify` v4 deployed (rules in SQL, one Sonnet call, rules only fallback, auth, idempotent); golden set **10 из 10** live (`docs/golden-results.md`, 0.16 USD); `ai.verify` calls the function with the rules as fallback; escalation link opens the reassign sheet | none |
 | P5 Reports and rating | done | `ai-shift-summary` (Sonnet) and `ai-explain-rating` (Haiku) deployed; PDF and Excel export; Сериков last on first time fix (64.7% vs team 91.3%, 92 days); `shift_report` equals the manual SQL count in five windows (`docs/phase5-acceptance.md`) | none (workload fix applied 2026-10-09) |
 | P6 Analytics | done | `ai-insights` deployed: Haiku reads the question, Sonnet writes cards, numbers checked against the data, rules fallback, cache, digest path; ask box, scope chips, mini charts; P1 to P6 within ±20% (`docs/phase6-acceptance.md`) | none (digest cron and `d_post_ppr` order applied 2026-10-09) |
-| P7 Demo hardening | in progress | Landing at `/` (`docs/LANDING.md`); Android APK built on EAS (preview profile); presentation screenshots in `docs/screenshots/presentation/`; `docs/architecture.md` | The script three times on real phones, dataset export, slides, video, VM deploy (`docs/DEPLOY_VM.md`) |
+| P7 Demo hardening | in progress | Landing, web panel and the PWA live on https://rota-naryad.netlify.app (PWA at `/app/`, two browser loop verified: red screen 1.9 s after «Выдать», AI verdict 9.5 s); Android APK on EAS; role guards on every mobile route; presentation screenshots; `docs/architecture.md` | The script three times on real phones, slides, video, Android push (Firebase) |
 
 ## Live project
 
@@ -102,3 +102,4 @@ screenshots (lane A); live sync wiring and the Phase 2 audit fixes, Telegram lin
 - EAS project linked (`de6b8e43-…`), preview APK built in the cloud.
 - 02:30. Owner applied the SQL bundle and set the Edge secrets. Telegram webhook set; live checks pass on the real models; contract suite 7 of 7.
 - 03:10. Web panel and landing live on Netlify: https://rota-naryad.netlify.app.
+- 04:00. PWA at /app/ built, verified in two browsers, deployed; landing links it («Открыть в браузере»).
