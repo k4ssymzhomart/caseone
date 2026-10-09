@@ -1,6 +1,8 @@
 // Screens for the DeviceFrame phone (src/landing/ui/DeviceFrame.tsx): real app screenshots fitted to the 1206 × 2622
 // display of the 6.3 inch Pro, with the Dynamic Island the simulator baked in painted over (the frame draws its own,
-// crisp at any density), as WebP at two widths for srcset, plus deviceScreens.ts with the URLs and sizes.
+// crisp at any density) and the simulator's «no service» dots turned into four signal bars (what
+// `xcrun simctl status_bar booted override --cellularMode active --cellularBars 4` shows), as WebP at two widths for
+// srcset, plus deviceScreens.ts with the URLs and sizes.
 //   npm run landing:device   (node apps/web/scripts/landing-device.mjs)
 // Sources: docs/screenshots/presentation/mobile (release build on real data). The other landing images come from
 // landing-shots.mjs; this script touches only src/landing/assets/device/ and deviceScreens.ts.
@@ -70,14 +72,101 @@ async function withoutIsland(file) {
       }
     }
   }
-  return { image: sharp(data, { raw: info }), island: found };
+  const bars = signalBars(data, info);
+  let image = sharp(data, { raw: info });
+  if (bars)
+    image = sharp(
+      await image
+        .composite([{ input: Buffer.from(bars), left: 0, top: 0 }])
+        .png()
+        .toBuffer(),
+    );
+  return { image, island: found, bars: Boolean(bars) };
+}
+
+/**
+ * The simulator has no carrier, so the status bar shows four dim dots left of the Wi‑Fi glyph. Finds them (four
+ * small squares, bottom aligned with the Wi‑Fi glyph, much dimmer than it), paints them with the status bar color and
+ * returns an SVG overlay with four rising bars in the glyph color on the same positions; null when they are not there.
+ */
+function signalBars(data, info) {
+  const { width, height, channels } = info;
+  const px = (x, y) => {
+    const i = (y * width + x) * channels;
+    return [data[i], data[i + 1], data[i + 2]];
+  };
+  const lum = ([r, g, b]) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const bg = px(Math.round(width * 0.66), 30);
+  const differs = (p) =>
+    Math.abs(p[0] - bg[0]) + Math.abs(p[1] - bg[1]) + Math.abs(p[2] - bg[2]) > 40;
+  const runs = [];
+  let cur = null;
+  for (let x = Math.round(width * 0.62); x < width - 20; x++) {
+    let y0 = -1;
+    let y1 = -1;
+    let peak = 0;
+    for (let y = 40; y < 150; y++) {
+      const p = px(x, y);
+      if (!differs(p)) continue;
+      if (y0 < 0) y0 = y;
+      y1 = y;
+      peak = Math.max(peak, lum(p));
+    }
+    if (y0 >= 0) {
+      if (!cur) cur = { x0: x, x1: x, y0, y1, peak };
+      else
+        Object.assign(cur, {
+          x1: x,
+          y0: Math.min(cur.y0, y0),
+          y1: Math.max(cur.y1, y1),
+          peak: Math.max(cur.peak, peak),
+        });
+    } else if (cur) {
+      runs.push(cur);
+      cur = null;
+    }
+  }
+  const wifiAt = runs.findIndex((r) => r.peak > 200 && r.y1 - r.y0 > 25);
+  if (wifiAt < 4) return null;
+  const wifi = runs[wifiAt];
+  const dots = runs.slice(wifiAt - 4, wifiAt);
+  const small = dots.every(
+    (d) =>
+      d.x1 - d.x0 < 15 &&
+      d.y1 - d.y0 < 15 &&
+      Math.abs(d.y1 - wifi.y1) <= 2 &&
+      d.peak < wifi.peak * 0.75,
+  );
+  if (!small || wifi.y1 >= height) return null;
+
+  for (const d of dots) {
+    for (let y = d.y0 - 2; y <= d.y1 + 2; y++) {
+      for (let x = d.x0 - 2; x <= d.x1 + 2; x++) {
+        const i = (y * width + x) * channels;
+        data[i] = bg[0];
+        data[i + 1] = bg[1];
+        data[i + 2] = bg[2];
+      }
+    }
+  }
+  const glyph = px(Math.round((wifi.x0 + wifi.x1) / 2), wifi.y1 - 2);
+  const color = `rgb(${glyph.join(',')})`;
+  const h = wifi.y1 - wifi.y0 + 1;
+  const rects = dots
+    .map((d, i) => {
+      const bh = Math.round(h * [0.36, 0.54, 0.72, 0.9][i]);
+      const w = d.x1 - d.x0 + 1;
+      return `<rect x="${d.x0}" y="${wifi.y1 + 1 - bh}" width="${w}" height="${bh}" rx="${(w * 0.28).toFixed(1)}" fill="${color}"/>`;
+    })
+    .join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">${rects}</svg>`;
 }
 
 const kebab = (s) => s.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 const entries = [];
 
 for (const [name, file] of Object.entries(screens)) {
-  const { image, island } = await withoutIsland(
+  const { image, island, bars } = await withoutIsland(
     join(repo, 'docs/screenshots/presentation/mobile', file),
   );
   const fitted = await image
@@ -100,7 +189,7 @@ for (const [name, file] of Object.entries(screens)) {
       id: `${name}${w}`,
     });
     console.log(
-      `device/${kebab(name)}-${w}.webp ${info.width}×${info.height} ${Math.round(bytes / 1024)} KB${island ? ' (island painted over)' : ''}`,
+      `device/${kebab(name)}-${w}.webp ${info.width}×${info.height} ${Math.round(bytes / 1024)} KB${island ? ' (island painted over)' : ''}${bars ? ' (signal bars)' : ''}`,
     );
   }
   entries.push({ name, files });

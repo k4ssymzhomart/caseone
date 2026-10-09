@@ -92,27 +92,27 @@ Anchors in brackets. Copy is final: put it in `content.ts` verbatim.
 
 ### 5.0 Nav (sticky)
 
-64 px, transparent over the hero, then `rgba(0,0,0,.6)` + blur 20 + 1 px bottom border `rgba(255,255,255,.08)` after 40 px of scroll. Left: Lockup white, 22 px tall. Center: «Как работает» (#how) · «ИИ» (#review) · «Аналитика» (#analytics) · «Внедрение» (#rollout) · «FAQ» (#faq). Right: glass «Веб-панель», primary «Скачать APK» with the Android mark. Under 1024 px: Lockup, primary «APK» (Android mark), menu button opening a full-screen sheet with the links.
+64 px, transparent over the hero, then `rgba(0,0,0,.8)` + blur 28, saturate 160% + 1 px bottom border `rgba(255,255,255,.08)` after 40 px of scroll. Left: Lockup white, 22 px tall. Center: «Как работает» (#how) · «ИИ» (#review) · «Аналитика» (#analytics) · «Внедрение» (#rollout) · «FAQ» (#faq). Right: glass «Веб-панель», primary «Скачать APK» with the Android mark. Under 1024 px: Lockup, primary «APK» (Android mark), menu button opening a full-screen sheet with the links.
 
 ### 5.1 Hero (#top) · a close up product shot
 
-Backdrop: the 4K silk render from `tools/gen-hero-bg.ts` (`assets/hero-bg-3840.jpg` for retina and wide screens, `hero-bg-1920.jpg` for phones and 1× screens; `main.tsx` preloads the one the same media query picks), black while it loads, a light left shade and a 200 px fade into the page. Min-height `100svh` capped at 1000. Two columns: copy (664 px) and the stage.
+Backdrop: the 4K silk render from `tools/gen-hero-bg.ts` (`assets/hero-bg-3840.jpg` for retina screens from 1024 px and wide screens, `hero-bg-1920.jpg` for phones, tablets and 1× screens; `main.tsx` preloads the one the same media query picks), black while it loads, a light left shade and a 200 px fade into the page. Min-height `100svh` capped at 1120; the hero clips its overflow. Two columns: copy (664 px) and the stage; rows: copy, platforms, figures.
 
 Left, set editorially (no glass box), top to bottom:
-- Eyebrow with a red dot: «QOSTANAI INDUSTRY HACKATHON 2026 · КЕЙС 1 «НАРЯДAI»»
+- Eyebrow with a red dot: «QOSTANAI INDUSTRY HACKATHON 2026 · КЕЙС 1 «НАРЯДAI»» (two parts; under 768 px the « · » hides and the case goes on its own line)
 - H1: «Наряд выдан,<br>ИИ на контроле.», the second line a white to soft red gradient
 - Lead: «Мастер выдаёт наряд с телефона за 6 нажатий. Исполнитель принимает его в один тап. ИИ следит за сроками, проверяет работу по фото и находит оборудование, которое ломается чаще других.»
 - Buttons: primary «Скачать APK» (Android mark), glass «Открыть в браузере» (Chrome and Safari marks), quiet link «Открыть веб панель →»
-- «Работает на» row, each item a real mark with two lines: Android · APK; iPhone · браузер; Windows и Mac · веб панель; Telegram · уведомления
-- Note (mono, tertiary): «Тестовые входы: мастер 1001 / 1111 · исполнитель 2001 / 1234»
-- Three glass stat pills: «≤ 6 нажатий на выдачу наряда» · «< 5 с, и статус у мастера» · «Каждый закрытый наряд проверяет ИИ»
+- «Работает на» row, 56 px below the buttons, each real mark on a 44 px app icon tile (the Windows and Apple pair on a wider one) with two lines: Android · APK; iPhone · браузер; Windows и Mac · веб панель; Telegram · уведомления. Under 768 px a 2 × 2 grid, each tile above its words.
+- A spec strip of three figures, Geist Mono 600 28 px numbers over 13 px tertiary labels, no dots: «≤ 6» нажатий на выдачу · «< 5 с» до статуса у мастера · «100 %» закрытых нарядов проверяет ИИ. Under 768 px one figure per row.
+- The test logins stay in the final CTA and the FAQ, not in the hero.
 
-Right, the stage: one large `DeviceFrame` (`emergency` screen; body width `min(25vw, 40svh)`, 280 to 400 px, so about 750 px tall at 1440 × 900) turned toward the copy (y −16°, x 4°, z 1.5°), with a red bloom behind it, rising from the hero's bottom edge and dissolving into the page. Over its left edge the Rota `Hud` toast loops through three states every 2.4 s (pause when the tab is hidden; reduced motion shows state 3 only):
-1. red dot · «Аварийный наряд №164 выдан · Ахметов Е.»
-2. green dot · «Ахметов Е. принял наряд №164»
-3. Rota mark · «ИИ проверил №164 · 94 из 100»
+Right, the stage: one large `DeviceFrame` (`emergency` screen; body width `min(25vw, 42svh)`, 280 to 460 px, so about 750 px tall at 1440 × 900 and 945 px at 1920 × 1080) turned toward the copy (y −16°, x 4°, z 1.5°), on a dark pool in the silk (so the screen is the brightest red on the page), its bottom edge on the hero's bottom edge, with a 64 px fade over the bottom bezel only. No glow filter on the phone. On the screen itself, in its plane at 56 % of its height, the Rota `Hud` toast loops through three states every 2.4 s at the screen's own type size (pause when the tab is hidden; reduced motion shows state 3 only), with the order number and score of the real screens:
+1. red dot · «Аварийный наряд №661» over a quieter «выдан · Ахметов Е.» (a two line notification)
+2. green dot · «Ахметов Е. принял наряд №661»
+3. Rota mark · «ИИ проверил №661 · 84 из 100»
 
-From 1024 to 1279 px the phone hangs from the top of its column; under 1024 the copy comes first and the phone follows, smaller and still turned, with the backdrop behind it only.
+From 1024 to 1279 px the phone hangs from the top of its column. Under 1024 the copy comes first, then the whole phone, smaller and still turned, on its own edge to edge patch of silk (the 1920 file, masked top and bottom), then the platforms and the figures.
 
 ### 5.2 Problem, chapters 01 to 03 (#problem) · ref `rota-02-story.png`, `deck-02.png`
 

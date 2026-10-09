@@ -1,8 +1,8 @@
 /* Hero as a close up product shot: the 4K silk backdrop, an editorial copy column, one large phone turned toward the
-   copy and fading into the page below. `--hero-phone` is the phone's body width; its height is 2.086 × that. */
+   copy and standing on the hero's bottom edge. `--hero-phone` is the phone's body width; its height is 2.086 × that. */
 
 .hero {
-  --hero-phone: clamp(280px, min(25vw, 40svh), 400px);
+  --hero-phone: clamp(280px, min(25vw, 42svh), 460px);
   --hero-pad-top: clamp(100px, 14svh, 128px);
   --hero-pad-bottom: clamp(40px, 7svh, 64px);
   position: relative;
@@ -10,13 +10,15 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: min(100svh, 1000px);
+  min-height: min(100svh, 1120px);
   padding: var(--hero-pad-top) 0 var(--hero-pad-bottom);
+  overflow: clip;
   isolation: isolate;
 }
 
-/* The backdrop: black until the image arrives. The 1920 file serves phones and 1× screens, the 4K file retina and wide
-   screens; main.tsx preloads the right one with HERO_BIG_BACKDROP from heroMedia.ts, the same query as below. */
+/* The backdrop: black until the image arrives. The 1920 file serves phones, tablets and 1× screens, the 4K file
+   retina and wide screens; main.tsx preloads the right one with HERO_BIG_BACKDROP from heroMedia.ts, the same query
+   as below. */
 .backdrop {
   position: absolute;
   inset: 0;
@@ -28,7 +30,7 @@
   background-size: cover;
 }
 
-@media (min-width: 768px) and (min-resolution: 1.5dppx), (min-width: 1921px) {
+@media (min-width: 1024px) and (min-resolution: 1.5dppx), (min-width: 1921px) {
   .backdrop {
     background-image: url('../assets/hero-bg-3840.jpg');
   }
@@ -58,21 +60,26 @@
   background: linear-gradient(to bottom, rgb(0 0 0 / 0), var(--color-bg-canvas));
 }
 
-/* Rows: slack, copy, pills, slack. The copy sits centered; the stage spans every row, so its bottom is the hero's
-   bottom padding edge on any screen height and the phone always rises from the same place. */
+/* Rows: slack, copy, platforms, figures, slack. The copy sits centered; the stage spans every row, so its bottom is
+   the hero's bottom padding edge on any screen height and the phone always stands on the same line. */
 .grid {
   flex: 1;
   display: grid;
   grid-template-columns: minmax(0, 664px) minmax(0, 1fr);
-  grid-template-rows: 1fr auto auto 1fr;
+  grid-template-rows: 1fr auto auto auto 1fr;
   column-gap: 40px;
 }
 
 /* Copy */
 
-.copy {
+.copy,
+.platforms,
+.stats {
   position: relative;
   z-index: 2;
+}
+
+.copy {
   grid-area: 2 / 1;
 }
 
@@ -96,13 +103,18 @@
     0 0 14px rgb(255 59 48 / 0.7);
 }
 
+.eyebrowPart {
+  white-space: nowrap;
+}
+
 .title {
   margin: 26px 0 0;
   color: var(--color-text-heading);
   font-size: clamp(44px, 5vw, 76px);
   font-weight: 700;
   line-height: 0.98;
-  letter-spacing: -0.042em;
+  letter-spacing: -0.034em;
+  word-spacing: 0.05em;
 }
 
 .line {
@@ -126,7 +138,7 @@
 
 .lead {
   max-width: 31em;
-  margin: 24px 0 0;
+  margin: 28px 0 0;
   color: rgb(255 255 255 / 0.7);
   font-size: 19px;
   line-height: 1.55;
@@ -139,7 +151,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin-top: 34px;
+  margin-top: 40px;
 }
 
 .panelLink {
@@ -158,12 +170,11 @@
   transform: translateX(3px);
 }
 
-/* «Работает на»: the platforms, each with its real mark */
+/* «Работает на»: the platforms, each mark on an app icon tile, the pair for Windows and Mac on a wider one. */
 
 .platforms {
-  margin-top: 36px;
-  padding-top: 22px;
-  border-top: 1px solid rgb(255 255 255 / 0.09);
+  grid-area: 3 / 1;
+  margin-top: 56px;
 }
 
 .platformsLabel {
@@ -180,7 +191,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 14px 28px;
-  margin: 14px 0 0;
+  margin: 16px 0 0;
   padding: 0;
   list-style: none;
 }
@@ -188,131 +199,158 @@
 .platforms li {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .platformMarks {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+  display: grid;
+  flex: none;
+  grid-auto-flow: column;
+  place-items: center;
+  gap: 6px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 11px;
+  border-radius: 13px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.11), rgb(255 255 255 / 0.04));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.1),
+    inset 0 1px 0 rgb(255 255 255 / 0.16),
+    0 10px 24px rgb(0 0 0 / 0.45);
 }
 
 .platformText {
   display: grid;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .platformName {
   color: var(--l-text);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: -0.005em;
 }
 
 .platformNote {
   color: var(--l-text-3);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 
-.note {
-  margin: 22px 0 0;
-  color: var(--l-text-3);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.01em;
-}
-
+/* The three figures as a spec strip: mono numbers, quiet labels, no dots. */
 .stats {
-  position: relative;
-  z-index: 2;
-  grid-area: 3 / 1;
-  display: flex;
-  gap: 8px;
-  width: max-content;
-  margin: 36px 0 0;
+  grid-area: 4 / 1;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: start;
+  gap: 40px;
+  margin: 40px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .stats li {
-  gap: 9px;
-  padding: 8px 13px;
-  font-size: 12.5px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
 }
 
-/* The stage: one phone, a red bloom behind it, the HUD beside it, a fade into the page below. */
+.stats b {
+  color: #fff;
+  font: 600 28px/1 var(--font-mono);
+  letter-spacing: -0.02em;
+  word-spacing: -0.3em;
+  white-space: nowrap;
+}
+
+.stats span {
+  max-width: 12em;
+  color: var(--l-text-3);
+  font-size: 13px;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+/* The stage: one phone on a dark pool in the silk, the HUD on its screen, a short fade over the bottom bezel. */
 
 .stage {
   position: relative;
-  grid-area: 1 / 2 / 5 / 3;
+  grid-area: 1 / 2 / 6 / 3;
   align-self: stretch;
   min-height: calc(var(--hero-phone) * 1.7);
 }
 
+/* A dark pool behind the phone: the silk glows around the outline and the screen is the brightest red on the page. */
 .bloom {
   position: absolute;
   left: 57%;
-  bottom: calc(var(--hero-phone) * 1.15 - var(--hero-pad-bottom));
-  width: calc(var(--hero-phone) * 2.4);
-  height: calc(var(--hero-phone) * 2.2);
+  bottom: calc(var(--hero-phone) * 1.043 - var(--hero-pad-bottom));
+  width: calc(var(--hero-phone) * 1.6);
+  height: calc(var(--hero-phone) * 2.5);
   background: radial-gradient(
     closest-side,
-    rgb(255 59 48 / 0.15),
-    rgb(255 59 48 / 0.05) 55%,
-    rgb(255 59 48 / 0)
+    rgb(0 0 0 / 0.6),
+    rgb(0 0 0 / 0.25) 60%,
+    rgb(0 0 0 / 0)
   );
   transform: translate(-50%, 50%);
   pointer-events: none;
 }
 
+/* The phone's bottom edge is the hero's bottom edge. */
 .shot {
   --device-w: var(--hero-phone);
   position: absolute;
   left: 57%;
-  bottom: calc(var(--hero-pad-bottom) * -1 - var(--hero-phone) * 0.04);
+  bottom: calc(var(--hero-pad-bottom) * -1);
   width: var(--hero-phone);
   transform: translateX(-50%);
 }
 
-.device {
-  filter: drop-shadow(0 0 60px rgb(255 59 48 / 0.18));
-}
-
-/* The phone's lower part dissolves into the canvas, a close up rather than a catalogue shot. The band spans the
-   whole width (the copy and the pills sit above it), so it never shows an edge. */
+/* Only the bottom bezel dissolves into the page; the band spans the whole width, so it never shows an edge. */
 .stage::after {
   content: '';
   position: absolute;
   left: -100vw;
   right: -100vw;
-  bottom: calc(var(--hero-pad-bottom) * -1 - var(--hero-phone) * 0.1);
-  height: calc(var(--hero-phone) * 0.56);
-  background: linear-gradient(
-    to bottom,
-    rgb(0 0 0 / 0),
-    rgb(0 0 0 / 0.55) 40%,
-    rgb(0 0 0 / 0.9) 66%,
-    #000 82%
-  );
+  bottom: calc(var(--hero-pad-bottom) * -1);
+  height: 64px;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0), #000);
   pointer-events: none;
 }
 
+/* The HUD lies on the screen, in its plane, in the empty red between the order and the buttons, at the screen's own
+   type size. The emergency message is two lines, like a notification; on the smallest phones a long one line message
+   wraps too. */
 .hudWrap {
   position: absolute;
-  top: 47%;
-  left: -18%;
+  top: 56%;
+  right: 0;
+  left: 0;
   z-index: 3;
+  display: flex;
+  justify-content: center;
 }
 
 .hud {
-  height: 44px;
-  padding: 0 18px;
-  font-size: 14.5px;
+  gap: 0.6em;
+  max-width: 90%;
+  height: auto;
+  padding: 0.7em 1.1em;
+  border-radius: 1.35em;
+  font-size: clamp(11px, calc(var(--hero-phone) * 0.036), 15px);
+  line-height: 1.25;
+  white-space: normal;
+  text-wrap: balance;
   box-shadow:
-    0 18px 40px rgb(0 0 0 / 0.55),
-    0 2px 6px rgb(0 0 0 / 0.4),
+    0 18px 40px rgb(0 0 0 / 0.45),
+    0 2px 6px rgb(0 0 0 / 0.35),
     inset 0 1px 0 rgb(255 255 255 / 0.08);
   animation: hudIn 340ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.hudText {
+  display: grid;
+  gap: 0.15em;
 }
 
 @keyframes hudIn {
@@ -330,24 +368,17 @@
   }
 
   .stats {
-    flex-wrap: wrap;
-    width: auto;
+    gap: 28px;
   }
 
   /* The panel link may wrap under the buttons here: flush with them then. */
   .panelLink {
     padding-inline: 0 4px !important;
   }
-
-  .hud {
-    height: 40px;
-    padding: 0 15px;
-    font-size: 13.5px;
-  }
 }
 
 /* Two columns on a short tablet screen: the copy runs taller than the phone, so the phone hangs from the top of the
-   column instead of rising from the bottom edge. */
+   column instead of standing on the bottom edge. */
 @media (min-width: 1024px) and (max-width: 1279px) {
   .hero {
     --hero-phone: clamp(280px, min(30vw, 42svh), 340px);
@@ -365,7 +396,7 @@
   }
 }
 
-/* Stacked: copy first, then the phone, smaller and still turned a little. */
+/* Stacked: copy, then the phone on its own patch of silk, then the platforms and the figures. */
 @media (max-width: 1023px) {
   .hero {
     --hero-phone: clamp(220px, 44vw, 320px);
@@ -373,40 +404,50 @@
     min-height: 0;
   }
 
-  /* The backdrop shows behind the phone only: the image anchored to the bottom, the copy on plain black. */
   .backdrop {
-    background-position: 74% 100%;
-    background-size: auto calc(var(--hero-phone) * 2.5);
-  }
-
-  .backdrop::before {
-    background: linear-gradient(
-      to bottom,
-      #000 0%,
-      #000 calc(100% - var(--hero-phone) * 2.5),
-      rgb(0 0 0 / 0) calc(100% - var(--hero-phone) * 1.6)
-    );
+    display: none;
   }
 
   .grid {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: none;
-  }
-
-  .copy,
-  .stats,
-  .stage {
-    grid-area: auto;
+    display: flex;
+    flex-direction: column;
   }
 
   .copy {
+    order: 1;
     max-width: 640px;
   }
 
-  /* Tall enough for the whole phone above the fade, so it never rides up into the pills. */
   .stage {
-    min-height: calc(var(--hero-phone) * 2.02 - var(--hero-pad-bottom));
-    margin-top: 48px;
+    order: 2;
+    min-height: calc(var(--hero-phone) * 2.086);
+    margin-top: 40px;
+  }
+
+  .platforms {
+    order: 3;
+    margin-top: 40px;
+  }
+
+  .stats {
+    order: 4;
+  }
+
+  /* The silk behind the phone only, edge to edge, fading out above and below. */
+  .stage::before {
+    content: '';
+    position: absolute;
+    inset: -12% calc(50% - 50vw);
+    z-index: -1;
+    background: url('../assets/hero-bg-1920.jpg') 70% 50% / cover no-repeat;
+    mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 72%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 72%, transparent);
+    pointer-events: none;
+  }
+
+  /* The whole phone shows here, with the platforms below it: no fade. */
+  .stage::after {
+    display: none;
   }
 
   .shot,
@@ -414,21 +455,33 @@
     left: 50%;
   }
 
-  .hudWrap {
-    top: 44%;
-    left: -24%;
+  .shot {
+    bottom: 0;
+  }
+
+  .bloom {
+    bottom: calc(var(--hero-phone) * 1.043);
   }
 }
 
 @media (max-width: 767px) {
   .hero {
-    --hero-phone: min(66vw, 280px);
+    --hero-phone: min(72vw, 300px);
     --hero-pad-bottom: 48px;
+  }
+
+  .eyebrowSep {
+    display: none;
+  }
+
+  .eyebrowPart {
+    display: block;
+    margin-top: 0.5em;
   }
 
   .title {
     font-size: clamp(38px, 11vw, 46px);
-    letter-spacing: -0.04em;
+    letter-spacing: -0.032em;
   }
 
   .lead {
@@ -444,26 +497,38 @@
     width: 100%;
   }
 
+  /* Two by two, each tile above its words, like icons on a home screen. */
   .platforms ul {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px 12px;
+    gap: 24px 16px;
+  }
+
+  .platforms li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* One figure per row: the number in a fixed column, its label beside it. */
+  .stats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
   }
 
   .stats li {
-    white-space: normal;
+    grid-template-columns: 64px minmax(0, 1fr);
+    align-items: baseline;
+    gap: 12px;
   }
 
-  .hudWrap {
-    top: 40%;
-    left: 50%;
-    transform: translateX(-50%);
+  .stats b {
+    font-size: 22px;
   }
 
-  .hud {
-    height: 38px;
-    padding: 0 13px;
-    font-size: 12.5px;
+  .stats span {
+    max-width: none;
+    font-size: 14px;
   }
 }
 

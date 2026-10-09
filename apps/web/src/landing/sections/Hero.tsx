@@ -1,8 +1,8 @@
 // Hero (§5.1) as a close up product shot: a 4K silk backdrop (tools/gen-hero-bg.ts), the pitch set editorially on
 // the left, and on the right one large phone drawn by us (DeviceFrame) with the real emergency screen, turned toward
-// the copy, lit red from behind and dissolving into the page below. The HUD toast loops issue → accept → AI check
-// beside it. Platform marks as in the final CTA: Android on the APK, Chrome and Safari on the browser app, and a
-// «Работает на» row (Android, iPhone, Windows and Mac, Telegram).
+// the copy, set on a dark pool in the silk and rising from the hero's bottom edge. The HUD toast loops issue → accept
+// → AI check on the screen itself, in its plane. Platform marks as in the final CTA: Android on the APK, Chrome and
+// Safari on the browser app, and a «Работает на» row of app icon tiles (Android, iPhone, Windows and Mac, Telegram).
 import {
   androidLogo,
   appleLogo,
@@ -35,7 +35,10 @@ const PLATFORM_LOGOS: Record<(typeof c.platforms)[number]['id'], readonly Logo[]
   telegram: [telegramLogo],
 };
 
-/** The HUD capsule cycling through three states; pauses while the tab is hidden; reduced motion shows the last. */
+/**
+ * The HUD capsule cycling through three states; pauses while the tab is hidden; reduced motion shows the last. A
+ * message with a line break is a two line notification: the title, then a quieter detail line.
+ */
 function HudLoop() {
   const reduced = useReducedMotion();
   const [i, setI] = useState(0);
@@ -57,6 +60,7 @@ function HudLoop() {
   }, [reduced]);
 
   const state = c.hud[reduced ? c.hud.length - 1 : i]!;
+  const [title, detail] = state.text.split('\n');
   return (
     <div className={h.hudWrap} aria-hidden="true">
       <div key={state.text} className={`${hudStyles.hud} ${h.hud}`}>
@@ -65,7 +69,10 @@ function HudLoop() {
         ) : (
           <span className={s.dot} data-tone={state.tone} />
         )}
-        <span>{state.text}</span>
+        <span className={h.hudText}>
+          <span>{title}</span>
+          {detail && <span className={hudStyles.muted}>{detail}</span>}
+        </span>
       </div>
     </div>
   );
@@ -79,7 +86,11 @@ export function Hero() {
         <div className={h.copy}>
           <p className={`${s.eyebrow} ${h.eyebrow}`}>
             <span className={h.eyebrowDot} />
-            {c.eyebrow}
+            <span className={h.eyebrowText}>
+              {c.eyebrow[0]}
+              <span className={h.eyebrowSep}> · </span>
+              <span className={h.eyebrowPart}>{c.eyebrow[1]}</span>
+            </span>
           </p>
           <h1 id="hero-title" className={h.title}>
             <span className={h.line}>{c.title[0]}</span>
@@ -97,34 +108,32 @@ export function Hero() {
               {c.panel}
             </MarkPill>
           </div>
+        </div>
 
-          <div className={h.platforms}>
-            <p className={h.platformsLabel}>{c.platformsLabel}</p>
-            <ul>
-              {c.platforms.map((p) => (
-                <li key={p.id}>
-                  <span className={h.platformMarks}>
-                    {PLATFORM_LOGOS[p.id].map((logo) => (
-                      <Mark key={logo.title} logo={logo} size={19} />
-                    ))}
-                  </span>
-                  <span className={h.platformText}>
-                    <span className={h.platformName}>{p.name}</span>
-                    <span className={h.platformNote}>{p.note}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <p className={h.note}>{c.note}</p>
+        <div className={h.platforms}>
+          <p className={h.platformsLabel}>{c.platformsLabel}</p>
+          <ul>
+            {c.platforms.map((p) => (
+              <li key={p.id}>
+                <span className={h.platformMarks}>
+                  {PLATFORM_LOGOS[p.id].map((logo) => (
+                    <Mark key={logo.title} logo={logo} size={22} />
+                  ))}
+                </span>
+                <span className={h.platformText}>
+                  <span className={h.platformName}>{p.name}</span>
+                  <span className={h.platformNote}>{p.note}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <ul className={h.stats}>
-          {c.stats.map((text) => (
-            <li key={text} className={s.pill}>
-              <span className={s.dot} />
-              {text}
+          {c.stats.map((x) => (
+            <li key={x.value}>
+              <b>{x.value}</b>
+              <span>{x.label}</span>
             </li>
           ))}
         </ul>
@@ -140,12 +149,12 @@ export function Hero() {
               tilt={{ x: 4, y: -16, z: 1.5, perspective: 2200 }}
               shadow="float"
               priority
-              className={h.device}
-            />
-            <HudLoop />
+            >
+              <HudLoop />
+            </DeviceFrame>
           </div>
           <p className={s.visuallyHidden}>
-            {c.hud.map((x) => x.text.replace(/[.\s]+$/, '')).join('. ')}.
+            {c.hud.map((x) => x.text.replace(/\n/g, ' ').replace(/[.\s]+$/, '')).join('. ')}.
           </p>
         </div>
       </div>
