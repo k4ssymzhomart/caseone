@@ -6,6 +6,7 @@
 # Then: deploy/netlify/deploy.sh              production (https://<site>.netlify.app)
 #       deploy/netlify/deploy.sh preview      draft URL only
 # SITE_NAME (default rota-naryad) picks the site; SITE_URL=https://<domain> makes og:image absolute.
+# COMMITTED_PUBLIC=1 ignores uncommitted edits to apps/web/public (e.g. a deck someone is still working on).
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 SITE_NAME="${SITE_NAME:-rota-naryad}"
@@ -22,6 +23,12 @@ if [ -z "${SKIP_APP:-}" ] && [ -f apps/mobile/dist-web/index.html ]; then
   mkdir -p "$OUT/app" && cp -R apps/mobile/dist-web/. "$OUT/app/"
 fi
 cp deploy/netlify/_redirects deploy/netlify/_headers "$OUT/"
+# COMMITTED_PUBLIC=1 ships the committed version of any apps/web/public file that has uncommitted edits.
+if [ -n "${COMMITTED_PUBLIC:-}" ]; then
+  git diff --name-only HEAD -- apps/web/public | while read -r f; do
+    git show "HEAD:$f" > "$OUT/${f#apps/web/public/}" && echo "shipping the committed $f"
+  done
+fi
 if [ -n "${SITE_URL:-}" ]; then
   perl -pi -e "s#content=\"/og\.jpg\"#content=\"${SITE_URL%/}/og.jpg\"#g" "$OUT/index.html"
 fi
