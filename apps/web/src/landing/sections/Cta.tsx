@@ -25,6 +25,9 @@ export function Cta() {
             <p className={s.lead}>{c.lead}</p>
             <div className={c_.buttons}>
               <LinkPill href={links.apk}>{c.apk}</LinkPill>
+              <LinkPill href={links.app} variant="secondary">
+                {c.app}
+              </LinkPill>
               <LinkPill href={links.panel} variant="secondary">
                 {c.panel}
               </LinkPill>

@@ -64,6 +64,9 @@ export function Hero() {
           <p className={h.lead}>{c.lead}</p>
           <div className={h.cta}>
             <LinkPill href={links.apk}>{c.apk}</LinkPill>
+            <LinkPill href={links.app} variant="secondary">
+              {c.app}
+            </LinkPill>
             <LinkPill href={links.panel} variant="secondary">
               {c.panel}
             </LinkPill>

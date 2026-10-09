@@ -5,6 +5,8 @@ export const links = {
   apk: 'https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk',
   /** The web panel lives in this app: the landing is `/`, the panel starts at `/login`. */
   panel: '/login',
+  /** The mobile app as a PWA in any browser, iPhone included (the APK stays the full experience). */
+  app: '/app/',
   /** Demo video ≤ 3 min (YouTube unlisted or Drive). */
   video: '',
   /** Pitch PDF, for example '/rota-pitch.pdf' in public/. */
