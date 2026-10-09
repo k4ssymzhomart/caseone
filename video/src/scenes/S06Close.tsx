@@ -1,4 +1,4 @@
-// 1:12 Phone B: closing the order with the fault code, materials against the norm and the after photo.
+// 1:09 Phone B: closing the order with the fault code, materials against the norm and the after photo.
 import React from "react";
 import { AbsoluteFill } from "remotion";
 import { Backdrop } from "../components/Backdrop";

@@ -1,4 +1,4 @@
-// 2:40 Measured numbers in two pages, each with the file that holds the measurement (src/data/numbers.ts).
+// 2:35 Measured numbers in two pages, each with the file that holds the measurement (src/data/numbers.ts).
 import React from "react";
 import { AbsoluteFill, Sequence } from "remotion";
 import { Backdrop } from "../components/Backdrop";

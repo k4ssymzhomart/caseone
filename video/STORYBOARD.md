@@ -11,7 +11,7 @@ the architecture and the measured numbers.
 | Sound | no voice; captions in Russian on screen. An optional music bed plays if `public/audio/music.mp3` exists |
 | Style | Rota dark canvas, signal red `#FF3B30`, Inter for words, Geist Mono for numbers and eyebrows, glass cards, dark mascots on the problem, privacy and outro beats, real platform logos where a platform is named |
 | Footage | `public/footage/<scene>.mp4` (or `-A`, `-B`, `-C`, `-web` per screen) when recorded (RECORDING.md); otherwise the real stills from `docs/screenshots/presentation` |
-| Chrome | from 0:23 to 2:17 a small Rota lockup top left, «Кейс 1 · НарядAI» top right and a chapter bar at the bottom: Выдача · Принятие · Сроки · Закрытие · Проверка ИИ · Вердикт · Доработка · Отчёт смены · Рейтинг · Аналитика |
+| Chrome | from 0:22 to 2:17 a small Rota lockup top left, «Кейс 1 · НарядAI» top right and a chapter bar at the bottom: Выдача · Принятие · Сроки · Закрытие · Проверка ИИ · Вердикт · Доработка · Отчёт смены · Рейтинг · Аналитика |
 
 Rules the film keeps:
 
@@ -38,17 +38,17 @@ Timecodes are positions in the finished film; neighbouring scenes cross fade for
 ### 1 · Cold open · 0:00 · 8 s · `s01-cold-open`
 
 - Footage: phone B, the red emergency screen with the siren, one tap on «Принять». Slot `s01-cold-open-B.mp4`
-  (optional; the still `mobile/09-worker-emergency.png` is the fallback).
+  (optional; the still `pwa/06-B-emergency-red-screen.png`, the red screen with the before photo, is the fallback).
 - Captions: «Аварийный наряд №661» · «Насос НШ-32 маслостанции» · «Течь масла · участок обогащения» · «Сирена звучит,
   пока исполнитель не ответит». Then «Qostanai Industry Hackathon 2026 · Кейс 1 «НарядAI»», the Rota lockup, «Наряд выдан,
   ИИ на контроле», «АО «Костанайские Минералы» · Demo Day 16.10.2026».
 - Motion: the phone eases out of a close up while red siren rings pulse and the phone glows in time with them; at 3.7 s
   the phone drops back, the brand wallpaper fades in, the mark spins into the lockup, the slogan rises.
 
-### 2 · The problem · 0:08 · 16 s · `s02-problem`
+### 2 · The problem · 0:08 · 14.5 s · `s02-problem`
 
 - Footage: none (motion graphics). Source: the case PDF, section 2.
-- Beats, 4.7 s each, the landing's chapter style with a huge outlined number behind:
+- Beats, 4.2 s each, the landing's chapter style with a huge outlined number behind:
   1. «Глава 01 · из кейса» «По рации и на бумаге.» «Наряды выдают устно. Порядок работ в голове у мастера, срочные
      заявки ждут.» Typewriter «Ахметов, приём!», «Канал 3 · шум · ответа нет», mascot `tired`.
   2. «Сроки никто не видит.» «Мастер не знает, кто свободен, что выполняется и что уже просрочено.» Grey pills «Иванов ·
@@ -57,18 +57,18 @@ Timecodes are positions in the finished film; neighbouring scenes cross fade for
      Struck rows ✕ «Фото после», «Перечень работ», «Списанные материалы», mascot `search`.
 - Bridge (2 s): the mark turns, «Rota переводит наряд в телефон и ставит ИИ на контроль».
 
-### 3 · The master issues an emergency order · 0:23 · 18 s · `s03-issue`
+### 3 · The master issues an emergency order · 0:22 · 18 s · `s03-issue`
 
 - Footage: phone A, master 1001, after «Сбросить демо». Taps: 1 «Выдать» in the tab bar, 2 preset «Аварийный»,
   3 equipment chip «Насос НШ-32 маслостанции», 4 problem chip «Течь масла», 5 «Выдать» (assignee Ахметов preselected by
   the AI, deadline from the norm). Slot `s03-issue.mp4`. Fallback stills: `mobile/02`, `07`, `08`, `pwa/05` with tap
   ripples at each button.
 - Captions: «Шаг 1 · мастер выдаёт наряд» · «Аварийный наряд за 5 нажатий» · «Требование кейса: не больше 6 нажатий и
-  1 минуты» · numbered tap list that lights up with each tap · card «ИИ предлагает исполнителя: Ахметов Е. · Свободен ·
+  1 минуты. Участок нужен, только если узла нет среди недавних: тогда 6.» (the still shows the area chip selected) · numbered tap list that lights up with each tap · card «ИИ предлагает исполнителя: Ахметов Е. · Свободен ·
   Слесарь 5 разряда · 6 нарядов по насосам, средняя оценка 4,4 · сегодня работал на этом участке».
 - Motion: tap ripples on the phone in sync with the list; the AI card rises when the suggestion appears on screen.
 
-### 4 · The worker answers · 0:41 · 16 s · `s04-accept`
+### 4 · The worker answers · 0:39 · 16 s · `s04-accept`
 
 - Footage: phones A and B side by side, recorded at the same time. B: the red screen with siren, «Принять»,
   «Начать исполнение». A: the shift screen, then the order card going «Принят в работу» and «В работе». Slots
@@ -79,20 +79,20 @@ Timecodes are positions in the finished film; neighbouring scenes cross fade for
   статус за 5 с».
 - Motion: a red glow pulses behind phone B until «Принять»; each status pill lights up when phone A changes.
 
-### 5 · Deadline control · 0:56 · 14 s · `s05-deadline`
+### 5 · Deadline control · 0:55 · 14 s · `s05-deadline`
 
 - Footage: A issues a second order to Ахметов with the «1 мин» demo deadline (Демо режим on), B taps «В очередь»; then
   the reminder at 30 s left and the overdue message on both phones. Slots `s05-deadline-A.mp4`, `s05-deadline-B.mp4`
-  (speed up the waiting part with `playbackRate` in `src/data/footage.ts`). Fallback: `pwa/07` (A), `pwa/12` (B) with the
-  app's HUD toasts.
+  (speed up the waiting part with `playbackRate` in `src/data/footage.ts`). Fallback: `pwa/11` (A, №661 «В работе», the same
+  moment as B), `pwa/12` (B) with the app's HUD toasts.
 - Captions: «Шаг 3 · ИИ контроль сроков» · «Срок под наблюдением» · clock 01:00 → 00:00 → +00:xx with «демо срок 1 мин ·
   в фильме минута сжата» · chips «проверка каждые 5 с», «напоминание до срока», «просрочка», «эскалация за 3 мин» · the
   message card, word for word from the template: «Скоро срок №662 · Через 1 мин истекает срок наряда №662. Насос водоотлива
   ЦНС-300 №2, Карьер.», then «Просрочен №662 · исполнителю и мастеру · Наряд №662 просрочен на 1 мин. Насос водоотлива
-  ЦНС-300 №2, Карьер. Исполнитель: Ахметов Е. Статус: В очереди с 10:36.»
+  ЦНС-300 №2, Карьер. Исполнитель: Ахметов Е. Статус: В очереди с 05:10.»
 - Motion: the clock turns amber at 30 s and red at the deadline; toasts drop onto both phones.
 
-### 6 · Closing with a photo · 1:10 · 9 s · `s06-close`
+### 6 · Closing with a photo · 1:09 · 9 s · `s06-close`
 
 - Footage: phone B closes order №661: works text, Г-01, Кольцо уплотнительное 2 шт, Масло ВМГЗ 2 л, Ветошь 1 кг, the
   after photo of the clean pump, comment, «Отправить на проверку». Slot `s06-close.mp4`. Fallback: `pwa/14`, `pwa/15`.
@@ -101,7 +101,7 @@ Timecodes are positions in the finished film; neighbouring scenes cross fade for
   форме.» · «Фото после: камера, сжатие, хеш · 1600 px, sha256 и dHash. Загрузка идёт, пока заполняется форма.» · «Фото
   после обязательно для внеплановых работ: так требует кейс.»
 
-### 7 · The AI check · 1:19 · 7 s · `s07-check`
+### 7 · The AI check · 1:17 · 8.5 s · `s07-check`
 
 - Footage: phone B on «ИИ проверяет наряд» until the verdict arrives. Slot `s07-check.mp4`. Fallback: `pwa/16`.
 - Captions: «Проверка ИИ · около 10 секунд» · «Правила решают, модель оценивает» · card «Правила R1…R4 в SQL»: ✓ Полнота
@@ -135,8 +135,9 @@ Timecodes are positions in the finished film; neighbouring scenes cross fade for
   downtime. Slot `s10-shift-report-web.mp4`. Fallback: `web-live/w04-shift-report.png` scrolled.
 - Captions: «Веб панель · смена» · «Смена в цифрах и словах» · quote card with the Claude logo «Сводка ИИ · ночь 08.10 ·
   6,6 с»: «За ночную смену выдано 9 нарядов, принято в работу 8, исполнено 7, закрыто 5. Просроченных нарядов и отказов не
-  было, в срок выполнено 100% исполненных нарядов.» (`docs/phase5-acceptance.md`) · «Числа только из отчёта: проверка не
-  нашла ни одного чужого.» · PDF and Excel logos «Скачать PDF», «Скачать Excel» · «Отчёт смены совпал с ручным подсчётом в
+  было, в срок выполнено 100% исполненных нарядов.» (`docs/phase5-acceptance.md`) · «Сводка за первую половину ночи, экран справа
+  снят в 05:40. Числа только из отчёта: чужих проверка не нашла.» (the still behind it shows the same shift later: 17
+  issued, not 9) · PDF and Excel logos «Скачать PDF», «Скачать Excel» · «Отчёт смены совпал с ручным подсчётом в
   SQL во всех 5 окнах проверки.»
 
 ### 11 · Rating · 1:59 · 8 s · `s11-rating`
@@ -178,8 +179,9 @@ Timecodes are positions in the finished film; neighbouring scenes cross fade for
 ### 14 · Numbers · 2:35 · 12 s · `s14-numbers`
 
 - Two pages of four tiles, each with the counting number, a label and its source file in mono:
-  - «ИИ точный, быстрый и дешёвый»: 10 из 10 · 1,9 с · 9,5 с · 0,016 USD
-  - «Данные и надёжность»: 559 · 22 из 22 · 5 из 5 · 657
+  - «ИИ точный, быстрый и дешёвый»: 10 из 10 · 1,9 с · 9,5 с · 0,016 USD («в среднем за проверку в эталонном прогоне
+    на Sonnet 5.5»)
+  - «Данные и надёжность»: 559 · 22 из 22 · 5 из 5 · 660
 
 ### 15 · Outro · 2:46 · 9 s · `s15-outro`
 
@@ -195,11 +197,11 @@ Timecodes are positions in the finished film; neighbouring scenes cross fade for
 | 10 из 10 | golden set, expected verdict, Claude Sonnet 5.5, prompt p0.2 | `docs/golden-results.md` |
 | 1,9 с | «Выдать» on the master to the red screen on the worker, two browsers, live database | `docs/progress.md` (P7) |
 | 9,5 с | sending the report to the AI verdict, same run | `docs/progress.md` (P7) |
-| 0,016 USD | one AI check with Sonnet 5.5 | `docs/golden-results.md` |
+| 0,016 USD | mean cost per case of the live golden run (0.1619 USD for 10 cases, 512 × 384 photos; a check with 1600 px phone photos costs more) | `docs/golden-results.md` |
 | 559 | history orders over 92 days with the planted patterns | `docs/progress.md`, `tools/db-check.ts` |
 | 22 из 22 | pattern measures P1 to P6 within ±20% of the answer key | `docs/phase6-acceptance.md` |
 | 5 из 5 | windows where `shift_report` equals the manual SQL count | `docs/phase5-acceptance.md` |
-| 657 | automated tests passing (`npx vitest run`, 09.10.2026: 657 passed, 1 skipped, 34 files) | measured for this film |
+| 660 | automated tests passing (`npx vitest run`, 09.10.2026 07:37: 660 passed, 1 skipped, 35 files) | measured for this film |
 | 64,7% / 91,3% | Сериков Д. first time fix against the team median, 92 days | `docs/phase5-acceptance.md` |
 | 6,6 с | Sonnet writing the shift summary | `docs/phase5-acceptance.md` |
 | 87, 80%, 40 | the score, confidence and rework score of the take on screen | the stills (`pwa/17`, `pwa/19`, `mobile/21`); `src/data/take.ts` |

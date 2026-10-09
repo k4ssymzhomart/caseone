@@ -1,4 +1,4 @@
-// 1:54 Web panel, shift report: numbers from SQL, the summary written by Claude Sonnet 5.5, PDF and Excel export.
+// 1:50 Web panel, shift report: numbers from SQL, the summary written by Claude Sonnet 5.5, PDF and Excel export.
 // The quoted summary is the live run recorded in docs/phase5-acceptance.md (night shift of 08.10, 6.6 s).
 import React from "react";
 import { AbsoluteFill } from "remotion";
@@ -40,7 +40,8 @@ export const S10ShiftReport: React.FC = () => (
                 отказов не было, в срок выполнено 100% исполненных нарядов.»
               </span>
               <span style={{ fontFamily: FONT.sans, fontSize: 22, lineHeight: 1.35, color: C.text2 }}>
-                Числа только из отчёта: проверка не нашла ни одного чужого.
+                Сводка за первую половину ночи, экран справа снят в 05:40. Числа только из отчёта: чужих проверка
+                не нашла.
               </span>
             </Glass>
           </Reveal>

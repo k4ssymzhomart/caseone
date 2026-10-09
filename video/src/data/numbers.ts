@@ -30,14 +30,14 @@ export const NUMBERS = {
     decimals: 1,
     suffix: " с",
     label: "от отправки отчёта до вердикта ИИ",
-    source: "docs/progress.md · P7, два браузера",
+    source: "docs/progress.md · P7, тот же прогон",
   },
   checkCost: {
     value: 0.016,
     decimals: 3,
     suffix: " USD",
-    label: "стоит одна проверка наряда моделью",
-    source: "docs/golden-results.md",
+    label: "в среднем за проверку в эталонном прогоне на Sonnet 5.5",
+    source: "docs/golden-results.md · 0,16 USD за 10",
   },
   history: {
     value: 559,
@@ -57,7 +57,7 @@ export const NUMBERS = {
     source: "docs/phase5-acceptance.md",
   },
   tests: {
-    value: 657,
+    value: 660,
     label: "автотестов проходят: домен, правила ИИ, рейтинг, шлюз приватности",
     source: "npx vitest run · 09.10.2026",
   },

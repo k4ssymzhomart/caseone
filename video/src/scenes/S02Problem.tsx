@@ -7,7 +7,8 @@ import { Split } from "../components/layout";
 import { Eyebrow, Headline, Lead, Mono, Reveal, useIn, useOut } from "../components/text";
 import { C, FONT, T } from "../theme";
 
-const CHAPTER = 140;
+// 3 beats of 125 frames (4.2 s) and a 2 s bridge: 435 frames in src/data/scenes.ts.
+const CHAPTER = 125;
 
 const Typewriter: React.FC<{ text: string; start: number; cps?: number }> = ({ text, start, cps = 16 }) => {
   const frame = useCurrentFrame();

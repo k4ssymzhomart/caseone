@@ -1,4 +1,4 @@
-// 1:28 The verdict on both phones, then the master's final word: «Согласен, закрыть».
+// 1:25 The verdict on both phones, then the master's final word: «Согласен, закрыть».
 import React from "react";
 import { AbsoluteFill } from "remotion";
 import { Backdrop } from "../components/Backdrop";

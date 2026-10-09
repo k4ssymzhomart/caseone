@@ -1,4 +1,4 @@
-// 1:40 Phone C, worker 2002, closes the К-2 bearing order without a photo and with 6 bearings: rework, two reasons.
+// 1:37 Phone C, worker 2002, closes the К-2 bearing order without a photo and with 6 bearings: rework, two reasons.
 import React from "react";
 import { AbsoluteFill } from "remotion";
 import { Backdrop } from "../components/Backdrop";

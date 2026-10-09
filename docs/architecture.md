@@ -4,6 +4,10 @@ Rota (case «НарядAI», АО «Костанайские Минералы»)
 
 ## The picture
 
+![Architecture: clients, Supabase with Postgres 17 at the centre, the privacy gateway in front of Claude, push, Telegram and 1С](readme/architecture.png)
+
+The same picture as a diagram GitHub draws from text:
+
 ```mermaid
 flowchart TB
   C["<b>Clients</b><br/>Android app<br/>phone app in the browser<br/>web panel"]
@@ -79,7 +83,7 @@ flowchart LR
   M & W & PWA & P -->|"supabase-js: publishable key + user JWT"| API
   M & W & PWA & P <-->|"one channel per user"| RT
   W & PWA -->|"JPEG ≤ 1600 px, sha256, dHash"| ST
-  W & PWA -->|"after «Исполнено»"| V
+  W & PWA -->|"after «Отправить на проверку»"| V
   P -->|"shift summary, ask box"| S & I
   W & PWA -->|"«Из чего сложился рейтинг»"| X
   API --> DB

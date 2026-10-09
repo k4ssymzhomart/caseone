@@ -12,7 +12,7 @@
   <a href="https://expo.dev/artifacts/eas/TlD9ou-FgpTX4RRfRIUjpkPEHCZDq6WKPXv5lNiAxJ0.apk"><img src="docs/readme/badges/android.svg" height="28" alt="Android APK"></a>
   <a href="https://rota-naryad.netlify.app/login"><img src="docs/readme/badges/web.svg" height="28" alt="Web panel and PWA"></a>
   <a href="docs/golden-results.md"><img src="docs/readme/badges/golden.svg" height="28" alt="AI check: 10 из 10 on the golden set"></a>
-  <a href="vitest.config.ts"><img src="docs/readme/badges/tests.svg" height="28" alt="657 tests passing"></a>
+  <a href="vitest.config.ts"><img src="docs/readme/badges/tests.svg" height="28" alt="660 tests passing"></a>
   <img src="docs/readme/badges/supabase.svg" height="28" alt="Supabase, Postgres 17, Realtime">
   <img src="docs/readme/badges/expo.svg" height="28" alt="Expo SDK 57, React Native 0.86">
 </p>
@@ -39,25 +39,26 @@ Built for **АО «Костанайские Минералы»** (chrysotile ope
 | <img src="docs/readme/logos/rota.svg" height="20" align="top"> **Landing** | [rota-naryad.netlify.app](https://rota-naryad.netlify.app) | |
 | <img src="docs/readme/logos/github.svg" height="20" align="top"> **Code** | this repository, setup in [`docs/development.md`](docs/development.md) | |
 
-## Why it wins: the numbers
+## Measured, not promised
 
-Every number below was measured on the live project or by the test suite. Click a card for its source.
+Every number below comes from a logged run: the live project, the live golden run on Claude Sonnet 5.5, or the test
+suite. Click a card for the file that holds it. Estimates live in their own section, [Estimated effect](#estimated-effect).
 
 <table>
   <tr>
-    <td align="center"><a href="docs/progress.md"><img src="docs/readme/stats/issue-to-red.png" width="250" alt="1.9 s from «Выдать» on the master's phone to the red screen on the worker's"></a><br><sub><a href="docs/progress.md">progress.md</a>, P7 live check</sub></td>
-    <td align="center"><a href="docs/progress.md"><img src="docs/readme/stats/ai-verdict.png" width="250" alt="9.5 s from «Исполнено» to Claude's verdict"></a><br><sub><a href="docs/progress.md">progress.md</a>, P7 live check</sub></td>
+    <td align="center"><a href="docs/progress.md"><img src="docs/readme/stats/issue-to-red.png" width="250" alt="1.9 s from «Выдать» to the worker's red screen on the live database"></a><br><sub><a href="docs/progress.md">progress.md</a>, P7 check in two browsers</sub></td>
+    <td align="center"><a href="docs/progress.md"><img src="docs/readme/stats/ai-verdict.png" width="250" alt="9.5 s from sending the report to Claude's verdict"></a><br><sub><a href="docs/progress.md">progress.md</a>, the same check</sub></td>
     <td align="center"><a href="docs/golden-results.md"><img src="docs/readme/stats/golden.png" width="250" alt="10 из 10 golden set verdicts right with Claude Sonnet 5.5"></a><br><sub><a href="docs/golden-results.md">golden-results.md</a></sub></td>
   </tr>
   <tr>
     <td align="center"><a href="docs/phase6-acceptance.md"><img src="docs/readme/stats/patterns.png" width="250" alt="22 of 22 planted anomaly measures found within ±20 %"></a><br><sub><a href="docs/phase6-acceptance.md">phase6-acceptance.md</a> §1</sub></td>
-    <td align="center"><a href="docs/phase6-acceptance.md"><img src="docs/readme/stats/invented.png" width="250" alt="0 invented numbers in 4 live AI analytics runs"></a><br><sub><a href="docs/phase6-acceptance.md">phase6-acceptance.md</a> §2</sub></td>
+    <td align="center"><a href="docs/phase6-acceptance.md"><img src="docs/readme/stats/invented.png" width="250" alt="0 invented numbers in 4 live AI analytics answers"></a><br><sub><a href="docs/phase6-acceptance.md">phase6-acceptance.md</a> §2</sub></td>
     <td align="center"><a href="docs/phase5-acceptance.md"><img src="docs/readme/stats/shift-report.png" width="250" alt="5 of 5 shift report windows equal to a manual SQL count"></a><br><sub><a href="docs/phase5-acceptance.md">phase5-acceptance.md</a> (b)</sub></td>
   </tr>
   <tr>
     <td align="center"><a href="tools/seed/PATTERNS.md"><img src="docs/readme/stats/history.png" width="250" alt="559 orders of history over 92 days with 6 planted patterns"></a><br><sub><a href="docs/progress.md">progress.md</a>, <a href="tools/seed/PATTERNS.md">PATTERNS.md</a></sub></td>
-    <td align="center"><a href="vitest.config.ts"><img src="docs/readme/stats/tests.png" width="250" alt="657 automated tests pass, plus 7 of 7 live contract scenarios"></a><br><sub><code>npm test</code> (34 files), <a href="docs/progress.md">progress.md</a></sub></td>
-    <td align="center"><a href="docs/golden-results.md"><img src="docs/readme/stats/cost.png" width="250" alt="0.016 USD per AI check with photos"></a><br><sub><a href="docs/golden-results.md">golden-results.md</a></sub></td>
+    <td align="center"><a href="vitest.config.ts"><img src="docs/readme/stats/tests.png" width="250" alt="660 automated tests pass, plus 7 of 7 live contract scenarios"></a><br><sub><code>npx vitest run</code>, 09.10.2026; <a href="docs/progress.md">progress.md</a></sub></td>
+    <td align="center"><a href="docs/golden-results.md"><img src="docs/readme/stats/cost.png" width="250" alt="0.016 USD mean cost of one check in the live golden run"></a><br><sub><a href="docs/golden-results.md">golden-results.md</a>, 0.16 USD for 10</sub></td>
   </tr>
 </table>
 
@@ -67,43 +68,44 @@ Every number below was measured on the live project or by the test suite. Click 
 
 | Step | Who | What happens | Status the other phone sees |
 | --- | --- | --- | --- |
-| 1 | мастер | «Выдать» → preset «Аварийный» → unit → problem chip → «Выдать». Five taps for the required fields; `suggest_assignees` preselects the free слесарь with the reasons; the deadline comes from the norm of the suggested fault code. | «Выдан» |
+| 1 | мастер | «Выдать» → preset «Аварийный» → unit → problem chip → «Выдать». Five taps for the required fields when the unit is among the recent ones, six with the area filter (the case allows six); `suggest_assignees` preselects the free слесарь with the reasons; the deadline comes from the norm of the suggested fault code. | «Выдан» |
 | 2 | исполнитель | A looping siren and a full screen red alert that never dismisses itself: «Принять» or «Отклонить» with a reason. | «Принят в работу» |
-| 3 | исполнитель | «Начать». One order in progress per worker; an emergency can pause the current one in the same transaction. | «Выполняет наряд №661» |
+| 3 | исполнитель | «Начать исполнение». One order in progress per worker; an emergency can pause the current one in the same transaction. | «Выполняет наряд №661» |
 | 4 | исполнитель | Works done, fault code Г-01, materials against the norm, the after photo (compressed on the phone, hashed, uploaded while the form is filled). | «Проверка ИИ» |
 | 5 | AI | SQL rules R1 to R4 plus one Claude Sonnet 5.5 call with the before and after photos: verdict, score, confidence, feedback for the worker. | «Ждёт подтверждения» |
 | 6 | мастер | The full report; «Согласен, закрыть», «Изменить оценку» or «Вернуть на доработку». The master has the final word. | «Закрыт» |
 
 Every status change is one `order_events` row with the server's clock, and reaches the other devices through
-Supabase Realtime (the case asks for 5 s; the live check measured 1.9 s from «Выдать» to the red screen).
+<img src="docs/readme/logos/supabase.svg" height="18" align="top"> Supabase Realtime: the case asks for 5 s, the live
+check in two browsers measured 1.9 s from «Выдать» to the red screen.
 
 ## Screens
 
 <table>
   <tr>
-    <td align="center" width="33%"><img src="docs/readme/screens/m-shift.png" width="230" alt="Master's shift screen"><br><b>Смена</b><br><sub>Who is free, busy, queued or off shift, with live counters</sub></td>
-    <td align="center" width="33%"><img src="docs/readme/screens/m-create.png" width="230" alt="New order screen"><br><b>Новый наряд</b><br><sub>Preset, area, unit, problem: the required fields in five taps</sub></td>
-    <td align="center" width="33%"><img src="docs/readme/screens/m-ai-report.png" width="230" alt="AI report from Claude Sonnet 5.5"><br><b>Отчёт ИИ</b><br><sub>Claude Sonnet 5.5: 87 из 100, confidence 80 %, the model and its latency on screen</sub></td>
+    <td align="center" valign="top" width="33%"><img src="docs/readme/screens/m-shift.png" width="230" alt="Master's shift screen"><br><b>Смена</b><br><sub>Who is free, busy, queued or off shift, with live counters</sub></td>
+    <td align="center" valign="top" width="33%"><img src="docs/readme/screens/m-board.png" width="230" alt="Master's order board"><br><b>Доска нарядов</b><br><sub>Orders by status with deadlines, filters and the shift counters, downtime included</sub></td>
+    <td align="center" valign="top" width="33%"><img src="docs/readme/screens/m-ai-report.png" width="230" alt="AI report from Claude Sonnet 5.5"><br><b>Отчёт ИИ</b><br><sub>Claude Sonnet 5.5: 87 из 100, confidence 80 %, the model and its latency on screen</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/readme/screens/m-overuse.png" width="230" alt="Close form flags overuse"><br><b>Отчёт о работе</b><br><sub>Materials against the norm: 6 bearings where the norm is 2 turn red before sending</sub></td>
-    <td align="center"><img src="docs/readme/screens/m-rework.png" width="230" alt="Rework with reasons"><br><b>На доработку</b><br><sub>The AI returns the order with its reasons: no after photo, overspend</sub></td>
-    <td align="center"><img src="docs/readme/screens/m-rating.png" width="230" alt="Worker rating explained"><br><b>Рейтинг</b><br><sub>The worker's own score by five components, explained in one paragraph</sub></td>
+    <td align="center" valign="top"><img src="docs/readme/screens/m-overuse.png" width="230" alt="Close form flags overuse"><br><b>Отчёт о работе</b><br><sub>Materials against the norm: 6 bearings where the norm is 2 turn red before sending</sub></td>
+    <td align="center" valign="top"><img src="docs/readme/screens/m-rework.png" width="230" alt="Rework with reasons"><br><b>На доработку</b><br><sub>The AI returns the order with its reasons: no after photo, overspend</sub></td>
+    <td align="center" valign="top"><img src="docs/readme/screens/m-rating.png" width="230" alt="Worker's own rating"><br><b>Рейтинг</b><br><sub>The worker's own 30 day score by five components, explained below it</sub></td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td align="center" width="50%"><img src="docs/readme/screens/w-shift-report.png" width="400" alt="Web shift report"><br><b>Отчёт смены</b><br><sub>Counts, reaction and execution time, downtime, workload, AI summary, PDF and Excel</sub></td>
-    <td align="center" width="50%"><img src="docs/readme/screens/w-rating.png" width="400" alt="Web rating"><br><b>Рейтинг исполнителей</b><br><sub>Workers and brigades for any period, stacked by quality, on time, first time fix, volume, discipline</sub></td>
+    <td align="center" valign="top" width="50%"><img src="docs/readme/screens/w-shift-report.png" width="400" alt="Web shift report"><br><b>Отчёт смены</b><br><sub>Counts, reaction and execution time, downtime, workload, AI summary, PDF and Excel</sub></td>
+    <td align="center" valign="top" width="50%"><img src="docs/readme/screens/w-rating.png" width="400" alt="Web rating"><br><b>Рейтинг исполнителей</b><br><sub>Workers and brigades for any period, stacked by quality, on time, first time fix, volume, discipline</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/readme/screens/w-analytics.png" width="400" alt="AI analytics cards"><br><b>Аналитика ИИ</b><br><sub>Findings with a recommendation and the orders behind every number</sub></td>
-    <td align="center"><img src="docs/readme/screens/w-dashboard.png" width="400" alt="Manager dashboard"><br><b>Сводка руководителя</b><br><sub>Active and overdue now, reaction, execution, downtime, top 5 units, best workers</sub></td>
+    <td align="center" valign="top"><img src="docs/readme/screens/w-analytics.png" width="400" alt="AI analytics cards"><br><b>Аналитика ИИ</b><br><sub>Findings with a recommendation and the orders behind every number</sub></td>
+    <td align="center" valign="top"><img src="docs/readme/screens/w-dashboard.png" width="400" alt="Manager dashboard"><br><b>Сводка руководителя</b><br><sub>Active and overdue now, reaction, execution, downtime, top 5 units, best workers</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/readme/screens/w-what-ai-sees.png" width="400" alt="What the AI sees"><br><b>Что видит ИИ</b><br><sub>Every LLM request as it left the plant: pseudonyms only, cost and latency per call</sub></td>
-    <td align="center"><img src="docs/readme/screens/w-equipment.png" width="400" alt="Equipment history of Конвейер К-3"><br><b>История оборудования</b><br><sub>Конвейер К-3: every order, repeat failures, total downtime</sub></td>
+    <td align="center" valign="top"><img src="docs/readme/screens/w-what-ai-sees.png" width="400" alt="What the AI sees"><br><b>Что видит ИИ</b><br><sub>Every LLM request as it left the plant: pseudonyms only, cost and latency per call</sub></td>
+    <td align="center" valign="top"><img src="docs/readme/screens/w-equipment.png" width="400" alt="Equipment history of Конвейер К-3"><br><b>История оборудования</b><br><sub>Конвейер К-3: every order, repeat failures, total downtime</sub></td>
   </tr>
 </table>
 
@@ -117,12 +119,12 @@ Every closed наряд gets an explainable score out of 100 (CLAUDE.md §11).
 
 | Part | Points | Decided by |
 | --- | --- | --- |
-| R1 completeness: works text, fault code, materials, after photo | 20 | SQL |
-| R2 photo integrity: camera, taken during the work, not a duplicate of another order (dHash, sha256) | 10 | SQL |
-| R3 materials against the norm and the historical p90 | 15 | SQL |
-| R4 time against the norm, deadline kept | 20 | SQL |
-| L1 the works match the problem, the code fits the works | 20 | Claude Sonnet 5.5 |
-| L2 the after photo: same unit, problem gone, neat, guards in place | 15 | Claude Sonnet 5.5 with vision |
+| R1 completeness: works text, fault code, materials, after photo | 20 | <img src="docs/readme/logos/postgresql.svg" height="18" align="top"> SQL |
+| R2 photo integrity: camera, taken during the work, not a duplicate of another order (dHash, sha256) | 10 | <img src="docs/readme/logos/postgresql.svg" height="18" align="top"> SQL |
+| R3 materials against the norm and the historical p90 | 15 | <img src="docs/readme/logos/postgresql.svg" height="18" align="top"> SQL |
+| R4 time against the norm, deadline kept | 20 | <img src="docs/readme/logos/postgresql.svg" height="18" align="top"> SQL |
+| L1 the works match the problem, the code fits the works | 20 | <img src="docs/readme/logos/claude.svg" height="18" align="top"> Claude Sonnet 5.5 |
+| L2 the after photo: same unit, problem gone, neat, guards in place | 15 | <img src="docs/readme/logos/claude.svg" height="18" align="top"> Claude Sonnet 5.5 with vision |
 
 - **Hard failures are deterministic.** Any rule fail means «На доработку», whatever the model says. Then ≥ 80 is
   «Принято», 60 to 79 «Принято с замечаниями», below 60 «На доработку».
@@ -130,7 +132,8 @@ Every closed наряд gets an explainable score out of 100 (CLAUDE.md §11).
   «Нужна проверка мастером»; the rules only review keeps working without the model.
 - **Tested before trusted.** The golden set of 10 cases (good repair, no after photo, duplicate photo, excess
   materials, wrong code, unrelated works, too fast, late but good, planned without photo, unclear photo) scores
-  **10 из 10** live on Sonnet 5.5 at about 0.016 USD a case ([results](docs/golden-results.md)).
+  **10 из 10** live on Sonnet 5.5, 0.16 USD for the ten cases ([results](docs/golden-results.md)). The golden photos are
+  512 × 384; a real check with two 1600 px phone photos sends more image tokens and costs more.
 - **One call, schema bound.** Sonnet 5.5 with a JSON schema, effort low, a 45 s timeout; Haiku 5.5 reads questions
   and explains ratings. A budget guard (`LLM_BUDGET_USD`) stops paid calls before the cap.
 
@@ -161,8 +164,9 @@ live in `settings` and change on the admin screen; «Ускорение врем
 | <img src="docs/readme/logos/telegram.svg" height="20" align="top"> Telegram | second channel through the bot, linked by a 15 minute token; messages carry the order number, unit, area, status and deadline, never a name |
 
 The pipeline is an outbox: a row in `notifications` (deduplicated per recipient), a trigger, `pg_net`, the
-`notify-dispatch` Edge Function. Status today: the in-app alerts, the red screen and Telegram work on the live project;
-remote push on Android waits for the Firebase key in EAS (the open item of P3 in [`docs/progress.md`](docs/progress.md)).
+`notify-dispatch` Edge Function. Status today: the in-app alerts and the red screen with the siren work on the live
+project, and the bot's webhook is set; remote push on Android waits for the Firebase key in EAS (the open item of P3 in
+[`docs/progress.md`](docs/progress.md)).
 
 ## Analytics: the history tells on the equipment
 
@@ -190,8 +194,14 @@ A weekly digest goes to masters and the руководитель every Monday at
 
 ## Architecture
 
-Everything runs on Supabase: hosted for the hackathon, self hosted on the plant's servers in production. The full page,
-with every call drawn and the job of each part: [`docs/architecture.md`](docs/architecture.md).
+Everything runs on Supabase: hosted for the hackathon, self hosted on the plant's servers in production. Postgres holds
+the state machine, the rules and the analytics; the apps and the Edge Functions only call it. The full page, with every
+call drawn and the job of each part: [`docs/architecture.md`](docs/architecture.md).
+
+<a href="docs/architecture.md"><img src="docs/readme/architecture.png" width="100%" alt="Architecture. Clients: the Android app, the phone app in the browser and the web panel talk to Supabase with supabase-js. Supabase: PostgREST RPC, Realtime, Storage, pg_cron and pg_net, six Edge Functions and Postgres 17 with the state machine, RLS, rules R1 to R4, detectors, Vault and integration_outbox. Outside: the privacy gateway in front of Claude Sonnet and Haiku or a local model, Expo push to FCM, the Telegram bot without names, 1С:ТОиР."></a>
+
+<details>
+<summary><b>The same picture as text</b> (mermaid, drawn by GitHub)</summary>
 
 ```mermaid
 flowchart TB
@@ -227,6 +237,8 @@ flowchart TB
   FN --> PUSH
   FN --> TG
 ```
+
+</details>
 
 <p align="center">
   <img src="docs/readme/logos/expo.svg" height="36" alt="Expo" title="Expo SDK 57">&nbsp;
@@ -271,9 +283,9 @@ definer RPCs `create_order` and `order_action`, with the server's clock and an i
 that also makes an offline outbox possible. `order_events` is append only. The apps ship only the project URL and the
 publishable key; `anon` cannot execute any RPC (checked by [`supabase/tests/transitions.sql`](supabase/tests/transitions.sql)).
 
-**Sized for 2 000 workers in two shifts.** One Realtime channel per signed in user, indexed views for the worker
-status, reports and detectors computed in SQL next to the data, photos compressed on the phone to at most 1600 px
-before upload.
+**Sized for 2 000 workers in two shifts.** One Realtime channel per signed in user, views over indexed tables for the
+worker status, reports and detectors computed in SQL next to the data, photos compressed on the phone to at most
+1600 px before upload.
 
 **Reliability first.** The state machine lives in SQL and is mirrored in TypeScript for the UI and the offline mock;
 a parity test keeps them equal. Realtime resubscribes and refetches on every foreground and reconnect; the AI check
@@ -285,7 +297,7 @@ falls back to rules only when the model is off or over budget.
 
 | Lever | Assumption | Estimate |
 | --- | --- | --- |
-| Dispatch | 60 наряды a shift, 2 shifts, 30 days = 3 600 a month. Finding a free слесарь by radio or phone takes 4 min; with the shift screen and the AI suggestion, 1 min. | 3 min × 3 600 ≈ **180 master hours a month** |
+| Dispatch | 60 наряды a shift across the plant, 2 shifts, 30 days = 3 600 a month (our guess for about 2 000 workers; the synthetic history models one repair service of 15 people, about 6 orders a day). Finding a free слесарь by radio or phone takes 4 min; with the shift screen and the AI suggestion, 1 min. | 3 min × 3 600 ≈ **180 master hours a month** |
 | Paperwork | A paper наряд, its closing act and retyping into 1С take 8 min per order; closing on the phone with the 1С outbox leaves 2 min. | 6 min × 3 600 ≈ **360 hours a month** |
 | Repeat failures | In the history, Конвейер К-3 lost 87 h to 21 unplanned failures in 92 days, 15 of them the same bearing code. Acting on the AI card removes half of those repeats (about 7 failures, 4.1 h each). | ≈ **29 h of conveyor downtime a quarter**, for one unit; multiply by the plant's cost of an hour of downtime |
 | Reaction | An unaccepted emergency escalates after 3 min with a named replacement, instead of when someone notices. | not quantified |
@@ -299,7 +311,7 @@ falls back to rules only when the model is off or over budget.
    `2001 / 1234`.
 3. As the мастер, issue an emergency наряд: «Выдать», «Аварийный», the unit «Насос НШ-32 маслостанции» (the area chip
    «Участок обогащения» narrows the list), the problem «Течь масла», «Выдать». The worker's screen turns red.
-4. As the worker: «Принять», «Начать», «Исполнено»; fill the form, add the after photo, «Отправить на проверку». The
+4. As the worker: «Принять», «Начать исполнение», «Исполнено»; fill the form, add the after photo, «Отправить на проверку». The
    AI verdict arrives in about ten seconds; the мастер taps «Согласен, закрыть».
 5. Open the [web panel](https://rota-naryad.netlify.app/login) as руководитель `3001 / 3333` or мастер `1001 / 1111`:
    «Отчёт смены», «Рейтинг» for «Месяц», «Аналитика ИИ».
@@ -308,9 +320,17 @@ falls back to rules only when the model is off or over budget.
 
 ## Demo video
 
-Video: coming with the Demo Day cut. It will be committed as `docs/video/rota-demo.mp4` and linked from the
-[landing](https://rota-naryad.netlify.app). Until then the six step strip above and the
-[screenshots](docs/screenshots/presentation/README.md) show the same loop on real data.
+<a href="video/README.md"><img src="docs/readme/film.png" width="100%" alt="The Rota demo film, 2:55: the red emergency screen, the two phones, the AI verdict 87 из 100 and the analytics card for Конвейер К-3."></a>
+
+The film is code: a Remotion project in [`video/`](video/README.md) that cuts the Demo Day script to 2:55 at
+1920 × 1080 with Russian captions, every number on screen listed with its source in
+[`video/src/data/numbers.ts`](video/src/data/numbers.ts). The draft runs on the real presentation screens of the live
+project; the recorded takes of the phones and the web panel go to `video/public/footage/`
+([RECORDING.md](video/RECORDING.md)) and replace the stills scene by scene. The final cut gets its link here.
+
+```sh
+cd video && npm install && npm run render     # out/rota-demo.mp4, 2:55, 1920 × 1080
+```
 
 <details>
 <summary><b>The Demo Day script</b> (case §11, about 7 minutes on three phones and the web panel)</summary>
@@ -321,7 +341,7 @@ shows the web panel and mirrors A and B.
 1. A: the shift panel shows who is free, busy, queued and off shift; the board shows the active orders.
 2. A: photographs the oil leak on «Насос НШ-32 маслостанции» and issues an emergency order; the AI preselects Ахметов
    with reasons; the tap counter stays at the required five.
-3. B: siren and the red screen; «Принять», «Начать». A sees «Выполняет наряд №…» within seconds.
+3. B: siren and the red screen; «Принять», «Начать исполнение». A sees «Выполняет наряд №…» within seconds.
 4. A: a second order to Ахметов with the «1 мин» deadline; B puts it in the queue. The reminder fires at 30 s left,
    the overdue message reaches both phones within 5 s of the deadline.
 5. B: closes the first order with Г-01, Кольцо уплотнительное 2 шт, Масло ВМГЗ 2 л, Ветошь 1 кг and the after photo.
@@ -345,6 +365,7 @@ shows the web panel and mirrors A and B.
 | [`supabase/seed`](supabase/seed), [`tools/seed`](tools/seed) | test accounts, the history generator run, the answer key of the planted patterns |
 | [`supabase/tests`](supabase/tests) | SQL acceptance scripts and `transitions.json` |
 | [`tools`](tools) | Node scripts: golden set, LLM smoke test, push test, database check, acceptance checks, README assets |
+| [`video`](video/README.md) | the demo film: Remotion project, [storyboard](video/STORYBOARD.md), recording guide |
 | [`docs`](docs) | [development guide](docs/development.md), [architecture](docs/architecture.md), [decisions](docs/decisions.md), [design](docs/design.md), [progress](docs/progress.md), acceptance reports, the case PDF |
 | [`CLAUDE.md`](CLAUDE.md) | the engineering spec every phase was built against |
 
@@ -358,7 +379,7 @@ shows the web panel and mirrors A and B.
 | ✓ | Test dataset | [`supabase/seed/`](supabase/seed) and [`tools/seed/PATTERNS.md`](tools/seed/PATTERNS.md) |
 | ✓ | Architecture | [`docs/architecture.md`](docs/architecture.md) |
 | ○ | Presentation of at most 10 slides | in progress; screens ready in [`docs/screenshots/presentation/`](docs/screenshots/presentation/README.md) |
-| ○ | Demo video of at most 3 minutes | in progress, see [Demo video](#demo-video) |
+| ○ | Demo video of at most 3 minutes | draft cut of 2:55 from [`video/`](video/README.md) on the real screens; the final cut after the phone recording, see [Demo video](#demo-video) |
 
 ## Credits and license
 

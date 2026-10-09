@@ -26,12 +26,12 @@ export type SceneMeta = { id: SceneId; frames: number; chapter?: string };
 
 export const SCENES: SceneMeta[] = [
   { id: "s01-cold-open", frames: 240 },
-  { id: "s02-problem", frames: 480 },
+  { id: "s02-problem", frames: 435 },
   { id: "s03-issue", frames: 540, chapter: "Выдача" },
   { id: "s04-accept", frames: 480, chapter: "Принятие" },
   { id: "s05-deadline", frames: 420, chapter: "Сроки" },
   { id: "s06-close", frames: 270, chapter: "Закрытие" },
-  { id: "s07-check", frames: 210, chapter: "Проверка ИИ" },
+  { id: "s07-check", frames: 255, chapter: "Проверка ИИ" },
   { id: "s08-verdict", frames: 360, chapter: "Вердикт" },
   { id: "s09-rework", frames: 420, chapter: "Доработка" },
   { id: "s10-shift-report", frames: 270, chapter: "Отчёт смены" },

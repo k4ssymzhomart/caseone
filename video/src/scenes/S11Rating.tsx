@@ -1,4 +1,4 @@
-// 2:03 Web panel, rating for the month: five components with fixed weights; Сериков at the bottom (PATTERNS P2).
+// 1:59 Web panel, rating for the month: five components with fixed weights; Сериков at the bottom (PATTERNS P2).
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { Backdrop } from "../components/Backdrop";

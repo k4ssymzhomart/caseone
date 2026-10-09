@@ -1,4 +1,4 @@
-// 1:21 The AI check: rules R1 to R4 in SQL decide hard failures, Claude Sonnet 5.5 judges the photos and the text.
+// 1:17 The AI check: rules R1 to R4 in SQL decide hard failures, Claude Sonnet 5.5 judges the photos and the text.
 // Rule results and the quote are from the live Sonnet review in docs/screenshots/presentation (mobile/29, pwa/19).
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
@@ -12,10 +12,10 @@ import { NUMBERS } from "../data/numbers";
 import { C, FONT } from "../theme";
 
 const RULES: Array<{ at: number; kind: "pass" | "warn"; title: string; pts: string; note?: string }> = [
-  { at: 22, kind: "pass", title: "Полнота отчёта", pts: "20 из 20" },
-  { at: 34, kind: "pass", title: "Подлинность фото", pts: "10 из 10" },
-  { at: 46, kind: "pass", title: "Материалы в норме", pts: "15 из 15" },
-  { at: 58, kind: "warn", title: "Время и срок", pts: "10 из 20", note: "подозрительно быстро" },
+  { at: 24, kind: "pass", title: "Полнота отчёта", pts: "20 из 20" },
+  { at: 40, kind: "pass", title: "Подлинность фото", pts: "10 из 10" },
+  { at: 56, kind: "pass", title: "Материалы в норме", pts: "15 из 15" },
+  { at: 72, kind: "warn", title: "Время и срок", pts: "10 из 20", note: "подозрительно быстро" },
 ];
 
 const RuleRow: React.FC<(typeof RULES)[number]> = ({ at, kind, title, pts, note }) => {
@@ -74,7 +74,7 @@ export const S07Check: React.FC = () => (
               ))}
             </Glass>
           </Reveal>
-          <Reveal delay={74}>
+          <Reveal delay={92}>
             <Glass style={{ padding: "24px 30px", display: "flex", flexDirection: "column", gap: 14 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                 <Logo name="claude" size={34} />
@@ -88,9 +88,9 @@ export const S07Check: React.FC = () => (
               </Lead>
             </Glass>
           </Reveal>
-          <Reveal delay={120}>
+          <Reveal delay={140}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 22 }}>
-              <CountUp {...NUMBERS.verdict} delay={120} size={96} color={C.red} />
+              <CountUp {...NUMBERS.verdict} delay={140} size={96} color={C.red} />
               <Lead size={26}>{NUMBERS.verdict.label}</Lead>
             </div>
           </Reveal>

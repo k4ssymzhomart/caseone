@@ -198,7 +198,7 @@ Sign in with the табельный номер and a 4 digit ПИН. All people 
 | `npm run push:test -- <ExponentPushToken[...]> [--emergency]` | a test push through the Expo push service (Android) |
 | `npx tsx tools/db-check.ts` | live database check (above) |
 | `npx tsx tools/gen-fixtures.ts` | rewrite the `@rota/shared` fixtures from `supabase/seed/directories.json` |
-| `npx tsx tools/gen-readme-assets.ts [--only logos,badges,banner,loop,stats,screens]` | the README banner, loop strip, number cards, gallery frames, badges and platform logos in `docs/readme/` (headless Chrome) |
+| `npx tsx tools/gen-readme-assets.ts [--only logos,badges,banner,loop,stats,screens,arch,film]` | the README banner, loop strip, number cards, gallery frames, architecture picture, film poster, badges and platform logos in `docs/readme/` (headless Chrome; the poster needs `npm run stills -- out/poster 2.5 47 90 136 --scale=0.5` in `video/` first) |
 | `RUN_SUPABASE=1 npx vitest run --project packages/shared src/api/supabase` | the `RotaApi` contract suite against the live project; every scenario starts with `demo_reset()` |
 
 Every LLM call checks the budget first: the account holds 5 USD and `LLM_BUDGET_USD` (default 4) caps the summed cost

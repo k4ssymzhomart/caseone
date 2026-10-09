@@ -1,4 +1,4 @@
-// 2:22 Architecture in one animated picture (docs/architecture.md), then the privacy gateway close up.
+// 2:17 Architecture in one animated picture (docs/architecture.md), then the privacy gateway close up.
 import React from "react";
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import { Backdrop } from "../components/Backdrop";

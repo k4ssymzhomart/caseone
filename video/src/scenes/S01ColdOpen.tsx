@@ -84,7 +84,7 @@ export const S01ColdOpen: React.FC = () => {
               slot="s01-cold-open-B"
               glow="rgba(255,59,48,0.55)"
               glowStrength={0.8 + 0.4 * Math.abs(Math.sin(frame / 9))}
-              shots={[{ still: "mobile/09-worker-emergency.png", at: 0, taps: [{ at: 92, x: 0.495, y: 0.82 }] }]}
+              shots={[{ still: "pwa/06-B-emergency-red-screen.png", at: 0, taps: [{ at: 92, x: 0.5, y: 0.857 }] }]}
             />
           </AbsoluteFill>
           <AbsoluteFill style={{ padding: "0 120px", flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>

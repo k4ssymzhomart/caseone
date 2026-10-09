@@ -1,4 +1,4 @@
-// 2:11 Web panel, AI analytics: the demo question in plain Russian, and the К-3 card in the case's own tone.
+// 2:07 Web panel, AI analytics: the demo question in plain Russian, and the К-3 card in the case's own tone.
 // The card text is the live answer to this question (docs/phase6-acceptance.md, run 2, and the rules card there).
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";

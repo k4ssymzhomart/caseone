@@ -1,4 +1,4 @@
-// 0:42 Phones A and B side by side: the red screen with the siren, «Принять», «Начать», the master sees each step.
+// 0:39 Phones A and B side by side: the red screen with the siren, «Принять», «Начать», the master sees each step.
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { Backdrop } from "../components/Backdrop";

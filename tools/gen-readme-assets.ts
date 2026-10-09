@@ -3,7 +3,8 @@
 // installed on the Mac, with the Inter and Geist Mono files from node_modules). Every picture uses the real
 // presentation screenshots in docs/screenshots/presentation/; nothing is redrawn.
 //   npx tsx tools/gen-readme-assets.ts                       everything
-//   npx tsx tools/gen-readme-assets.ts --only logos,badges   some parts: logos, badges, banner, loop, stats, screens
+//   npx tsx tools/gen-readme-assets.ts --only logos,badges   some parts: logos, badges, banner, loop, stats, screens,
+//                                                            arch, film (film needs the frames named at writeFilm)
 // CHROME=/path/to/chrome overrides the browser. Output PNGs are palette compressed with sharp.
 import { spawn } from 'node:child_process';
 import {
@@ -131,7 +132,7 @@ const BADGES: Badge[] = [
   { file: 'android', label: 'Android', value: 'APK', logo: 'android', tone: 'dark' },
   { file: 'web', label: 'Web', value: 'panel + PWA', logo: 'chrome', tone: 'dark' },
   { file: 'golden', label: 'AI check', value: '10 из 10 golden', logo: 'claude', tone: 'green' },
-  { file: 'tests', label: 'Tests', value: '657 passing', tone: 'green' },
+  { file: 'tests', label: 'Tests', value: '660 passing', tone: 'green' },
   {
     file: 'supabase',
     label: 'Supabase',
@@ -440,7 +441,7 @@ const LOOP: { shot: Shot; step: string; title: string; text: string }[] = [
     shot: { src: 'pwa/12-B-order-in-progress.png', time: '05:10' },
     step: '03',
     title: 'In progress',
-    text: '«Принять», «Начать»: the master’s board follows live.',
+    text: '«Принять», «Начать исполнение»: the master sees it live.',
   },
   {
     shot: { src: 'pwa/15-B-close-after-photo.png', time: '05:11' },
@@ -497,14 +498,14 @@ const STATS: { file: string; eyebrow: string; value: string; unit?: string; labe
     eyebrow: 'Live loop',
     value: '1.9',
     unit: 's',
-    label: '«Выдать» on the master’s phone to the red screen on the worker’s',
+    label: '«Выдать» to the worker’s red screen on the live database',
   },
   {
     file: 'ai-verdict',
     eyebrow: 'Live loop',
     value: '9.5',
     unit: 's',
-    label: '«Исполнено» to Claude’s verdict with photo analysis',
+    label: 'from sending the report to Claude’s verdict, the same live run',
   },
   {
     file: 'golden',
@@ -522,7 +523,7 @@ const STATS: { file: string; eyebrow: string; value: string; unit?: string; labe
     file: 'invented',
     eyebrow: 'Analytics',
     value: '0',
-    label: 'invented numbers in 4 live AI analytics runs',
+    label: 'invented numbers in 4 live AI analytics answers',
   },
   {
     file: 'shift-report',
@@ -539,14 +540,15 @@ const STATS: { file: string; eyebrow: string; value: string; unit?: string; labe
   {
     file: 'tests',
     eyebrow: 'Engineering',
-    value: '657',
-    label: 'automated tests pass, plus 7 of 7 live scenarios',
+    value: '660',
+    label: 'automated tests pass, plus 7 of 7 live contract scenarios',
   },
   {
     file: 'cost',
     eyebrow: 'Cost',
-    value: '$0.016',
-    label: 'per AI check with photos on Claude Sonnet 5.5',
+    value: '0.016',
+    unit: 'USD',
+    label: 'mean cost of one check in the live golden run on Sonnet 5.5',
   },
 ];
 
@@ -570,11 +572,11 @@ async function writeStats(): Promise<void> {
 
 const PHONES: { file: string; shot: Shot }[] = [
   { file: 'm-shift', shot: { src: 'mobile/02-master-shift.png' } },
-  { file: 'm-create', shot: { src: 'mobile/07-master-create.png' } },
+  { file: 'm-board', shot: { src: 'mobile/03-master-board.png' } },
   { file: 'm-ai-report', shot: { src: 'mobile/28-master-ai-report-sonnet.png' } },
   { file: 'm-overuse', shot: { src: 'mobile/20-worker-close-overuse.png' } },
   { file: 'm-rework', shot: { src: 'mobile/23-master-rework-reasons.png' } },
-  { file: 'm-rating', shot: { src: 'mobile/25-worker-rating-explained.png' } },
+  { file: 'm-rating', shot: { src: 'mobile/24-worker-rating.png' } },
 ];
 
 const WINDOWS: { file: string; src: string; path: string; top?: number }[] = [
@@ -637,6 +639,188 @@ async function writeScreens(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------------------------------------------
+// Architecture: 1200 × 724 at 2×. The same parts and calls as docs/architecture.md, drawn in the Rota style with the
+// real marks; every box and arrow is a part or a call that exists in apps/, packages/shared or supabase/.
+
+const mark = (name: PlatformLogoName, size = 18): string =>
+  `<svg viewBox="0 0 24 24" width="${size}" height="${size}">${logoInner(platformLogos[name])}</svg>`;
+const rotaMark = (size = 18): string =>
+  `<svg viewBox="${rotaMarkBox}" width="${size}" height="${size}">${rotaMarkInner}</svg>`;
+const shieldMascot = readFileSync(
+  join(repo, 'packages/design/assets/mascots/dark/shield.svg'),
+  'utf8',
+);
+
+async function writeArchitecture(): Promise<void> {
+  const node = (
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    title: string,
+    text: string,
+    icons = '',
+    cls = '',
+  ) =>
+    `<div class="node ${cls}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"><h4>${icons}<span>${title}</span></h4><p>${text}</p></div>`;
+  const fns: [string, string][] = [
+    ['ai-verify', 'rules, then one Sonnet call'],
+    ['ai-insights', 'Haiku reads, Sonnet writes'],
+    ['ai-shift-summary', 'Sonnet, from the report'],
+    ['ai-explain-rating', 'Haiku, three sentences'],
+    ['notify-dispatch', 'push and Telegram'],
+    ['telegram-webhook', 'links a chat by token'],
+  ];
+  const fnRows = fns
+    .map(
+      ([n, t], i) =>
+        `<div class="fn" style="top:${44 + i * 44}px"><b class="mono">${n}</b><span>${t}</span></div>`,
+    )
+    .join('');
+  const chips = [
+    'state machine',
+    'RLS by role',
+    'rules R1 to R4',
+    'detectors',
+    'Vault',
+    'integration_outbox',
+  ]
+    .map((c) => `<span class="chip mono">${c}</span>`)
+    .join('');
+  const arrow = (d: string, both = false) =>
+    `<path d="${d}" fill="none" stroke="rgb(255 255 255/.38)" stroke-width="1.4" marker-end="url(#a)"${both ? ' marker-start="url(#as)"' : ''}/>`;
+  const red = (d: string) =>
+    `<path d="${d}" fill="none" stroke="#ff3b30" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#ar)"/>`;
+  const html = `<style>
+.card{position:relative;width:1200px;height:724px;border-radius:28px;overflow:hidden;background:#000;box-shadow:inset 0 0 0 1px rgb(255 255 255/.09)}
+.glow{position:absolute;inset:0;background:radial-gradient(520px 300px at 100% 0%,rgb(255 59 48/.22),rgb(255 59 48/0) 70%),
+  radial-gradient(600px 260px at 50% 112%,rgb(255 59 48/.2),rgb(255 59 48/0) 70%)}
+.eyebrow{position:absolute;left:48px;top:34px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#ff6555}
+h2{position:absolute;left:48px;top:54px;font-size:30px;font-weight:800;letter-spacing:-.03em}
+.lbl{position:absolute;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8e8e93}
+.node{position:absolute;border-radius:14px;background:rgb(28 28 30/.94);box-shadow:inset 0 0 0 1px rgb(255 255 255/.1);padding:12px 14px}
+.node h4{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;letter-spacing:-.01em}
+.node h4 svg{flex:none}
+.node p{margin-top:6px;font-size:11.5px;line-height:1.42;color:#aeaeb2}
+.node.red{box-shadow:inset 0 0 0 1px rgb(255 59 48/.6);background:linear-gradient(135deg,rgb(255 59 48/.16),rgb(28 28 30/.94) 60%)}
+.panel{position:absolute;left:350px;top:128px;width:500px;height:500px;border-radius:20px;background:rgb(255 255 255/.025);
+  box-shadow:inset 0 0 0 1px rgb(62 207 142/.35)}
+.panel .hd{position:absolute;left:18px;right:18px;top:14px;display:flex;align-items:center;justify-content:space-between}
+.panel .hd b{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:700}
+.panel .hd span{display:flex;align-items:center;gap:7px;font-size:12px;color:#aeaeb2}
+.fns{padding:12px 14px}
+.fn{position:absolute;left:14px;right:14px;height:36px;border-radius:9px;background:rgb(255 255 255/.04);display:flex;flex-direction:column;justify-content:center;padding:0 10px}
+.fn b{font-size:12px;font-weight:500;color:#fff}
+.fn span{font-size:10.5px;color:#8e8e93;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{font-size:10.5px;padding:3px 8px;border-radius:999px;background:rgb(255 255 255/.06);color:#d1d1d6}
+.legend{position:absolute;left:48px;top:484px;width:262px;font-size:11.5px;line-height:1.5;color:#8e8e93}
+.legend b{color:#d1d1d6;font-weight:600}
+.foot{position:absolute;left:48px;right:48px;top:640px;display:flex;gap:24px}
+.foot div{flex:1;border-radius:14px;padding:12px 14px;background:rgb(255 255 255/.03);box-shadow:inset 0 0 0 1px rgb(255 255 255/.08)}
+.foot h5{display:flex;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#ff6555;font-weight:500}
+.foot p{margin-top:5px;font-size:11.5px;line-height:1.4;color:#aeaeb2}
+.mascot svg{width:26px;height:26px;display:block}
+svg.wires{position:absolute;inset:0;width:1200px;height:724px;pointer-events:none}
+</style>
+<div class="card"><div class="glow"></div>
+<div class="eyebrow mono">Architecture</div>
+<h2>One source of truth: Postgres</h2>
+<div class="lbl mono" style="left:48px;top:130px">Clients</div>
+${node(48, 150, 262, 96, 'Android app', 'Expo SDK 57 APK for мастер, исполнитель and руководитель: siren screen, camera, photo pipeline', mark('android') + mark('expo'))}
+${node(48, 260, 262, 96, 'Phone app in the browser', 'the same Expo code at <span class="mono">/app/</span>, on an iPhone or a laptop', mark('safari') + mark('chrome'))}
+${node(48, 370, 262, 96, 'Web panel', 'Vite and React: shift, reports with PDF and Excel, rating, AI analytics, admin', mark('react'))}
+<div class="legend">Every client talks to Supabase with <b>supabase-js</b>: the publishable key plus the user's JWT, <b>one Realtime channel</b> per user, photos at most 1600 px with sha256 and dHash <b>straight to Storage</b>.</div>
+<div class="panel"><div class="hd"><b>${mark('supabase', 20)}Supabase</b><span class="mono">${mark('postgresql', 16)}Postgres 17</span></div></div>
+${node(368, 176, 230, 80, 'PostgREST RPC', '<span class="mono">create_order</span>, <span class="mono">order_action</span>, suggest_assignees, reports, rating')}
+${node(368, 266, 230, 80, 'Realtime', 'orders, notifications, ai_reviews, employees: status on every screen')}
+${node(368, 356, 230, 64, 'Storage', 'private bucket <span class="mono">photos</span>, signed URLs')}
+${node(368, 430, 230, 80, 'pg_cron and pg_net', 'watchdog every 5 s, AI check retry, Monday digest')}
+<div class="node fns" style="left:610px;top:176px;width:222px;height:334px"><h4>Edge Functions · Deno</h4>${fnRows}</div>
+<div class="node" style="left:368px;top:522px;width:464px;height:92px"><h4>${mark('postgresql', 18)}<span>Postgres 17</span></h4><div class="chips">${chips}</div></div>
+<div class="lbl mono" style="left:884px;top:130px">Outside the database</div>
+${node(884, 150, 268, 84, 'Privacy gateway', 'names, табельные номера, phones → E01…E15, M01, R01; logged in llm_audit', `<span class="mascot">${shieldMascot}</span>`, 'red')}
+${node(884, 246, 268, 84, 'Claude Sonnet · Haiku', '5.5 models through one fetch client, or a local model: <span class="mono">openai_compatible</span>', mark('claude'))}
+${node(884, 342, 268, 84, 'Expo push → FCM', 'channels orders, emergency with the siren, reminders', mark('expo') + mark('android'))}
+${node(884, 438, 268, 84, 'Telegram bot', 'number, unit, area, status, deadline; never a name', mark('telegram'))}
+${node(884, 534, 268, 84, '1С:ТОиР', '<span class="mono">order.created</span>, <span class="mono">order.closed</span> with materials', mark('onec'))}
+<svg class="wires" viewBox="0 0 1200 724"><defs>
+<marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="rgb(255 255 255/.55)"/></marker>
+<marker id="as" viewBox="0 0 8 8" refX="1" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M8 0L0 4L8 8z" fill="rgb(255 255 255/.55)"/></marker>
+<marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="#ff3b30"/></marker></defs>
+${arrow('M312 198H366', true)}${arrow('M312 308H366', true)}${arrow('M312 418H366', true)}
+${arrow('M483 510V520')}${arrow('M721 510V520')}${arrow('M600 470H608')}
+${red('M834 238H850M834 282H850M834 326H850M834 370H850M850 370V238H866V192H882')}${arrow('M1018 234V245')}
+${arrow('M834 414H866V384H882')}${arrow('M866 414V480H882', true)}
+${arrow('M834 570H882')}
+</svg>
+<div class="foot">
+  <div><h5 class="mono">${mark('supabase', 13)}${mark('netlify', 13)}${mark('expo', 13)}Hackathon</h5><p>Supabase Cloud in eu-central-1, the web on Netlify, the APK from EAS. Synthetic people only.</p></div>
+  <div><h5 class="mono">${rotaMark(13)}At the plant</h5><p>Self hosted Supabase (open source) on the plant's servers or in a Kazakhstan cloud under Law 94-V.</p></div>
+  <div><h5 class="mono">${rotaMark(13)}Guarantees</h5><p>Server clock only, idempotent RPC by <span class="mono">client_action_id</span>, RLS by role, append only <span class="mono">order_events</span>.</p></div>
+</div>
+</div>`;
+  await render(html, 1200, 724, join(out, 'architecture.png'));
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// The film poster: four frames of the Remotion film (video/), 1200 × 470 at 2×. The frames come from
+//   cd video && npm run stills -- out/poster 2.5 47 90 136 --scale=0.5
+// and the part is skipped when they are missing.
+
+const FILM_FRAMES = [
+  't002.5s-f0075.png',
+  't047.0s-f1410.png',
+  't090.0s-f2700.png',
+  't136.0s-f4080.png',
+];
+
+async function writeFilm(): Promise<void> {
+  const dir = join(repo, 'video/out/poster');
+  const frames = FILM_FRAMES.map((f) => join(dir, f));
+  const missing = frames.filter((f) => !existsSync(f));
+  if (missing.length > 0) {
+    console.log(
+      `skip    film poster: render the frames first (missing ${missing.length} in video/out/poster)`,
+    );
+    return;
+  }
+  const scenes = (
+    [
+      ['0:00', 'Красный экран и сирена'],
+      ['0:22', 'Мастер выдаёт наряд'],
+      ['0:55', 'Контроль сроков'],
+      ['1:17', 'Проверка ИИ и вердикт'],
+      ['1:37', 'Доработка: нет фото, перерасход'],
+      ['1:50', 'Отчёт смены, рейтинг, аналитика'],
+      ['2:17', 'Архитектура и шлюз приватности'],
+    ] as [string, string][]
+  )
+    .map(([t, s]) => `<li><b class="mono">${t}</b>${esc(s)}</li>`)
+    .join('');
+  const html = `<style>
+.card{position:relative;width:1200px;height:470px;border-radius:28px;overflow:hidden;background:#000;box-shadow:inset 0 0 0 1px rgb(255 255 255/.09)}
+.glow{position:absolute;inset:0;background:radial-gradient(560px 360px at 78% 50%,rgb(255 59 48/.32),rgb(255 59 48/0) 70%),radial-gradient(380px 240px at 0% 0%,rgb(255 59 48/.14),rgb(255 59 48/0) 70%)}
+.copy{position:absolute;left:48px;top:44px;width:380px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#ff6555}
+h2{margin-top:12px;font-size:34px;line-height:1.02;font-weight:800;letter-spacing:-.035em}
+.sub{margin-top:12px;font-size:13.5px;line-height:1.45;color:#aeaeb2}
+ul{list-style:none;margin-top:18px;display:flex;flex-direction:column;gap:7px}
+li{display:flex;gap:12px;font-size:13px;color:#d1d1d6}
+li b{width:34px;color:#ff9d8e;font-weight:500}
+.grid{position:absolute;right:40px;top:40px;display:grid;grid-template-columns:350px 350px;gap:14px}
+.f{position:relative;width:350px;height:197px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px rgb(255 255 255/.12),0 18px 34px -12px rgb(0 0 0/.8)}
+.f img{width:100%;height:100%;object-fit:cover;display:block}
+</style><div class="card"><div class="glow"></div>
+<div class="copy"><div class="eyebrow mono">Demo film · 2:55 · 1920 × 1080</div><h2>Наряд выдан,<br>ИИ на контроле</h2>
+<div class="sub">The Demo Day script in under three minutes: two phones, the AI check, the web panel. Russian captions, every number with its source file.</div>
+<ul>${scenes}</ul></div>
+<div class="grid">${frames.map((f) => `<div class="f"><img src="${url(f)}"></div>`).join('')}</div>
+</div>`;
+  await render(html, 1200, 470, join(out, 'film.png'));
+}
+
+// ---------------------------------------------------------------------------------------------------------------
 
 mkdirSync(out, { recursive: true });
 if (want('logos')) writeLogos();
@@ -645,3 +829,5 @@ if (want('banner')) await writeBanner();
 if (want('loop')) await writeLoop();
 if (want('stats')) await writeStats();
 if (want('screens')) await writeScreens();
+if (want('arch')) await writeArchitecture();
+if (want('film')) await writeFilm();

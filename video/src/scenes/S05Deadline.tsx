@@ -1,4 +1,4 @@
-// 0:58 Deadline control: a second order with the «1 мин» demo deadline, the reminder, then the overdue message on
+// 0:55 Deadline control: a second order with the «1 мин» demo deadline, the reminder, then the overdue message on
 // both phones. Over stills the toasts are printed by the app's own templates (packages/shared), word for word.
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
@@ -34,7 +34,8 @@ const B_TOASTS: HudToast[] = [
 ];
 const A_TOASTS: HudToast[] = [{ at: DEADLINE + 12, until: 410, title: overdue.title, body: overdue.body, tone: "critical" }];
 
-const A_SHOTS: Shot[] = [{ still: "pwa/07-A-board.png", at: 0 }];
+// The master sees №661 in progress, the same moment as phone B (the board still of pwa/07 is from before «Принять»).
+const A_SHOTS: Shot[] = [{ still: "pwa/11-A-order-in-progress.png", at: 0 }];
 const B_SHOTS: Shot[] = [{ still: "pwa/12-B-order-in-progress.png", at: 0 }];
 
 const Clock: React.FC = () => {

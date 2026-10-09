@@ -1,4 +1,4 @@
-// 0:24 Phone A, master 1001: an emergency order in 5 taps, the AI suggests Ахметов.
+// 0:22 Phone A, master 1001: an emergency order in 5 taps, the AI suggests Ахметов.
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { Backdrop } from "../components/Backdrop";
@@ -84,7 +84,9 @@ export const S03Issue: React.FC = () => {
             </Reveal>
             <Reveal delay={12}>
               <Mono size={T.small} color={C.text3} weight={400}>
-                Требование кейса: не больше 6 нажатий и 1 минуты
+                Требование кейса: не больше 6 нажатий и 1 минуты.
+                <br />
+                Участок нужен, только если узла нет среди недавних: тогда 6.
               </Mono>
             </Reveal>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
