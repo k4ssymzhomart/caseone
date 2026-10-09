@@ -11,9 +11,11 @@ public/brand
 public/fonts
 public/stills
 
-# Screen recordings are large: keep them on the recording machine (RECORDING.md), not in git
+# Raw screen recordings are large: keep them on the recording machine (RECORDING.md), not in git. The cut scene
+# files (public/footage/sNN-*.mp4, a few MB each) are committed.
 public/footage/*
 !public/footage/README.md
+!public/footage/s[0-9][0-9]-*.mp4
 
 # Chrome profile of scripts/record-web.mjs (holds a signed in session)
 .rec-profile

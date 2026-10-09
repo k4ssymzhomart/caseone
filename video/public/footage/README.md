@@ -1,7 +1,8 @@
 # Footage slots
 
-Recordings dropped here replace the stills of their scene (`src/data/footage.ts`). Git ignores everything in this folder
-except this file; RECORDING.md says how to record and cut each one.
+Recordings dropped here replace the stills of their scene (`src/data/footage.ts`). The cut scene files below are in git;
+the raw takes in `raw/` are not. RECORDING.md says how to record and cut each one. The phone scenes s01 and s03 to s09
+come from take 2 of 09.10.2026 on the iOS simulators; its timings are in `docs/live-loop-timings.md`.
 
 | File | Scene | Screen |
 | --- | --- | --- |
