@@ -23,6 +23,7 @@
     "build:web": "npm run build --workspace apps/web --if-present",
     "landing:assets": "node apps/web/scripts/landing-shots.mjs",
     "landing:screens": "node apps/web/scripts/landing-screens.mjs",
+    "landing:device": "node apps/web/scripts/landing-device.mjs",
     "tokens": "node packages/design/scripts/build-tokens.mjs",
     "assets": "tsx tools/gen-assets.ts",
     "typecheck": "npm run typecheck --workspaces --if-present && tsc --noEmit -p tools && for d in supabase/functions/*/; do test ! -f \"$d/tsconfig.json\" || tsc --noEmit -p \"$d\" || exit 1; done",
