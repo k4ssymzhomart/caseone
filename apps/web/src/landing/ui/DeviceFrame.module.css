@@ -32,6 +32,13 @@
     0 calc(var(--u) * 24) calc(var(--u) * 60) rgb(0 0 0 / 0.5);
 }
 
+.device[data-shadow='soft'] .drop {
+  background: rgb(0 0 0 / 0.5);
+  box-shadow:
+    0 calc(var(--u) * 120) calc(var(--u) * 260) rgb(16 16 24 / 0.26),
+    0 calc(var(--u) * 30) calc(var(--u) * 70) rgb(16 16 24 / 0.16);
+}
+
 .device[data-solid] .drop {
   transform: translateZ(calc(var(--u) * -158));
 }

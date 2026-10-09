@@ -29,30 +29,37 @@ export const content = {
   soon: 'скоро',
 
   hero: {
+    badgeLead: 'Новое:',
+    badge: 'Claude проверяет каждый закрытый наряд',
     title: ['Наряд выдан,', 'ИИ на контроле.'],
     lead:
       'Мастер выдаёт наряд с телефона за 6 нажатий. Исполнитель принимает его в один тап. ИИ следит за сроками, проверяет работу по фото и находит оборудование, которое ломается чаще других.',
     apk: 'Скачать APK',
     app: 'Открыть в браузере',
-    panel: 'Открыть веб панель',
     platformsLabel: 'Работает на',
     platforms: [
-      { id: 'android', name: 'Android', note: 'APK' },
-      { id: 'iphone', name: 'iPhone', note: 'браузер' },
-      { id: 'desktop', name: 'Windows и Mac', note: 'веб панель' },
-      { id: 'telegram', name: 'Telegram', note: 'уведомления' },
+      { id: 'android', name: 'Android' },
+      { id: 'iphone', name: 'iPhone' },
+      { id: 'desktop', name: 'Windows и Mac' },
+      { id: 'telegram', name: 'Telegram' },
     ],
-    hud: [
-      { tone: 'critical', text: 'Аварийный наряд №661\nвыдан · Ахметов Е.' },
-      { tone: 'free', text: 'Ахметов Е. принял наряд №661' },
-      { tone: 'mark', text: 'ИИ проверил №661 · 84 из 100' },
-    ],
-    stats: [
-      { value: '≤ 6', label: 'нажатий на выдачу' },
-      { value: '< 5 с', label: 'до статуса у мастера' },
-      { value: '100 %', label: 'закрытых нарядов проверяет ИИ' },
-    ],
-    shotEmergency: 'Экран исполнителя: красный экран аварийного наряда с кнопками «Принять» и «Отклонить»',
+    // The floating cards: the real figures of the demo take and the seeded history (docs/live-loop-timings.md,
+    // tools/seed/PATTERNS.md); the app screens show №661 on Насос НШ-32 with 84 из 100, and Иванов С. on №641,
+    // Конвейер К-2 (the worker the phone's crop hides; Ахметов Е. is on the screen itself).
+    cards: {
+      review: { title: 'ИИ проверил наряд №661', score: 84, total: 'из 100', verdict: 'Принято' },
+      emergency: {
+        title: 'Аварийный наряд',
+        note: 'Насос НШ-32 · течь масла',
+        value: '0,72 с',
+        label: 'до исполнителя',
+      },
+      repeats: { title: 'Конвейер К-3', note: '7 остановок за 30 дней', value: 'М-02 · 5 из 7' },
+      worker: { name: 'Иванов С.', note: 'Конвейер К-2 · №641', status: 'В работе' },
+    },
+    cardsText:
+      'Аварийный наряд на насос НШ-32 доходит до исполнителя за 0,72 с. ИИ проверил наряд №661: 84 из 100, принято. Конвейер К-3: 7 остановок за 30 дней, 5 из них шифр М-02. Иванов С. в работе: наряд №641, конвейер К-2.',
+    shot: 'Экран мастера «Смена»: свободны Ахметов Е., Касымов Б. и Ким Д., работает Иванов С.',
   },
 
   problem: {

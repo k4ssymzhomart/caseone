@@ -1,9 +1,31 @@
 /* The glass sits on a pseudo element: a backdrop filter on the header itself would make it the containing block
-   of the fixed menu sheet and collapse the sheet to nothing. */
+   of the fixed menu sheet and collapse the sheet to nothing. Two looks from data-theme: frosted white over the hero,
+   dark glass after it; the colors cross fade. */
 .nav {
+  --n-glass: rgb(0 0 0 / 0.8);
+  --n-hairline: rgb(255 255 255 / 0.08);
+  --n-link: rgb(255 255 255 / 0.78);
+  --n-link-hover: var(--rota-white);
+  --n-control: rgb(255 255 255 / 0.06);
+  --n-control-border: rgb(255 255 255 / 0.14);
   position: fixed;
   inset: 0 0 auto;
   z-index: 50;
+  color: var(--color-text-heading);
+}
+
+.nav[data-theme='light'] {
+  --n-glass: rgb(248 248 250 / 0.86);
+  --n-hairline: rgb(10 10 10 / 0.07);
+  --n-link: rgb(10 10 10 / 0.7);
+  --n-link-hover: var(--rota-ink-950);
+  --n-control: rgb(255 255 255 / 0.72);
+  --n-control-border: rgb(10 10 10 / 0.1);
+}
+
+/* With the menu open the bar joins the sheet below it, over the light hero too. */
+.nav[data-open] {
+  --n-glass: rgb(0 0 0 / 0.94);
 }
 
 .nav::before {
@@ -11,17 +33,14 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  border-bottom: 1px solid rgb(255 255 255 / 0.08);
-  background: rgb(0 0 0 / 0.8);
-  opacity: 0;
-  transition: opacity 200ms ease;
+  border-bottom: 1px solid var(--n-hairline);
+  background-color: var(--n-glass);
+  transition:
+    background-color 260ms ease,
+    border-color 260ms ease;
   backdrop-filter: blur(28px) saturate(160%);
   -webkit-backdrop-filter: blur(28px) saturate(160%);
   pointer-events: none;
-}
-
-.nav[data-scrolled]::before {
-  opacity: 1;
 }
 
 .inner {
@@ -41,6 +60,10 @@
   border-radius: 6px;
 }
 
+.brand path {
+  transition: fill 260ms ease;
+}
+
 .links {
   display: flex;
   flex: 1;
@@ -49,15 +72,21 @@
 }
 
 .links a {
-  color: rgb(255 255 255 / 0.78);
+  color: var(--n-link);
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
-  transition: color 120ms ease;
+  transition: color 200ms ease;
 }
 
 .links a:hover {
-  color: #fff;
+  color: var(--n-link-hover);
+}
+
+/* The kit's glass pill is white on white over the hero: a hairline and a whiter fill there. */
+.nav[data-theme='light'] .panel {
+  border-color: var(--n-control-border);
+  background: var(--n-control);
 }
 
 .actions {
@@ -77,9 +106,9 @@
   width: 44px;
   height: 44px;
   padding: 0;
-  border: 1px solid rgb(255 255 255 / 0.14);
+  border: 1px solid var(--n-control-border);
   border-radius: 50%;
-  background: rgb(255 255 255 / 0.06);
+  background: var(--n-control);
   cursor: pointer;
 }
 
@@ -90,8 +119,10 @@
   width: 16px;
   height: 2px;
   border-radius: 2px;
-  background: #fff;
-  transition: transform 200ms ease, background-color 200ms ease;
+  background: var(--color-text-heading);
+  transition:
+    transform 200ms ease,
+    background-color 200ms ease;
 }
 
 .burger {

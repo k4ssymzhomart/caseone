@@ -73,7 +73,7 @@ Phone frame (`PhoneShot`): width prop (default 300 desktop, 240 mobile); outer r
 
 ## 4. Design rules
 
-- Dark only: `<html data-theme="dark">`, canvas `#000`. Use the token variables from `tokens.css`; hex values below are for orientation.
+- Dark: `<html data-theme="dark">`, canvas `#000`; the one exception is the hero, a light panel (§5.1). Use the token variables from `tokens.css`; hex values below are for orientation.
 - Text: primary `#FFFFFF`, secondary `#AEAEB2`, tertiary `#86868B`, quiet `#6E6E73`. Signal red `#FF3B30`, eyebrow red `#FF6555`, soft red text `#FF9D8E`. Status: green `#30D158`, yellow `#FFD60A`, blue `#0A84FF`, gray `#8E8E93`.
 - Fonts: Rota's stack for sans (SF on Apple devices), `"Inter"` before `system-ui` elsewhere. Never ship SF Pro files (Apple's license). Geist Mono for eyebrows, numbers, codes (`М-02`, `№164`).
 - Type, desktop: H1 72/1.0 bold, tracking −0.035em. Centered section H2 72/1.02, side-by-side chapter H2 56/1.04, both −0.03em. Lead 19/1.55 secondary. Body 17/1.5. Eyebrow Geist Mono 500, 12 px, uppercase, tracking 0.16em, eyebrow red. Mobile: H1 44, H2 38, lead 17.
@@ -92,27 +92,34 @@ Anchors in brackets. Copy is final: put it in `content.ts` verbatim.
 
 ### 5.0 Nav (sticky)
 
-64 px, transparent over the hero, then `rgba(0,0,0,.8)` + blur 28, saturate 160% + 1 px bottom border `rgba(255,255,255,.08)` after 40 px of scroll. Left: Lockup white, 22 px tall. Center: «Как работает» (#how) · «ИИ» (#review) · «Аналитика» (#analytics) · «Внедрение» (#rollout) · «FAQ» (#faq). Right: glass «Веб-панель», primary «Скачать APK» with the Android mark. Under 1024 px: Lockup, primary «APK» (Android mark), menu button opening a full-screen sheet with the links.
+64 px. Over the hero it is light, like the reference's white bar: frosted white `rgba(248,248,250,.86)` + blur 28, saturate 160% + 1 px bottom hairline, ink links and Lockup wordmark, «Веб панель» as a white pill with a hairline, «Скачать APK» as the ink pill with the white Android mark. Once the hero has scrolled out from under it, it cross fades to dark glass: `rgba(0,0,0,.8)` + the same blur + 1 px bottom border `rgba(255,255,255,.08)`, white links, white APK pill. One IntersectionObserver on the hero (root margin −64 px at the top) decides, no scroll handler; the header carries `data-theme`, so the kit's buttons and the wordmark follow it. Center: «Как работает» (#how) · «ИИ» (#review) · «Аналитика» (#analytics) · «Внедрение» (#rollout) · «FAQ» (#faq). Under 1024 px: Lockup, primary «APK» (Android mark), menu button opening a full screen sheet with the links; with the sheet open the bar is dark.
 
-### 5.1 Hero (#top) · a close up product shot
+### 5.1 Hero (#top) · a light centered stage
 
-Backdrop: the 4K silk render from `tools/gen-hero-bg.ts` (`assets/hero-bg-3840.jpg` for retina screens from 1024 px and wide screens, `hero-bg-1920.jpg` for phones, tablets and 1× screens; `main.tsx` preloads the one the same media query picks), black while it loads, a light left shade and a 200 px fade into the page. Min-height `100svh` capped at 1120; the hero clips its overflow. Two columns: copy (664 px) and the stage; rows: copy, platforms, figures.
+After the user's reference (a light banking landing): a full width light panel on the black page with 40 px rounded bottom corners (28 under 768 px), the only light block of the page. The section carries `data-theme="light"`; its own colors are `--h-*` tokens in `Hero.module.css` built from the Rota palette.
 
-Left, set editorially (no glass box), top to bottom:
-- No eyebrow: the hero opens with the headline (the case is named in the footer and the page meta)
-- H1: «Наряд выдан,<br>ИИ на контроле.», both lines plain white
-- Lead: «Мастер выдаёт наряд с телефона за 6 нажатий. Исполнитель принимает его в один тап. ИИ следит за сроками, проверяет работу по фото и находит оборудование, которое ломается чаще других.»
-- Buttons: primary «Скачать APK» (Android mark), glass «Открыть в браузере» (Chrome and Safari marks), quiet link «Открыть веб панель →»
-- «Работает на» row, 56 px below the buttons, each real mark on a 44 px app icon tile (the Windows and Apple pair on a wider one) with two lines: Android · APK; iPhone · браузер; Windows и Mac · веб панель; Telegram · уведомления. Under 768 px a 2 × 2 grid, each tile above its words.
-- A spec strip of three figures, Geist Mono 600 28 px numbers over 13 px tertiary labels, no dots: «≤ 6» нажатий на выдачу · «< 5 с» до статуса у мастера · «100 %» закрытых нарядов проверяет ИИ. Under 768 px one figure per row.
-- The test logins stay in the final CTA and the FAQ, not in the hero.
+Backdrop: the satin field with one glossy white ribbon piped with two red lines, rendered by `tools/gen-hero-bg-light.ts` for this panel (`npm run landing:hero-bg-light`), anchored top right with `cover`, so a crop eats the left edge or the bottom, never the ribbon:
+- from 1200 px the 6 : 5 stage (`hero-light-stage-1600.jpg`, `hero-light-stage-3200.jpg` for retina and 1× screens wider than 1600): the ribbon enters at the top right, stays right of about 78 % of the width beside the copy and the buttons, and opens into a silver sheet behind the right cards;
+- 1024 to 1199 px the 9 : 10 stage (`hero-light-stage-narrow-1200.jpg`, `-2400.jpg` on retina), the ribbon pressed harder against the edge;
+- 768 to 1023 px `hero-light-tablet.jpg`, under 768 px `hero-light-phone.jpg`: the red lines show in the top right corner beside the app icon, the ribbon swings out past the right edge beside the copy and comes back in as a silver sheet behind the phone.
+`main.tsx` preloads the one file the CSS picks (`heroMedia.ts` holds the queries) and the phone screen; until the image arrives the panel is `--rota-gray-50`.
 
-Right, the stage: one large `DeviceFrame` (`emergency` screen; body width `min(25vw, 42svh)`, 280 to 460 px, so about 750 px tall at 1440 × 900 and 945 px at 1920 × 1080) turned toward the copy (y −16°, x 4°, z 1.5°), on a dark pool in the silk (so the screen is the brightest red on the page), its bottom edge on the hero's bottom edge, with a 64 px fade over the bottom bezel only. No glow filter on the phone. On the screen itself, in its plane at 56 % of its height, the Rota `Hud` toast loops through three states every 2.4 s at the screen's own type size (pause when the tab is hidden; reduced motion shows state 3 only), with the order number and score of the real screens:
-1. red dot · «Аварийный наряд №661» over a quieter «выдан · Ахметов Е.» (a two line notification)
-2. green dot · «Ахметов Е. принял наряд №661»
-3. Rota mark · «ИИ проверил №661 · 84 из 100»
+Centered, top to bottom:
+- The Rota app icon, drawn (the black tile of `packages/design/assets/app-icon` with the red mark, continuous corners), 80 to 108 px, with a deep soft drop shadow
+- A white pill with a hairline and a soft shadow, linking to #review: Claude mark · «Новое: Claude проверяет каждый закрытый наряд» · «→» (under 768 px without «Новое:»)
+- H1: «Наряд выдан,<br>ИИ на контроле.», ink, plain, 700, up to 88 px (about 79 at 1440), tracking −0.042em, word spacing 0.06em. No eyebrow above it: the case is named in the footer and the page meta
+- Lead, gray, max 38 em (30 em on tablets): «Мастер выдаёт наряд с телефона за 6 нажатий. Исполнитель принимает его в один тап. ИИ следит за сроками, проверяет работу по фото и находит оборудование, которое ломается чаще других.»
+- Buttons: ink pill «Скачать APK» (white Android mark), white outlined pill «Открыть в браузере» (Chrome and Safari marks); stacked full width under 768 px. The web panel stays one tap away in the nav («Веб панель»)
+- «Работает на», one quiet line under the buttons, each name after its real mark: Android · iPhone · Windows и Mac (Windows and Apple marks) · Telegram; a 2 × 2 grid under 768 px
+- The phone: one upright `DeviceFrame` (black finish, a soft light backdrop shadow) with the master's light «Смена» screen (`deviceScreens.masterShiftLight`), body width `clamp(300px, 20vw + 150px, 500px)` (about 440 at 1440), shown for 1.22 of its width and cut by the panel's rounded bottom edge, so it reads as continuing below
 
-From 1024 to 1279 px the phone hangs from the top of its column. Under 1024 the copy comes first, then the whole phone, smaller and still turned, on its own edge to edge patch of silk (the 1920 file, masked top and bottom), then the platforms and the figures.
+Four floating cards around the phone, as in the reference (positions from the phone's edges, sizes in em of one card type scale, soft wide shadows, a slow 6 to 7.6 s drift of 7 px each, out of phase; static with reduced motion). Decorative (`aria-hidden`), with one visually hidden sentence repeating their content. Figures only from the repo (`docs/live-loop-timings.md`, `tools/seed/PATTERNS.md`, the app screens):
+1. top left, white: the light `check` mascot on a soft tile, «ИИ проверил наряд №661», a green bar at 84 %, a mint pill «● Принято», «84 из 100»
+2. right, high, black: «Аварийный наряд», «Насос НШ-32 · течь масла», a dark pill with a pulsing red dot, «0,72 с до исполнителя» (A taps «Выдать», B shows the red screen)
+3. left, low, white: «Конвейер К-3», «7 остановок за 30 дней», a soft red pill «М-02 · 5 из 7»
+4. right, low, a white row: the yellow `wrench` avatar, «Иванов С.», «Конвейер К-2 · №641», «● В работе» (the worker the phone's crop hides; Ахметов Е. is on the screen itself)
+
+From 1024 to 1279 px the phone and the cards come in closer; 768 to 1023 px only cards 1 and 2, overlapping the phone's edges; under 768 px no cards, everything centered, the phone large. No horizontal scroll at any width.
 
 ### 5.2 Problem, chapters 01 to 03 (#problem) · ref `rota-02-story.png`, `deck-02.png`
 
@@ -278,7 +285,7 @@ export const links = {
 - `<html lang="ru" data-theme="dark">`; title «Rota — наряд выдан, ИИ на контроле»; description «Мобильное приложение и веб-панель для выдачи и контроля нарядов: ИИ следит за сроками, проверяет работу по фото и находит проблемное оборудование. Кейс «НарядAI», Qostanai Industry Hackathon 2026.»
 - Open Graph and Twitter card with `/og.jpg` (1200 × 630), `og:locale` `ru_RU`, `theme-color` `#000000`, favicon the red mark.
 - One `<h1>`; sections are `<section aria-labelledby>`; every phone `alt` in Russian; decorative mascots `aria-hidden`; visible focus everywhere; the marquee and the HUD loop are `aria-hidden` and have static equivalents in text.
-- Hero images eager with `fetchpriority="high"`; everything below the fold `loading="lazy"` with width and height set (no layout shift). Hero backdrop JPEGs: 4K ≤ 1.6 MB, 1920 ≤ 450 KB.
+- Hero images eager with `fetchpriority="high"` and preloaded from `main.tsx`; everything below the fold `loading="lazy"` with width and height set (no layout shift). Hero backdrop JPEGs: the 3200 stage ≤ 1.6 MB, the others ≤ 600 KB.
 
 ## 8. Deploy (only when the user says go)
 

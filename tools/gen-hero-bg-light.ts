@@ -8,6 +8,8 @@
 //
 //   npx tsx tools/gen-hero-bg-light.ts             renders the winning variant, writes the three JPEGs
 //   npx tsx tools/gen-hero-bg-light.ts --quick     desktop at 1920 × 1080, PNG only, for iteration
+//   --stage                                        with --quick: the two stage frames instead (1600 and 1024 wide)
+//   --edge                                         with --quick: the phone and tablet frames at half size
 //   --variant <name>                               one of VARIANTS below (default: WINNER)
 //   --png <dir>                                    where the lossless PNGs go (default: the system temp folder)
 //   --no-jpeg                                      PNGs only
@@ -16,7 +18,9 @@
 // 60 %) stays calm and nearly flat (#eeeef1 to #f4f4f7); the ribbon enters at the top right, keeps right of
 // x ≈ 1.34 beside the copy, opens into a broad silver sheet behind the right cards and leaves through the bottom
 // right corner; a soft pale fold crosses the left half under the copy. Phone portrait 1170 × 2532: the same ribbon
-// pressed against the right edge.
+// pressed against the right edge. Stages (hero-light-stage-*.jpg, what the landing's hero uses from 1024 px, where the
+// centered hero panel runs about as tall as it is wide), 6 : 5 from 1200 px and 9 : 10 below: the same ribbon pressed
+// toward the right edge beside the copy and the buttons, opening behind the right cards lower down.
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -717,6 +721,186 @@ function mobileScene(ribbons: LightRibbon[]): Scene {
   };
 }
 
+/**
+ * The edge frames: the landing's hero on phones (390 × about 1150 css px) and tablets (768 × about 1300), where the
+ * centered copy runs nearly edge to edge from the badge to the platforms row. The ribbon enters at the top right
+ * corner beside the app icon with its red lines, curls out past the right edge beside the copy, and comes back in
+ * as a broad silver sheet behind the phone. `out` is how far past the edge it swings (negative press).
+ */
+type EdgeFrame = {
+  name: string;
+  w: number;
+  h: number;
+  /** Press at the top, beside the copy (negative: past the edge) and at the bottom. */
+  press: [number, number, number];
+  /** Heights where the ribbon starts and ends its way back in. */
+  back: [number, number];
+  thin: number;
+};
+
+const EDGES: Record<'phone' | 'tablet', EdgeFrame> = {
+  phone: {
+    name: 'phone',
+    w: 1170,
+    h: 3450,
+    press: [0.26, -0.7, 0.62],
+    back: [0.6, 0.96],
+    thin: 0.4,
+  },
+  tablet: {
+    name: 'tablet',
+    w: 1536,
+    h: 2600,
+    press: [0.3, -0.5, 0.6],
+    back: [0.52, 0.92],
+    thin: 0.5,
+  },
+};
+
+function toEdge(r: LightRibbon, f: EdgeFrame): LightRibbon {
+  const aspect = f.w / f.h;
+  const [top, out, low] = f.press;
+  const press = (y: number) =>
+    top +
+    (out - top) * smoothstep(0.0, 0.24, y) +
+    (low - out) * smoothstep(f.back[0], f.back[1], y);
+  const thin = (y: number) => f.thin * mix(0.85, 1.15, smoothstep(0.35, 0.9, y));
+  const yAt = (n: number, i: number) =>
+    crScalar(
+      r.pts.map((p) => p[1]),
+      i / Math.max(1, n - 1),
+    );
+  return {
+    ...r,
+    pts: r.pts.map(([x, y, z]) => [aspect - (ASPECT - x) * press(y), y, z] as V3),
+    width: r.width.map((w, i) => w * thin(yAt(r.width.length, i))),
+  };
+}
+
+function edgeScene(ribbons: LightRibbon[], f: EdgeFrame, scale = 1): Scene {
+  const aspect = f.w / f.h;
+  return {
+    name: f.name,
+    w: Math.round(f.w * scale),
+    h: Math.round(f.h * scale),
+    calm: [0.04, 0.12, 0.96, 0.56],
+    folds: [
+      {
+        from: [-0.04, 0.5],
+        to: [aspect * 0.8, 0.74],
+        bow: 0.02,
+        amp: 0.005,
+        rise: 0.012,
+        fall: 0.07,
+      },
+      {
+        from: [-0.06, 0.08],
+        to: [aspect * 0.45, -0.06],
+        bow: -0.01,
+        amp: 0.008,
+        rise: 0.05,
+        fall: 0.04,
+      },
+      {
+        from: [aspect * 0.2, 1.04],
+        to: [aspect * 0.9, 0.62],
+        bow: 0.03,
+        amp: 0.006,
+        rise: 0.025,
+        fall: 0.06,
+      },
+    ],
+    ribbons: ribbons.map((r) => toEdge(r, f)),
+    pools: [
+      [aspect * 0.5, 0.3, 0.25, 0.025],
+      [0.02, 0.02, 0.16, -0.04],
+      [aspect * 0.95, 0.75, 0.16, -0.045],
+    ],
+  };
+}
+
+/**
+ * A stage frame: the centered hero panel of the landing, about as tall as it is wide. `wide` (6 : 5) serves screens
+ * from 1200 px; `narrow` (9 : 10) the panel from 1024 to 1199 px, where the copy column takes more of the width, so
+ * its ribbon is pressed harder against the right edge.
+ */
+type StageFrame = {
+  name: string;
+  aspect: number;
+  /** How far the ribbon positions keep from the right edge, beside the copy (top) and lower down (bottom). */
+  press: [number, number];
+  /** Ribbon widths, the same way. */
+  thin: [number, number];
+  calm: Scene['calm'];
+  pools: Scene['pools'];
+};
+
+const STAGES: Record<'wide' | 'narrow', StageFrame> = {
+  wide: {
+    name: 'stage',
+    aspect: 1.2,
+    press: [0.5, 0.8],
+    thin: [0.7, 0.86],
+    calm: [0.26, 0.1, 0.78, 0.56],
+    pools: [
+      [0.6, 0.34, 0.36, 0.025], // the copy sits on the lightest satin
+      [0.04, 0.05, 0.26, -0.035], // pale silver in the top left corner
+      [1.1, 0.7, 0.3, -0.05], // silver around the ribbon so its white face reads
+      [0.08, 1.02, 0.26, -0.03],
+    ],
+  },
+  narrow: {
+    name: 'stage-narrow',
+    aspect: 0.9,
+    press: [0.3, 0.6],
+    thin: [0.52, 0.72],
+    calm: [0.16, 0.1, 0.84, 0.56],
+    pools: [
+      [0.45, 0.34, 0.32, 0.025],
+      [0.03, 0.05, 0.22, -0.035],
+      [0.84, 0.72, 0.26, -0.05],
+      [0.06, 1.02, 0.22, -0.03],
+    ],
+  },
+};
+
+/**
+ * The desktop ribbons in a stage frame: positions pressed toward the right edge beside the copy and the buttons
+ * (the inner edge stays right of about 78 % of the width down to 55 % of the height), relaxing lower down so the
+ * sheet opens behind the right cards; widths pressed less, so the red lines keep their weight.
+ */
+function toStage(r: LightRibbon, f: StageFrame): LightRibbon {
+  const press = (y: number) => mix(f.press[0], f.press[1], smoothstep(0.55, 1.0, y));
+  const thin = (y: number) => mix(f.thin[0], f.thin[1], smoothstep(0.5, 1.0, y));
+  const yAt = (n: number, i: number) =>
+    crScalar(
+      r.pts.map((p) => p[1]),
+      i / Math.max(1, n - 1),
+    );
+  return {
+    ...r,
+    pts: r.pts.map(([x, y, z]) => [f.aspect - (ASPECT - x) * press(y), y, z] as V3),
+    width: r.width.map((w, i) => w * thin(yAt(r.width.length, i))),
+  };
+}
+
+function stageScene(ribbons: LightRibbon[], f: StageFrame, W: number): Scene {
+  const toX = (x: number) => (x * f.aspect) / ASPECT;
+  return {
+    name: f.name,
+    w: W,
+    h: Math.round(W / f.aspect / 2) * 2,
+    calm: f.calm,
+    folds: desktopFolds.map((d) => ({
+      ...d,
+      from: [toX(d.from[0]), d.from[1]] as [number, number],
+      to: [toX(d.to[0]), d.to[1]] as [number, number],
+    })),
+    ribbons: ribbons.map((r) => toStage(r, f)),
+    pools: f.pools,
+  };
+}
+
 // ---------------------------------------------------------------- run
 
 const variantName = arg('--variant') ?? WINNER;
@@ -733,10 +917,31 @@ async function writeJpeg(px: Uint8Array, w: number, h: number, file: string, qua
 }
 const kb = (n: number) => `${Math.round(n / 1024)} KB`;
 
+const tag = `hero-light-${variantName}`;
+if (QUICK && argv.includes('--edge')) {
+  for (const f of [EDGES.phone, EDGES.tablet]) {
+    const sc = edgeScene(variant, f, 0.5);
+    const file = path.join(OUT, `${tag}-${f.name}-quick.png`);
+    fs.writeFileSync(file, encodePNG(sc.w, sc.h, toSRGB8(compose(sc, sc.w, sc.h), 1023)));
+    log(`wrote ${file}`);
+  }
+  process.exit(0);
+}
+if (QUICK && argv.includes('--stage')) {
+  for (const [f, w] of [
+    [STAGES.wide, 1600],
+    [STAGES.narrow, 1024],
+  ] as const) {
+    const st = stageScene(variant, f, w);
+    const file = path.join(OUT, `${tag}-${f.name}-quick.png`);
+    fs.writeFileSync(file, encodePNG(st.w, st.h, toSRGB8(compose(st, st.w, st.h), 1019)));
+    log(`wrote ${file}`);
+  }
+  process.exit(0);
+}
 const DW = QUICK ? 1920 : 3840;
 const desk = desktopScene(variant, DW);
 const img = compose(desk, desk.w, desk.h);
-const tag = `hero-light-${variantName}`;
 if (QUICK) {
   fs.writeFileSync(
     path.join(OUT, `${tag}-quick.png`),
@@ -752,6 +957,27 @@ if (QUICK) {
   const mob = mobileScene(variant);
   const mobPx = toSRGB8(compose(mob, mob.w, mob.h), 1018);
   fs.writeFileSync(path.join(OUT, `${tag}-mobile.png`), encodePNG(mob.w, mob.h, mobPx));
+  const st = stageScene(variant, STAGES.wide, 3200);
+  const stImg = compose(st, st.w, st.h);
+  const stBig = toSRGB8(stImg, 1019);
+  const stSmall = toSRGB8(halve(stImg, st.w, st.h), 1020);
+  fs.writeFileSync(path.join(OUT, `${tag}-stage-3200.png`), encodePNG(st.w, st.h, stBig));
+  fs.writeFileSync(path.join(OUT, `${tag}-stage-1600.png`), encodePNG(st.w / 2, st.h / 2, stSmall));
+  const nr = stageScene(variant, STAGES.narrow, 2400);
+  const nrImg = compose(nr, nr.w, nr.h);
+  const nrBig = toSRGB8(nrImg, 1021);
+  const nrSmall = toSRGB8(halve(nrImg, nr.w, nr.h), 1022);
+  fs.writeFileSync(path.join(OUT, `${tag}-stage-narrow-2400.png`), encodePNG(nr.w, nr.h, nrBig));
+  fs.writeFileSync(
+    path.join(OUT, `${tag}-stage-narrow-1200.png`),
+    encodePNG(nr.w / 2, nr.h / 2, nrSmall),
+  );
+  const edges = [EDGES.phone, EDGES.tablet].map((f, i) => {
+    const sc = edgeScene(variant, f);
+    const px = toSRGB8(compose(sc, sc.w, sc.h), 1024 + i);
+    fs.writeFileSync(path.join(OUT, `${tag}-${f.name}.png`), encodePNG(sc.w, sc.h, px));
+    return { sc, px };
+  });
   log(`wrote PNGs to ${OUT}`);
   if (!NO_JPEG) {
     const q4 = Number(process.env.Q4K ?? 96);
@@ -766,6 +992,22 @@ if (QUICK) {
     log(
       `hero-light-mobile.jpg ${kb(await writeJpeg(mobPx, mob.w, mob.h, path.join(ASSETS, 'hero-light-mobile.jpg'), qm))}`,
     );
+    log(
+      `hero-light-stage-3200.jpg ${kb(await writeJpeg(stBig, st.w, st.h, path.join(ASSETS, 'hero-light-stage-3200.jpg'), q4))}`,
+    );
+    log(
+      `hero-light-stage-1600.jpg ${kb(await writeJpeg(stSmall, st.w / 2, st.h / 2, path.join(ASSETS, 'hero-light-stage-1600.jpg'), q2))}`,
+    );
+    log(
+      `hero-light-stage-narrow-2400.jpg ${kb(await writeJpeg(nrBig, nr.w, nr.h, path.join(ASSETS, 'hero-light-stage-narrow-2400.jpg'), q4))}`,
+    );
+    log(
+      `hero-light-stage-narrow-1200.jpg ${kb(await writeJpeg(nrSmall, nr.w / 2, nr.h / 2, path.join(ASSETS, 'hero-light-stage-narrow-1200.jpg'), q2))}`,
+    );
+    for (const { sc, px } of edges) {
+      const file = `hero-light-${sc.name}.jpg`;
+      log(`${file} ${kb(await writeJpeg(px, sc.w, sc.h, path.join(ASSETS, file), qm))}`);
+    }
   }
 }
 log('done');

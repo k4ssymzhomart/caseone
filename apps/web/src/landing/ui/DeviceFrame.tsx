@@ -38,8 +38,11 @@ export interface DeviceFrameProps {
   rimLight?: boolean;
   /** 3D pose in degrees; any x or y rotation draws the band's side walls. */
   tilt?: Tilt;
-  /** `float`: a deep soft shadow; `contact`: plus a tight shadow under the bottom edge; default `float`. */
-  shadow?: 'none' | 'float' | 'contact';
+  /**
+   * `float`: a deep soft shadow for the dark canvas; `soft`: a lighter, wider one for a light backdrop; `contact`:
+   * the float shadow plus a tight one under the bottom edge; default `float`.
+   */
+  shadow?: 'none' | 'float' | 'soft' | 'contact';
   /** A slow 6 px drift (off under reduced motion). */
   float?: boolean;
   /** Above the fold: load the screen at once with high priority. */
@@ -116,6 +119,7 @@ export function DeviceFrame({
       data-finish={finish}
       data-solid={solid || undefined}
       data-float={float || undefined}
+      data-shadow={shadow === 'soft' ? 'soft' : undefined}
     >
       {shadow === 'contact' && <div className={st.contact} aria-hidden="true" />}
       <div className={st.body} style={{ transform: pose }}>

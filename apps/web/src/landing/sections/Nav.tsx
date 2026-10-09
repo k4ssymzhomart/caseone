@@ -1,5 +1,8 @@
-// Sticky nav (§5.0): transparent over the hero, glass after 40 px of scroll. Under 1024 px: lockup, APK and a menu
-// button that opens a full screen sheet with the links. Every APK link carries the Android mark.
+// Sticky nav (§5.0): frosted white over the light hero, like the reference's white bar, and dark glass once the hero
+// has scrolled out from under it. One IntersectionObserver decides (the hero against the page below the nav), no
+// scroll handler. The header carries data-theme, so the kit's buttons and the Lockup's wordmark follow it and the
+// colors cross fade. Under 1024 px: lockup, APK and a menu button that opens a full screen sheet with the links
+// (always dark). Every APK link carries the Android mark.
 import { androidLogo } from '@rota/design';
 import { useEffect, useState } from 'react';
 import { Lockup } from '@/components/rota/Logo/Logo';
@@ -10,16 +13,21 @@ import { MarkPill } from './Marks';
 import n from './Nav.module.css';
 
 const c = content.nav;
+const NAV_HEIGHT = 64;
 
 export function Nav() {
-  const [scrolled, setScrolled] = useState(false);
+  const [onHero, setOnHero] = useState(true);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    const hero = document.getElementById('top');
+    if (!hero || typeof IntersectionObserver === 'undefined') return;
+    // Light while any of the hero is still below the nav's bottom edge.
+    const io = new IntersectionObserver(([e]) => setOnHero(e!.isIntersecting), {
+      rootMargin: `-${NAV_HEIGHT}px 0px 0px 0px`,
+    });
+    io.observe(hero);
+    return () => io.disconnect();
   }, []);
 
   useEffect(() => {
@@ -37,11 +45,13 @@ export function Nav() {
     };
   }, [open]);
 
+  const light = onHero && !open;
+
   return (
-    <header className={n.nav} data-scrolled={scrolled || open ? '' : undefined}>
+    <header className={n.nav} data-theme={light ? 'light' : 'dark'} data-open={open || undefined}>
       <div className={n.inner}>
         <a className={n.brand} href="#top" aria-label={c.home}>
-          <Lockup height={22} color="var(--rota-white)" />
+          <Lockup height={22} color="var(--color-text-heading)" />
         </a>
         <nav className={n.links} aria-label={c.label}>
           {c.links.map((l) => (
@@ -51,7 +61,12 @@ export function Nav() {
           ))}
         </nav>
         <div className={n.actions}>
-          <LinkPill href={links.panel} variant="secondary" size="m" className={n.wide}>
+          <LinkPill
+            href={links.panel}
+            variant="secondary"
+            size="m"
+            className={`${n.wide} ${n.panel}`}
+          >
             {c.panel}
           </LinkPill>
           <MarkPill

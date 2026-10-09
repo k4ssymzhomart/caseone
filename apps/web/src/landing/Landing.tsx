@@ -1,5 +1,6 @@
 // The public page at `/` (docs/LANDING.md): the product in the Rota landing style and the submission hub for the
-// jury. Dark only, static: no API calls, no cookies, no analytics. Copy in content.ts, URLs in links.ts.
+// jury. Dark, with one light panel for the hero; static: no API calls, no cookies, no analytics. Copy in content.ts,
+// URLs in links.ts.
 import { useLayoutEffect } from 'react';
 import { content } from './content';
 import s from './landing.module.css';

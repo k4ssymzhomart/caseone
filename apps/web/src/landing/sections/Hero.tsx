@@ -1,32 +1,34 @@
-// Hero (§5.1) as a close up product shot: a 4K silk backdrop (tools/gen-hero-bg.ts), the pitch set editorially on
-// the left, and on the right one large phone drawn by us (DeviceFrame) with the real emergency screen, turned toward
-// the copy, set on a dark pool in the silk and rising from the hero's bottom edge. The HUD toast loops issue → accept
-// → AI check on the screen itself, in its plane. Platform marks as in the final CTA: Android on the APK, Chrome and
-// Safari on the browser app, and a «Работает на» row of app icon tiles (Android, iPhone, Windows and Mac, Telegram).
+// Hero (§5.1) as a light stage above the black page, after the user's reference: the satin backdrop with the red
+// ribbon (tools/gen-hero-bg-light.ts), everything centered top to bottom: the app icon tile, a «Новое» pill to the
+// AI review, the headline, the lead, two buttons with their platform marks and a quiet «Работает на» row; then one
+// upright phone with the master's light «Смена» screen, cut by the panel's rounded bottom edge, and four floating
+// cards around it with real figures. The cards are decorative; their content is repeated once as text.
 import {
   androidLogo,
   appleLogo,
   chromeLogo,
+  claudeLogo,
+  markPath,
   safariLogo,
   telegramLogo,
   windowsLogo,
   type PlatformLogo as Logo,
 } from '@rota/design';
-import { useEffect, useState } from 'react';
-import hudStyles from '@/components/rota/Hud/Hud.module.css';
-import { LogoMark } from '@/components/rota/Logo/Logo';
+import checkMascot from '@rota/design/assets/mascots/check.svg';
+import { PlatformLogo } from '@/components/rota/PlatformLogo';
+import avatarWrench from '../assets/avatars/avatar-wrench.webp';
 import { deviceScreens } from '../assets/deviceScreens';
 import { content } from '../content';
 import { HERO_SCREEN_SIZES } from '../heroMedia';
 import { links } from '../links';
 import s from '../landing.module.css';
 import { DeviceFrame } from '../ui/DeviceFrame';
-import { useReducedMotion } from '../ui/motion';
+import { squircle } from '../ui/deviceModel';
 import h from './Hero.module.css';
-import { Mark, MarkPill } from './Marks';
+import { MarkPill } from './Marks';
 
 const c = content.hero;
-const STEP_MS = 2400;
+const k = c.cards;
 
 const PLATFORM_LOGOS: Record<(typeof c.platforms)[number]['id'], readonly Logo[]> = {
   android: [androidLogo],
@@ -35,43 +37,92 @@ const PLATFORM_LOGOS: Record<(typeof c.platforms)[number]['id'], readonly Logo[]
   telegram: [telegramLogo],
 };
 
-/**
- * The HUD capsule cycling through three states; pauses while the tab is hidden; reduced motion shows the last. A
- * message with a line break is a two line notification: the title, then a quieter detail line.
- */
-function HudLoop() {
-  const reduced = useReducedMotion();
-  const [i, setI] = useState(0);
+/** The app icon's continuous corners (iOS proportions: radius 22.4 % of the side). */
+const TILE = squircle(0, 0, 100, 100, 22.4);
 
-  useEffect(() => {
-    if (reduced) return;
-    let timer: number | undefined;
-    const start = () => {
-      window.clearInterval(timer);
-      if (!document.hidden)
-        timer = window.setInterval(() => setI((v) => (v + 1) % c.hud.length), STEP_MS);
-    };
-    start();
-    document.addEventListener('visibilitychange', start);
-    return () => {
-      window.clearInterval(timer);
-      document.removeEventListener('visibilitychange', start);
-    };
-  }, [reduced]);
-
-  const state = c.hud[reduced ? c.hud.length - 1 : i]!;
-  const [title, detail] = state.text.split('\n');
+/** The Rota app icon, drawn: the black tile of packages/design/assets/app-icon with the red mark, crisp at any size. */
+function AppIcon() {
   return (
-    <div className={h.hudWrap} aria-hidden="true">
-      <div key={state.text} className={`${hudStyles.hud} ${h.hud}`}>
-        {state.tone === 'mark' ? (
-          <LogoMark size={15} />
-        ) : (
-          <span className={s.dot} data-tone={state.tone} />
-        )}
-        <span className={h.hudText}>
-          <span>{title}</span>
-          {detail && <span className={hudStyles.muted}>{detail}</span>}
+    <svg className={h.icon} viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="hero-icon-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" className={h.iconTop} />
+          <stop offset="1" className={h.iconBottom} />
+        </linearGradient>
+      </defs>
+      <path d={TILE} fill="url(#hero-icon-fill)" />
+      <path d={TILE} className={h.iconEdge} />
+      <path d={markPath} className={h.iconMark} transform="translate(21.5 21.5) scale(0.57)" />
+    </svg>
+  );
+}
+
+/** Four cards around the phone, each in its own slow drift. */
+function Cards() {
+  return (
+    <div className={h.cards} aria-hidden="true">
+      <div className={`${h.card} ${h.review}`}>
+        <span className={h.reviewTile}>
+          <img
+            src={checkMascot}
+            width={72}
+            height={72}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+          />
+        </span>
+        <span className={h.reviewBody}>
+          <span className={h.reviewTitle}>{k.review.title}</span>
+          <span className={h.bar}>
+            <span style={{ width: `${k.review.score}%` }} />
+          </span>
+          <span className={h.reviewFoot}>
+            <span className={h.mint}>
+              <span className={s.dot} data-tone="free" />
+              {k.review.verdict}
+            </span>
+            <span className={h.score}>
+              <b>{k.review.score}</b> {k.review.total}
+            </span>
+          </span>
+        </span>
+      </div>
+
+      <div className={`${h.card} ${h.emergency}`}>
+        <span className={h.cardTitle}>{k.emergency.title}</span>
+        <span className={h.cardNote}>{k.emergency.note}</span>
+        <span className={h.darkPill}>
+          <span className={`${s.dot} ${h.pulse}`} data-tone="critical" />
+          <b>{k.emergency.value}</b>
+          <span>{k.emergency.label}</span>
+        </span>
+      </div>
+
+      <div className={`${h.card} ${h.repeats}`}>
+        <span className={h.cardTitle}>{k.repeats.title}</span>
+        <span className={h.cardNote}>{k.repeats.note}</span>
+        <span className={h.redPill}>{k.repeats.value}</span>
+      </div>
+
+      <div className={`${h.card} ${h.worker}`}>
+        <img
+          src={avatarWrench}
+          width={52}
+          height={52}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+        />
+        <span className={h.workerText}>
+          <span className={h.workerName}>{k.worker.name}</span>
+          <span className={h.cardNote}>{k.worker.note}</span>
+        </span>
+        <span className={h.status}>
+          <span className={s.dot} data-tone="working" />
+          {k.worker.status}
         </span>
       </div>
     </div>
@@ -80,74 +131,62 @@ function HudLoop() {
 
 export function Hero() {
   return (
-    <section id="top" className={h.hero} aria-labelledby="hero-title">
+    <section id="top" className={h.hero} data-theme="light" aria-labelledby="hero-title">
       <div className={h.backdrop} aria-hidden="true" />
-      <div className={`${s.container} ${h.grid}`}>
-        <div className={h.copy}>
-          <h1 id="hero-title" className={h.title}>
-            <span className={h.line}>{c.title[0]}</span>
-            <span className={h.line}>{c.title[1]}</span>
-          </h1>
-          <p className={h.lead}>{c.lead}</p>
-          <div className={h.cta}>
-            <MarkPill href={links.apk} logos={[androidLogo]} variant="primary">
-              {c.apk}
-            </MarkPill>
-            <MarkPill href={links.app} logos={[chromeLogo, safariLogo]}>
-              {c.app}
-            </MarkPill>
-            <MarkPill href={links.panel} variant="quiet" className={h.panelLink}>
-              {c.panel}
-            </MarkPill>
-          </div>
+      <div className={`${s.container} ${h.inner}`}>
+        <AppIcon />
+        <a className={h.badge} href="#review">
+          <PlatformLogo logo={claudeLogo} size={16} tone="brand" />
+          <span>
+            <span className={h.badgeLead}>{c.badgeLead} </span>
+            {c.badge}
+          </span>
+          <span className={h.badgeArrow} aria-hidden="true">
+            →
+          </span>
+        </a>
+        <h1 id="hero-title" className={h.title}>
+          <span className={h.line}>{c.title[0]}</span>
+          <span className={h.line}>{c.title[1]}</span>
+        </h1>
+        <p className={h.lead}>{c.lead}</p>
+        <div className={h.cta}>
+          <MarkPill href={links.apk} logos={[androidLogo]} variant="primary" className={h.primary}>
+            {c.apk}
+          </MarkPill>
+          <MarkPill href={links.app} logos={[chromeLogo, safariLogo]} className={h.secondary}>
+            {c.app}
+          </MarkPill>
         </div>
-
         <div className={h.platforms}>
-          <p className={h.platformsLabel}>{c.platformsLabel}</p>
+          <span className={h.platformsLabel}>{c.platformsLabel}</span>
           <ul>
             {c.platforms.map((p) => (
               <li key={p.id}>
-                <span className={h.platformMarks}>
-                  {PLATFORM_LOGOS[p.id].map((logo) => (
-                    <Mark key={logo.title} logo={logo} size={22} />
-                  ))}
-                </span>
-                <span className={h.platformText}>
-                  <span className={h.platformName}>{p.name}</span>
-                  <span className={h.platformNote}>{p.note}</span>
-                </span>
+                {PLATFORM_LOGOS[p.id].map((logo) => (
+                  <PlatformLogo key={logo.title} logo={logo} size={15} tone="brand" />
+                ))}
+                {p.name}
               </li>
             ))}
           </ul>
         </div>
 
-        <ul className={h.stats}>
-          {c.stats.map((x) => (
-            <li key={x.value}>
-              <b>{x.value}</b>
-              <span>{x.label}</span>
-            </li>
-          ))}
-        </ul>
-
         <div className={h.stage}>
-          <div className={h.bloom} aria-hidden="true" />
-          <div className={h.shot}>
+          <Cards />
+          <p className={s.visuallyHidden}>{c.cardsText}</p>
+          <div className={h.phone}>
             <DeviceFrame
-              src={deviceScreens.emergency}
-              alt={c.shotEmergency}
+              src={deviceScreens.masterShiftLight}
+              alt={c.shot}
               width="var(--hero-phone)"
               sizes={HERO_SCREEN_SIZES}
-              tilt={{ x: 4, y: -16, z: 1.5, perspective: 2200 }}
-              shadow="float"
+              finish="black"
+              rimLight={false}
+              shadow="soft"
               priority
-            >
-              <HudLoop />
-            </DeviceFrame>
+            />
           </div>
-          <p className={s.visuallyHidden}>
-            {c.hud.map((x) => x.text.replace(/\n/g, ' ').replace(/[.\s]+$/, '')).join('. ')}.
-          </p>
         </div>
       </div>
     </section>
