@@ -5,6 +5,7 @@
 // the text, the recommendation and «Доказательства»: key numbers, a mini chart of the detector row, the evidence
 // orders as links to /orders/:id, a weekly chart of those orders and the unit's history. The question lives in the
 // URL (?q=), so an answer can be reloaded and linked. The mascot «search» shows while the detectors run.
+import { claudeLogo } from '@rota/design';
 import {
   ddmm,
   formatCount,
@@ -34,11 +35,14 @@ import {
   Eyebrow,
   Field,
   Input,
+  isClaudeModel,
   Loading,
+  ModelLabel,
   Page,
   Pill,
   Section,
   Tag,
+  WithMark,
 } from '@/components/ui';
 import {
   barProps,
@@ -119,6 +123,7 @@ export function AnalyticsPage() {
                   <InsightCard
                     key={`${card.kind}:${card.id ?? i}:${card.title}`}
                     card={card}
+                    model={answer.scope.model}
                     orders={evidence.data}
                     ordersPending={evidence.isPending}
                     onOpen={() => setEvidenceWanted(true)}
@@ -246,6 +251,11 @@ function ScopeBar({ scope }: { scope: InsightScope }) {
       </ul>
       <div className={styles.scopeMeta}>
         <Pill tone={SOURCE_TONE[scope.source]}>{t(`analytics.scope.source.${scope.source}`)}</Pill>
+        {scope.source !== 'rules' && isClaudeModel(scope.model) ? (
+          <span className={styles.model}>
+            <ModelLabel model={scope.model}>{scope.model}</ModelLabel>
+          </span>
+        ) : null}
         {asked && scope.parsed_by ? (
           <span className={rs.note}>{t(`analytics.scope.parsed.${scope.parsed_by}`)}</span>
         ) : null}
@@ -261,12 +271,14 @@ function ScopeBar({ scope }: { scope: InsightScope }) {
 
 interface InsightCardProps {
   card: Insight;
+  /** The model that wrote the answer's cards (scope.model); a model card shows its mark when it is Claude. */
+  model: string | null;
   orders: Map<number, EvidenceOrder> | undefined;
   ordersPending: boolean;
   onOpen: () => void;
 }
 
-function InsightCard({ card, orders, ordersPending, onOpen }: InsightCardProps) {
+function InsightCard({ card, model, orders, ordersPending, onOpen }: InsightCardProps) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const ids = useMemo(() => orderIds(card), [card]);
@@ -280,7 +292,17 @@ function InsightCard({ card, orders, ordersPending, onOpen }: InsightCardProps) 
         <div className={styles.cardTop}>
           <Pill tone={SEVERITY_TONE[severity]}>{t(`analytics.severity.${severity}`)}</Pill>
           <Tag>{kindLabel(card.kind)}</Tag>
-          {byModel ? <Tag>{t('analytics.card.ai')}</Tag> : null}
+          {byModel ? (
+            <Tag>
+              {isClaudeModel(model) ? (
+                <WithMark logo={claudeLogo} size={12} gap="tight">
+                  {t('analytics.card.ai')}
+                </WithMark>
+              ) : (
+                t('analytics.card.ai')
+              )}
+            </Tag>
+          ) : null}
         </div>
         <h3 className={styles.cardTitle}>{card.title}</h3>
         <p className={styles.cardBody}>{card.body}</p>

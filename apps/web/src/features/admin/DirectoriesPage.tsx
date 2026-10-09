@@ -1,6 +1,7 @@
 // /admin/directories (admin): read only tables for every directory (areas, equipment, brigades, employees, fault
 // codes, materials, work norms, problem templates, equipment type specialties). Data: useDirectories(). The open
 // tab lives in ?tab= so a link can point at one directory; the search filters the rows of the open tab.
+import { telegramLogo } from '@rota/design';
 import {
   formatCount,
   formatInt,
@@ -14,7 +15,19 @@ import {
 } from '@rota/shared';
 import { useMemo, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router';
-import { EmptyState, Field, Input, Page, Pill, QueryState, Segmented, Table, Tag, type Column } from '@/components/ui';
+import {
+  EmptyState,
+  Field,
+  Input,
+  Page,
+  Pill,
+  QueryState,
+  Segmented,
+  Table,
+  Tag,
+  WithMark,
+  type Column,
+} from '@/components/ui';
 import { t, tData } from '@/lib/i18n';
 import { useDirectories } from '@/lib/queries';
 import type { WebKey } from '@/lib/strings';
@@ -206,11 +219,16 @@ function buildTabs(d: Directories): Record<Tab, RenderedTab> {
         `${e.tab_no} ${e.full_name} ${e.short_name} ${tData(`role.${e.role}`)} ${e.specialty ?? ''} ${brigadeName(e.brigade_id)} ${e.pseudonym}`,
       columns: [
         { key: 'tab_no', header: t('admin.col.tab_no'), mono: true, render: (e) => e.tab_no },
-        { key: 'name', header: t('admin.col.employee'), render: (e) => <span className={styles.strong}>{e.full_name}</span> },
+        { key: 'name', header: t('admin.col.employee'), render: (e) => <span className={`${styles.strong} ${styles.nowrap}`}>{e.full_name}</span> },
         { key: 'role', header: t('admin.col.role'), render: (e) => tData(`role.${e.role}`) },
         { key: 'specialty', header: t('admin.col.specialty'), render: (e) => e.specialty ?? '' },
         { key: 'grade', header: t('admin.col.grade'), align: 'right', mono: true, render: (e) => e.grade ?? '' },
-        { key: 'brigade', header: t('admin.col.brigade'), render: (e) => brigadeName(e.brigade_id) },
+        {
+          key: 'brigade',
+          header: t('admin.col.brigade'),
+          // «Бригада 2» never breaks before its number
+          render: (e) => <span className={styles.nowrap}>{brigadeName(e.brigade_id)}</span>,
+        },
         { key: 'shift', header: t('admin.col.shift'), render: (e) => (e.shift ? SHIFT_LABEL[e.shift] : '') },
         {
           key: 'on_shift',
@@ -225,8 +243,19 @@ function buildTabs(d: Directories): Record<Tab, RenderedTab> {
         { key: 'pseudonym', header: t('admin.col.pseudonym'), mono: true, render: (e) => e.pseudonym },
         {
           key: 'telegram',
-          header: t('admin.col.telegram'),
-          render: (e) => (e.telegram_chat_id != null ? t('admin.telegram.linked') : none()),
+          header: (
+            <WithMark logo={telegramLogo} size={14}>
+              {t('admin.col.telegram')}
+            </WithMark>
+          ),
+          render: (e) =>
+            e.telegram_chat_id != null ? (
+              <WithMark logo={telegramLogo} size={16}>
+                {t('admin.telegram.linked')}
+              </WithMark>
+            ) : (
+              none()
+            ),
         },
       ],
     }),

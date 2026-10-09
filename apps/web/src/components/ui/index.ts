@@ -1,4 +1,5 @@
 // App primitives for page authors. Kit components (Button, Switch, Mascot, ...) come from '@/components/rota'.
+export { BrandMark, isClaudeModel, ModelLabel, WithMark } from './BrandMark';
 export { Card, Grid } from './Card';
 export { Field, FormError, Input, Select, type SelectOption } from './Field';
 export { Kpi } from './Kpi';

@@ -8,6 +8,11 @@
   align-items: start;
 }
 
+/* «Скачать PDF» and «Скачать Excel»: the file badge leads, so the left padding is optically smaller. */
+.exportButton[data-variant] {
+  padding-left: 12px;
+}
+
 /* Holds the previous render while a new period loads, instead of a skeleton flash. */
 .stale {
   display: grid;

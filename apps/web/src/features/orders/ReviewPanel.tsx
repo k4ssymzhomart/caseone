@@ -9,7 +9,7 @@ import {
   type AiReview,
   type OrderDetail,
 } from '@rota/shared';
-import { Card, EmptyState, Pill } from '@/components/ui';
+import { Card, EmptyState, ModelLabel, Pill } from '@/components/ui';
 import {
   CHECK_GLYPH,
   CHECK_TONE,
@@ -100,7 +100,13 @@ export function ReviewPanel({ detail }: { detail: OrderDetail }) {
       </ul>
 
       <div className={styles.reviewMeta}>
-        <span>{rulesOnly ? t('order.review.meta_rules') : t('order.review.meta_model', { model: review.model ?? '' })}</span>
+        <span>
+          {rulesOnly ? (
+            t('order.review.meta_rules')
+          ) : (
+            <ModelLabel model={review.model}>{t('order.review.meta_model', { model: review.model ?? '' })}</ModelLabel>
+          )}
+        </span>
         {review.latency_ms != null ? <span>{t('order.review.meta_latency', { sec: seconds(review.latency_ms) })}</span> : null}
         <span>{t('order.review.meta_attempt', { n: review.attempt })}</span>
       </div>

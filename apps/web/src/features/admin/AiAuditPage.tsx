@@ -2,10 +2,25 @@
 // response, exactly as the privacy gateway sent and stored them, the spend and error counters, and the pseudonym
 // table the gateway uses. Mascot shield. Data: useLlmAudit(), useLlmAuditStats() (features/admin/useLlmAudit.ts),
 // useDirectories() for the pseudonyms. Empty state when the journal has no rows (always in mock mode).
+import { anthropicLogo } from '@rota/design';
 import { formatAgo, formatDateTime, formatInt, formatNumber, type Employee, type Json } from '@rota/shared';
 import { useMemo, useState, type ReactNode } from 'react';
 import { Button, Mascot } from '@/components/rota';
-import { Card, EmptyState, Grid, Kpi, Page, Pill, QueryState, Section, Segmented, Tag } from '@/components/ui';
+import {
+  Card,
+  EmptyState,
+  Grid,
+  isClaudeModel,
+  Kpi,
+  ModelLabel,
+  Page,
+  Pill,
+  QueryState,
+  Section,
+  Segmented,
+  Tag,
+  WithMark,
+} from '@/components/ui';
 import { apiMode } from '@/lib/api';
 import { t, tData } from '@/lib/i18n';
 import { useDirectories } from '@/lib/queries';
@@ -211,6 +226,7 @@ export function AiAuditPage() {
                 <div className={styles.introText}>
                   <h2 className={styles.introTitle}>{t('admin.ai.intro_title')}</h2>
                   <p className={styles.introBody}>{t('admin.ai.intro_text')}</p>
+                  <ProviderLine rows={rows} />
                 </div>
               </div>
             </Card>
@@ -221,6 +237,19 @@ export function AiAuditPage() {
       </QueryState>
       <Pseudonyms employees={employees} />
     </Page>
+  );
+}
+
+/** Where the journal's requests went: the Anthropic mark and the Claude models seen in the rows. */
+function ProviderLine({ rows }: { rows: readonly LlmAuditRow[] }) {
+  const models = [...new Set(rows.map((r) => r.model).filter(isClaudeModel))].sort();
+  if (models.length === 0) return null;
+  return (
+    <p className={styles.provider}>
+      <WithMark logo={anthropicLogo} size={16}>
+        {t(models.length === 1 ? 'admin.ai.provider_one' : 'admin.ai.provider_many', { models: models.join(', ') })}
+      </WithMark>
+    </p>
   );
 }
 
@@ -285,9 +314,11 @@ function Journal({ rows, pattern }: { rows: readonly LlmAuditRow[]; pattern: Reg
                     <span className={styles.listMain}>
                       <span className={styles.listTitle}>{purposeLabel(row.purpose)}</span>
                       <span className={styles.meta}>
-                        {[row.model, row.latency_ms != null ? seconds(row.latency_ms) : null]
-                          .filter(Boolean)
-                          .join(' · ')}
+                        <ModelLabel model={row.model} size={12}>
+                          {[row.model, row.latency_ms != null ? seconds(row.latency_ms) : null]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </ModelLabel>
                       </span>
                     </span>
                     <ResultPill state={resultOf({ error: response.error, answered: response.state !== 'pending' })} />
@@ -315,7 +346,7 @@ function Detail({ row, pattern }: { row: LlmAuditRow; pattern: RegExp }) {
   const response = parseResponse(row.response_redacted);
   const meta = [
     row.model,
-    request.provider,
+    request.provider === 'anthropic' ? 'Anthropic' : request.provider,
     row.latency_ms != null ? seconds(row.latency_ms) : null,
     row.cost_usd != null ? `${usd(Number(row.cost_usd))} USD` : null,
   ]
@@ -332,7 +363,11 @@ function Detail({ row, pattern }: { row: LlmAuditRow; pattern: RegExp }) {
           <h3 className={styles.detailTitle}>{purposeLabel(row.purpose)}</h3>
           <ResultPill state={response.state} />
         </div>
-        {meta ? <span className={styles.meta}>{meta}</span> : null}
+        {meta ? (
+          <span className={styles.meta}>
+            <ModelLabel model={row.model}>{meta}</ModelLabel>
+          </span>
+        ) : null}
         {response.input_tokens != null || response.output_tokens != null ? (
           <span className={styles.meta}>
             {t('admin.ai.tokens', {

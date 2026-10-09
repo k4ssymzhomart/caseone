@@ -2,12 +2,13 @@
 // «Ускорение времени ×10» (useUpdateSettings; masters may change exactly these two keys), «Сбросить демо»
 // (useDemoReset, red with a confirm sheet), the shift readiness after a reset (useWorkerStatuses), the Demo Day
 // script and the link to «Что видит ИИ» (admins only; llm_audit is closed to masters).
+import { androidLogo } from '@rota/design';
 import { isRotaError, workerStateTone, type Settings, type WorkerStatusView } from '@rota/shared';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useHud } from '@/components/HudHost';
 import { Button, SettingsGroup, SettingsRow, Switch } from '@/components/rota';
-import { Page, StatusDot } from '@/components/ui';
+import { Page, StatusDot, WithMark } from '@/components/ui';
 import { apiMode, useRequiredSession } from '@/lib/api';
 import { t } from '@/lib/i18n';
 import { useDemoReset, useUpdateSettings } from '@/lib/mutations';
@@ -136,7 +137,11 @@ export function DemoPage() {
               </li>
             ))}
           </ol>
-          <p className={styles.footnote}>{t('demo.script_note')}</p>
+          <p className={styles.footnote}>
+            <WithMark logo={androidLogo} size={14}>
+              {t('demo.script_note')}
+            </WithMark>
+          </p>
         </section>
       </div>
 

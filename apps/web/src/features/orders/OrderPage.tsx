@@ -40,6 +40,7 @@ import { orderBadge, orderEyebrow } from '@/lib/present';
 import { useDirectories, useOrder, useWorkerStatuses } from '@/lib/queries';
 import { paths } from '@/lib/routes';
 import { useNow } from '@/lib/useNow';
+import { ExportButton } from '../reports/export/ExportButton';
 import { downloadPdf, imageDataUrl } from '../reports/export/files';
 import { useExport } from '../reports/export/useExport';
 import { CancelDialog, OverrideDialog, PriorityDialog, ReturnDialog } from './ActionDialogs';
@@ -307,9 +308,7 @@ function OrderPdfButton({ detail }: { detail: OrderDetail }) {
       return lost ? t('order.pdf.photo_failed') : undefined;
     });
   return (
-    <Button variant="secondary" onClick={() => void download()} disabled={exp.busy != null}>
-      {exp.busy ? t('export.busy') : t('report.export_pdf')}
-    </Button>
+    <ExportButton kind="pdf" busy={exp.busy != null} onClick={() => void download()} disabled={exp.busy != null} />
   );
 }
 

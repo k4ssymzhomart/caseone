@@ -117,6 +117,48 @@
   font-size: 12px;
 }
 
+/* The phone app: Android (the APK) and iPhone (the browser app), each a quiet pill led by its mark. */
+.apps {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.appsLabel {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.appLinks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.appLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 32px;
+  padding: 0 14px 0 10px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.appLink:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-bg-subtle);
+}
+
 .slogan {
   color: var(--color-text-secondary);
   font-size: 12px;

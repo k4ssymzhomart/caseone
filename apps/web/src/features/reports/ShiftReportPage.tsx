@@ -33,6 +33,7 @@ import {
   Grid,
   Kpi,
   Loading,
+  ModelLabel,
   Page,
   Pill,
   QueryState,
@@ -54,6 +55,7 @@ import {
   type OverdueExportRow,
   type ShiftExportInput,
 } from './export/shiftExport';
+import { ExportButton } from './export/ExportButton';
 import { useExport } from './export/useExport';
 import { filterText, hoursText, minutesText, num, periodEyebrow, shareText } from './format';
 import { Meter, NoData, Stale } from './kit';
@@ -97,26 +99,24 @@ export function ShiftReportPage() {
       eyebrow={eyebrow}
       actions={
         <>
-          <Button
-            variant="secondary"
+          <ExportButton
+            kind="pdf"
+            busy={exp.busy === 'pdf'}
             disabled={!ready}
             onClick={() => {
               const r = report.data;
               if (r) void exp.run('pdf', () => downloadPdf(shiftReportPdf(exportInput(r)), fileName('pdf')));
             }}
-          >
-            {exp.busy === 'pdf' ? t('export.busy') : t('report.export_pdf')}
-          </Button>
-          <Button
-            variant="secondary"
+          />
+          <ExportButton
+            kind="xlsx"
+            busy={exp.busy === 'xlsx'}
             disabled={!ready}
             onClick={() => {
               const r = report.data;
               if (r) void exp.run('xlsx', () => downloadXlsx(shiftReportSheets(exportInput(r)), fileName('xlsx')));
             }}
-          >
-            {exp.busy === 'xlsx' ? t('export.busy') : t('report.export_excel')}
-          </Button>
+          />
         </>
       }
     >
@@ -224,7 +224,9 @@ function Summary({ query, onRefresh }: { query: UseQueryResult<ShiftSummary>; on
                 <li key={`${i}:${rec}`}>{rec}</li>
               ))}
             </ol>
-            <p className={s.note}>{summaryMeta(data)}</p>
+            <p className={s.note}>
+              <ModelLabel model={data.source === 'llm' ? data.model : null}>{summaryMeta(data)}</ModelLabel>
+            </p>
           </div>
         ) : busy || query.isPending ? (
           <div className={s.summary} aria-busy="true">

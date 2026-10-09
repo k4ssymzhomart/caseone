@@ -13,7 +13,6 @@ import {
 } from '@rota/shared';
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router';
-import { Button } from '@/components/rota';
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 import { ChartCard, ChartTooltip } from '@/components/chart';
 import {
@@ -38,6 +37,7 @@ import { t } from '@/lib/i18n';
 import { useDirectories, useRating } from '@/lib/queries';
 import { downloadPdf, downloadXlsx, fileStamp } from './export/files';
 import { ratingPdf, ratingSheets, type RatingExportInput } from './export/ratingExport';
+import { ExportButton } from './export/ExportButton';
 import { useExport } from './export/useExport';
 import { filterText, num, periodEyebrow, scoreText, shareText } from './format';
 import { Stale } from './kit';
@@ -89,26 +89,24 @@ export function RatingPage() {
               { value: 'brigade', label: t('rating.tab.brigades') },
             ]}
           />
-          <Button
-            variant="secondary"
+          <ExportButton
+            kind="pdf"
+            busy={exp.busy === 'pdf'}
             disabled={!ready}
             onClick={() => {
               const rows = rating.data;
               if (rows) void exp.run('pdf', () => downloadPdf(ratingPdf(exportInput(rows)), fileName('pdf')));
             }}
-          >
-            {exp.busy === 'pdf' ? t('export.busy') : t('report.export_pdf')}
-          </Button>
-          <Button
-            variant="secondary"
+          />
+          <ExportButton
+            kind="xlsx"
+            busy={exp.busy === 'xlsx'}
             disabled={!ready}
             onClick={() => {
               const rows = rating.data;
               if (rows) void exp.run('xlsx', () => downloadXlsx(ratingSheets(exportInput(rows)), fileName('xlsx')));
             }}
-          >
-            {exp.busy === 'xlsx' ? t('export.busy') : t('report.export_excel')}
-          </Button>
+          />
         </>
       }
     >

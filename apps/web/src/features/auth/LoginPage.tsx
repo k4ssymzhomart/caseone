@@ -1,15 +1,18 @@
 // /login: wallpaper backdrop, a glass card with the Lockup, табельный номер and ПИН, demo account chips.
-// Workers are signed out at once: «Исполнители работают в мобильном приложении».
+// Workers are signed out at once: «Исполнители работают в мобильном приложении». Under the form a quiet line links the
+// phone app: Android to the APK, iPhone to the browser app at /app/.
+import { androidLogo, appleLogo } from '@rota/design';
 import { isRotaError, PINS } from '@rota/shared';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router';
 import wallpaper from '@rota/design/assets/wallpaper.jpg';
 import { WORKER_BLOCKED } from '@/components/layout';
 import { Button, Lockup, Mascot } from '@/components/rota';
-import { Field, FormError, Input, Loading } from '@/components/ui';
+import { BrandMark, Field, FormError, Input, Loading } from '@/components/ui';
 import { apiMode, demoAccounts, signIn, signOut, useSession, useSessionReady } from '@/lib/api';
 import { t, type Key } from '@/lib/i18n';
 import { homeFor, paths } from '@/lib/routes';
+import { links } from '@/landing/links';
 import styles from './LoginPage.module.css';
 
 const DEMO: readonly { tabNo: string; label: Key }[] = [
@@ -149,6 +152,19 @@ export function LoginPage() {
             {apiMode === 'mock' ? <span className={styles.note}>{t('login.mock_note')}</span> : null}
           </div>
         ) : null}
+        <nav className={styles.apps} aria-label={t('login.apps')}>
+          <span className={styles.appsLabel}>{t('login.apps')}</span>
+          <div className={styles.appLinks}>
+            <a className={styles.appLink} href={links.apk} rel="noopener" title={t('login.app_android_hint')}>
+              <BrandMark logo={androidLogo} size={16} />
+              {t('login.app_android')}
+            </a>
+            <a className={styles.appLink} href={links.app} title={t('login.app_iphone_hint')}>
+              <BrandMark logo={appleLogo} size={16} />
+              {t('login.app_iphone')}
+            </a>
+          </div>
+        </nav>
         <p className={styles.slogan}>{t('app.slogan')}</p>
       </main>
     </div>

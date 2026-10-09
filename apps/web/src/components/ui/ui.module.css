@@ -180,6 +180,30 @@
   color: var(--color-text-on-accent);
 }
 
+/* Brand marks (BrandMark, WithMark, ModelLabel): a mark centered on the line of text it leads. */
+.brandMark {
+  flex: none;
+}
+
+.withMark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  min-width: 0;
+  vertical-align: middle;
+}
+
+.withMark[data-gap='tight'] {
+  gap: 6px;
+}
+
+.withMarkText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 [data-tone='free'] { --tone: var(--status-free); --tone-soft: var(--status-free-soft); }
 [data-tone='working'] { --tone: var(--status-working); --tone-soft: var(--status-working-soft); }
 [data-tone='queue'] { --tone: var(--status-queue); --tone-soft: var(--status-queue-soft); }
