@@ -1,8 +1,9 @@
 import React from "react";
-import { AbsoluteFill, Composition, Folder } from "remotion";
+import { AbsoluteFill, Composition, Folder, Still } from "remotion";
 import { Film, SCENE_COMPONENTS } from "./Film";
 import { FILM_FRAMES, FPS, HEIGHT, SCENES, WIDTH } from "./data/scenes";
 import { fontsReady } from "./fonts";
+import { Thumbnail } from "./Thumbnail";
 
 // Fonts load once for every composition (loadFont holds the render until they are ready).
 void fontsReady;
@@ -36,6 +37,7 @@ export const RemotionRoot: React.FC = () => (
       height={720}
       defaultProps={{ frames: FILM_FRAMES }}
     />
+    <Still id="RotaThumbnail" component={Thumbnail} width={1280} height={720} />
     <Folder name="Scenes">
       {SCENES.map((s) => (
         <Composition

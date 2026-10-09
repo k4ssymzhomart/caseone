@@ -13,6 +13,7 @@ npm install
 npm run dev            # Remotion Studio: «RotaDemo», the 720p draft and each scene under «Scenes»
 npm run render:draft   # out/rota-demo-draft.mp4, 1280 × 720
 npm run render         # out/rota-demo.mp4, 1920 × 1080
+npm run thumbnail      # ../docs/readme/youtube-thumb.jpg, 1280 × 720, the YouTube thumbnail (src/Thumbnail.tsx)
 npm run stills -- out/stills 12 45 90   # review frames at those seconds (two per scene without arguments)
 npm run lint           # eslint + tsc
 ```

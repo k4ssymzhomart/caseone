@@ -162,7 +162,7 @@ file in `public/footage/`.
 ### 16 · Numbers · 2:41 · 10 s · `s14-numbers`
 
 - Two pages of four tiles, each with its source file: «Быстрый контур, точный ИИ»: 10 из 10 · 0,72 с · 8,5 с ·
-  0,016 USD; «Данные и надёжность»: 559 · 22 из 22 · 5 из 5 · 660.
+  0,016 USD; «Данные и надёжность»: 540 · 22 из 22 · 5 из 5 · 660.
 
 ### 17 · Outro · 2:50 · 8 s · `s15-outro`
 
@@ -187,7 +187,7 @@ file in `public/footage/`.
 | 0,0162 USD, 6,2 с | the model call of the check of №660 as the AI log shows it | `s13-privacy-web.mp4` |
 | 10 из 10 | golden set, expected verdict, Claude Sonnet 5.5, prompt p0.2 | `docs/golden-results.md` |
 | 0,016 USD | mean cost per case of the live golden run (0.1619 USD for 10 cases) | `docs/golden-results.md` |
-| 559 | history orders over 92 days with the planted patterns | `docs/progress.md`, `tools/db-check.ts` |
+| 540 | history orders over 92 days with the planted patterns (non demo; the database holds 559 with the 19 Demo Day start orders) | `docs/progress.md`, live count 09.10.2026 |
 | 22 из 22 | pattern measures P1 to P6 within ±20% of the answer key | `docs/phase6-acceptance.md` |
 | 5 из 5 | windows where `shift_report` equals the manual SQL count | `docs/phase5-acceptance.md` |
 | 660 | automated tests passing (`npx vitest run`, 09.10.2026 07:37: 660 passed, 1 skipped, 35 files) | measured for this film |

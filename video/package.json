@@ -29,6 +29,7 @@
     "stills": "npm run sync && node scripts/stills.mjs",
     "render:draft": "npm run sync && remotion render RotaDemoDraft out/rota-demo-draft.mp4",
     "render": "npm run sync && remotion render RotaDemo out/rota-demo.mp4",
+    "thumbnail": "npm run sync && remotion still RotaThumbnail ../docs/readme/youtube-thumb.jpg --image-format=jpeg --jpeg-quality=90",
     "typecheck": "tsc",
     "lint": "eslint src && tsc"
   }

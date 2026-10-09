@@ -41,10 +41,12 @@ export const NUMBERS = {
     label: "в среднем за проверку в эталонном прогоне на Sonnet 5.5",
     source: "docs/golden-results.md · 0,16 USD за 10",
   },
+  // History only: the live database holds 540 non demo orders created 08.07 to 07.10.2026 (92 days), plus the 19
+  // Demo Day start orders of demo_reset, 559 in all (docs/progress.md, deliverables check 09.10.2026).
   history: {
-    value: 559,
+    value: 540,
     label: "нарядов истории за 92 дня с шестью заложенными закономерностями",
-    source: "docs/progress.md · tools/db-check.ts",
+    source: "docs/progress.md · без демо",
   },
   patterns: {
     value: 22,
