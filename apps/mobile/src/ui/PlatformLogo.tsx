@@ -3,6 +3,12 @@ import Svg, { Path, Text as SvgText } from 'react-native-svg';
 
 import { useTheme } from '@/lib/theme';
 
+/**
+ * Logo sizes (docs/design.md §10): `inline` beside footnote, mono or caps text, `compact` for a short row of
+ * marks at the end of a list row, `row` as a list row's left accessory (the size of an iOS settings icon).
+ */
+export const LOGO_SIZE = { inline: 16, compact: 20, row: 28 } as const;
+
 export interface PlatformLogoProps {
   /** A single logo from @rota/design, e.g. telegramLogo. */
   logo: Logo;

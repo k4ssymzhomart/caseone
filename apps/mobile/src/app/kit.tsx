@@ -1,6 +1,17 @@
 // The /kit gallery (PHASE_0 §7.1): tokens, type, every kit component in its states, mascots, brand, HUD.
 // Sample domain copy below (equipment, statuses, names) is a design specimen and lives only here.
-import { mascotNames, type StatusTone, type TypeVariant } from '@rota/design';
+import {
+  androidLogo,
+  appleLogo,
+  chromeLogo,
+  claudeLogo,
+  mascotNames,
+  safariLogo,
+  telegramLogo,
+  windowsLogo,
+  type StatusTone,
+  type TypeVariant,
+} from '@rota/design';
 import { useRouter } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -28,12 +39,14 @@ import {
   ListGroup,
   ListRow,
   Lockup,
+  LOGO_SIZE,
   LogoMark,
   Mascot,
   OrderCard,
   PhotoTile,
   Pill,
   PinDots,
+  PlatformLogo,
   ScoreBadge,
   Screen,
   Segmented,
@@ -69,6 +82,16 @@ const PIN_LENGTH = 4;
 /** The dots keep their fill while they shake (PinDots shakes for 400 ms), then clear. */
 const PIN_CLEAR_MS = 450;
 const LOADING_DEMO_MS = 1500;
+/** The platform and service marks the app shows (docs/design.md §10), one row. */
+const KIT_LOGOS = [
+  telegramLogo,
+  androidLogo,
+  appleLogo,
+  chromeLogo,
+  safariLogo,
+  windowsLogo,
+  claudeLogo,
+] as const;
 
 export default function KitScreen() {
   // The root layout hosts the HudProvider (toasts at the top), so the kit uses it directly.
@@ -1285,6 +1308,18 @@ function BrandSection() {
           <Lockup height={theme.space[12]} />
           <Lockup height={theme.space[8]} color={theme.color.textSecondary} />
         </View>
+      </Sub>
+      <Sub label="PlatformLogo">
+        <Wrap gap={theme.space[5]}>
+          {KIT_LOGOS.map((logo) => (
+            <PlatformLogo
+              key={logo.title}
+              logo={logo}
+              size={LOGO_SIZE.row}
+              accessibilityLabel={logo.title}
+            />
+          ))}
+        </Wrap>
       </Sub>
     </Section>
   );

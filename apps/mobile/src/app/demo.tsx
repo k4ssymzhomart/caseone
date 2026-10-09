@@ -1,5 +1,6 @@
 // «Демо» for master and admin (CLAUDE.md §20, PHASE_0 §7.1, PHASE_2 §2.3): demo mode and the ×10 time scale
 // through settings, «Сбросить демо» (demo_reset, then resync), and local test notifications.
+import { claudeLogo } from '@rota/design';
 import { ACTIVE_STATUSES, type Directories, type Settings } from '@rota/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Redirect, router, type Href } from 'expo-router';
@@ -20,6 +21,7 @@ import { useConfirm } from '@/ui/ConfirmSheet';
 import { useHud } from '@/ui/Hud';
 import { ListGroup } from '@/ui/ListGroup';
 import { ListRow } from '@/ui/ListRow';
+import { LOGO_SIZE, PlatformLogo } from '@/ui/PlatformLogo';
 import { Screen } from '@/ui/Screen';
 import { Switch } from '@/ui/Switch';
 
@@ -209,7 +211,11 @@ function DemoContent() {
         </ListGroup>
 
         <ListGroup>
-          <ListRow title={t('demo.ai')} subtitle={t('demo.aiHint')} />
+          <ListRow
+            left={<PlatformLogo logo={claudeLogo} size={LOGO_SIZE.row} />}
+            title={t('demo.ai')}
+            subtitle={t('demo.aiHint')}
+          />
         </ListGroup>
       </View>
     </Screen>

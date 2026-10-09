@@ -1,6 +1,7 @@
 // Master report (CLAUDE.md §12): verdict, score, confidence, model, per check breakdown, before and after
 // photos, materials against the norm, works, timeline. Actions while ai_review or rework:
 // «Согласен, закрыть», «Изменить оценку», «Вернуть на доработку».
+import { claudeLogo } from '@rota/design';
 import {
   formatDateTime,
   formatDuration,
@@ -26,6 +27,7 @@ import { Card } from '@/ui/Card';
 import { CheckRow } from '@/ui/CheckRow';
 import { Eyebrow } from '@/ui/Eyebrow';
 import { ListGroup } from '@/ui/ListGroup';
+import { LOGO_SIZE, PlatformLogo } from '@/ui/PlatformLogo';
 import { ScoreBadge } from '@/ui/ScoreBadge';
 import { Screen } from '@/ui/Screen';
 import { T } from '@/ui/T';
@@ -104,6 +106,8 @@ export function MasterReview({ detail, review, dirs, canAct, refreshing, onRefre
   const downtime = downtimeMinutes(o);
   const checks = reviewChecks(review);
   const latency = latencyText(review.latency_ms);
+  // The Claude mark only where Claude wrote the review: never on a rules only review or the mock.
+  const byClaude = review.model?.startsWith('claude') ?? false;
   const busy = pending !== null;
 
   const agree = () => void run(o.id, 'close', {}, { success: t('review.hud.closed'), number: o.number });
@@ -189,10 +193,13 @@ export function MasterReview({ detail, review, dirs, canAct, refreshing, onRefre
           ) : null}
           {(closed || returned) && review.master_comment ? <T variant="body">{review.master_comment}</T> : null}
           {review.model ? (
-            <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: theme.space[2], flexWrap: 'wrap' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.space[2], flexWrap: 'wrap' }}>
               <T variant="footnote" tone="secondary">
                 {t('review.model')}
               </T>
+              {byClaude ? (
+                <PlatformLogo logo={claudeLogo} size={LOGO_SIZE.inline} accessibilityLabel={claudeLogo.title} />
+              ) : null}
               <T variant="monoM">{review.model}</T>
               {latency ? (
                 <T variant="monoM" tone="secondary">
@@ -205,7 +212,17 @@ export function MasterReview({ detail, review, dirs, canAct, refreshing, onRefre
 
         {review.report_master?.summary ? (
           <View style={{ gap: theme.space[2] }}>
-            <Eyebrow style={{ paddingHorizontal: theme.space[4] }}>{t('review.summary')}</Eyebrow>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: theme.space[2],
+                paddingHorizontal: theme.space[4],
+              }}
+            >
+              {byClaude ? <PlatformLogo logo={claudeLogo} size={LOGO_SIZE.inline} /> : null}
+              <Eyebrow>{t('review.summary')}</Eyebrow>
+            </View>
             <Card>
               <T variant="body">{review.report_master.summary}</T>
             </Card>

@@ -3,6 +3,22 @@
 Newest first. Each entry: what we decided, why, and what follows from it. Spec: CLAUDE.md; phase briefs in
 `docs/PHASE_N.md`.
 
+## 2026-10-09 · Real platform logos instead of plain names, at the owner's request
+
+**Decision.** Where the app, the panel or the site names a platform or a service, the real mark stands beside the
+name: Telegram on the profile's Telegram row, Android, Apple or the browser on the push row, Claude beside the model
+and in the «Вывод ИИ» header of the master's AI report and on «Что видит ИИ», Windows, Apple and Chrome on the admin
+screen that sends people to the web panel. The marks come from `packages/design/src/brand/platforms.ts` and are drawn
+only through `PlatformLogo`.
+
+**Why.** The owner found platforms named in text only and asked for their logos throughout the app and the website.
+This overrides the «no icon packs» rule for brand logos only; every other icon stays banned.
+
+**Follows.** `docs/design.md` §10 lists the sizes, the tones, the placements and the limits (one row of logos per
+block, the name stays visible, status is still a dot plus a word). The Claude mark shows only on reviews Claude wrote,
+so a rules only or mock review never carries it. Screens import single logos, never the whole map, to keep the
+bundles small.
+
 ## 2026-10-08 · Lane B run as subagents by the lane A session
 
 **Decision.** Lane B (`packages/shared`, `apps/web`, `supabase/functions`, `tools`, these docs) ran as subagents

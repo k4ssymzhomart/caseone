@@ -1,4 +1,5 @@
 // Shared pieces of the profile screens: identity, «На смене», connection, push status, Telegram, theme, sign out.
+import { telegramLogo } from '@rota/design';
 import type { LiveStatus, Session } from '@rota/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, type Href } from 'expo-router';
@@ -18,15 +19,22 @@ import { useHud } from '@/ui/Hud';
 import { ListGroup } from '@/ui/ListGroup';
 import { ListRow, type ListRowDensity } from '@/ui/ListRow';
 import { Pill, type PillTone } from '@/ui/Pill';
+import { LOGO_SIZE, PlatformLogo } from '@/ui/PlatformLogo';
 import { Segmented, type SegmentedItem } from '@/ui/Segmented';
 import { Switch } from '@/ui/Switch';
 import { T } from '@/ui/T';
 
+import { pushPlatformMark } from './platformMark';
 import { shortToken, usePushStatus, type PushStatus } from './push';
 import { openTelegramLink, telegramAvailable } from './telegram';
 import { useSignOut } from './signOut';
 
 const capitalize = (s: string) => (s ? s[0]!.toUpperCase() + s.slice(1) : s);
+
+/** Keeps a row's title on the text column of a sibling row that starts with a logo. */
+function LogoIndent() {
+  return <View style={{ width: LOGO_SIZE.row }} />;
+}
 
 export function roleLabel(role: Session['role']): string {
   return t(`profile.role.${role}`);
@@ -140,8 +148,10 @@ const PUSH_PILL: Record<Exclude<PushStatus, 'checking'>, { label: string; tone: 
 
 /** Push status pill, the token, the test notification, and a way to turn notifications on. */
 export function NotificationsGroup({ density, testUrl }: { density: ListRowDensity; testUrl: string }) {
+  const theme = useTheme();
   const hud = useHud();
   const push = usePushStatus();
+  const [mark] = useState(pushPlatformMark);
   const [sending, setSending] = useState(false);
   const pill = push.status === 'checking' ? null : PUSH_PILL[push.status];
 
@@ -157,20 +167,36 @@ export function NotificationsGroup({ density, testUrl }: { density: ListRowDensi
     }
   };
 
+  // The push row leads with the platform's mark; the rows under it keep to its text column, and so do the
+  // separators (an iOS settings group with icons).
+  const indent = mark ? <LogoIndent /> : undefined;
   return (
-    <ListGroup header={t('profile.notifications')}>
+    <ListGroup
+      header={t('profile.notifications')}
+      separatorInset={mark ? theme.space[4] + LOGO_SIZE.row + theme.space[3] : undefined}
+    >
       <ListRow
         density={density}
         title={t('profile.push')}
+        subtitle={mark ? t(mark.label) : undefined}
+        left={mark ? <PlatformLogo logo={mark.logo} size={LOGO_SIZE.row} /> : undefined}
         value={pill ? undefined : t('profile.pushChecking')}
         right={pill ? <Pill label={t(pill.label)} tone={pill.tone} /> : undefined}
+        testID="profile-push"
       />
       {push.token ? (
-        <ListRow density={density} title={t('profile.token')} value={shortToken(push.token)} mono />
+        <ListRow
+          density={density}
+          left={indent}
+          title={t('profile.token')}
+          value={shortToken(push.token)}
+          mono
+        />
       ) : null}
       {push.permission === 'granted' ? (
         <ListRow
           density={density}
+          left={indent}
           title={t('profile.test')}
           onPress={() => void test()}
           disabled={sending}
@@ -179,6 +205,7 @@ export function NotificationsGroup({ density, testUrl }: { density: ListRowDensi
       {push.permission === 'undetermined' ? (
         <ListRow
           density={density}
+          left={indent}
           title={t('profile.enable')}
           onPress={() => router.push('/(auth)/onboarding' as Href)}
         />
@@ -186,6 +213,7 @@ export function NotificationsGroup({ density, testUrl }: { density: ListRowDensi
       {push.permission === 'denied' ? (
         <ListRow
           density={density}
+          left={indent}
           title={t('profile.openSettings')}
           onPress={() => void Linking.openSettings().catch(() => undefined)}
         />
@@ -201,10 +229,11 @@ export function TelegramGroup({ density, session }: { density: ListRowDensity; s
   const [busy, setBusy] = useState(false);
   const me = dirs.data?.employees.find((e) => e.id === session.user_id);
   const linked = me?.telegram_chat_id != null;
+  const logo = <PlatformLogo logo={telegramLogo} size={LOGO_SIZE.row} />;
   if (!telegramAvailable) {
     return (
       <ListGroup footer={t('profile.telegramSoon')}>
-        <ListRow density={density} title={t('profile.telegram')} disabled />
+        <ListRow density={density} left={logo} title={t('profile.telegram')} disabled />
       </ListGroup>
     );
   }
@@ -212,6 +241,7 @@ export function TelegramGroup({ density, session }: { density: ListRowDensity; s
     <ListGroup footer={t(linked ? 'profile.telegramLinkedNote' : 'profile.telegramNote')}>
       <ListRow
         density={density}
+        left={logo}
         title={t(linked ? 'profile.telegramRelink' : 'profile.telegram')}
         right={linked ? <Pill tone="success" label={t('profile.telegramLinked')} /> : undefined}
         showChevron

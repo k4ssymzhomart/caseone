@@ -147,11 +147,28 @@ Hairline borders (`StyleSheet.hairlineWidth`) on dense lists.
 | `TapCounter` | demo only: mono capsule at top right, «5 нажатий · 0:38» |
 | `TabBar` | glass, 64 high plus the safe area, text labels only; active label in `textPrimary` with a 4 px red dot above, inactive in `textSecondary`; the master's middle item «Выдать» is an inverse pill |
 
-## 10. Glyphs, no icon packs
+## 10. Glyphs and logos, no icon packs
 
 Rota uses no icon sets: no Lucide, no SF Symbols, no emoji. Use text labels, brand images (the mark and the mascots) and only these glyphs: `› ‹ → ← ↑ ↓ ✓ ✕ + − · • ● ○ … №`. Digits on the PIN keypad are fine; Rota's rule against letter keycaps is about letters.
 
 If a screen seems to need an icon, it needs a better label. If the user later approves a functional icon set for camera, mic and QR, it gets added in one place.
+
+**Platform and service logos are the one exception** (the owner's request, 2026-10-09). Wherever a screen names a platform or a service (Telegram, Android, Apple, Windows, Chrome, Safari, Claude…), its real mark sits beside the name. Nothing else becomes an icon.
+
+- Source: `packages/design/src/brand/platforms.ts` (Simple Icons paths; Windows drawn from its geometry; XLSX, PDF and 1С are neutral badges). Import single logos (`import { telegramLogo } from '@rota/design'`), never the `platformLogos` map.
+- Draw them only through `PlatformLogo`: `apps/mobile/src/ui/PlatformLogo.tsx` (tone `theme` gives the brand color, white on dark where the brand is near black) and `apps/web/src/components/rota/PlatformLogo` (tones `dark`, `brand`, `mono`). Monochrome inside buttons, where a colored mark would clash.
+- Sizes on mobile (`LOGO_SIZE`): `inline` 16 beside footnote, mono or caps text; `compact` 20 for a short row of marks at the end of a list row; `row` 28 as a list row's left accessory. Web: 16 to 24 inline, 28 to 40 in feature rows. Vertically centered on the text, 8 apart.
+- One row of logos per block at most, no logo walls. The mark never replaces the word: status is still a dot plus a word, and the visible name stays.
+- In a list group where one row leads with a mark, the rows under it keep to its text column (an empty 28 slot) and the separators inset to that column.
+
+| Where (mobile) | Mark |
+| --- | --- |
+| Profile, «Подключить Telegram» and the linked «Telegram» row | Telegram, row accessory |
+| Profile, the Push row | Android on Android, Apple on iOS, Chrome or Safari in the PWA (no mark for other browsers), with the name under «Push» |
+| Master AI report, the model line and the «Вывод ИИ» header | Claude, inline, only when the review's model is `claude…` (never on a rules only or mock review) |
+| Admin, «Windows или Mac» row about the web panel | Windows, Apple, Chrome, compact, at the row's end |
+| Demo, «Что видит ИИ» | Claude, row accessory |
+| Kit, Brand section | every mark the app uses, one row |
 
 ## 11. Mascots
 

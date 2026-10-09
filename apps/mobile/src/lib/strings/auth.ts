@@ -62,6 +62,10 @@ export const authRu: Record<string, string> = {
 
   'profile.notifications': 'Уведомления',
   'profile.push': 'Push',
+  'profile.pushOn.android': 'Android',
+  'profile.pushOn.ios': 'iPhone',
+  'profile.pushOn.chrome': 'Chrome',
+  'profile.pushOn.safari': 'Safari',
   'profile.pushChecking': 'Проверяем…',
   'profile.token': 'Токен',
   'profile.test': 'Проверить уведомление',
@@ -116,6 +120,8 @@ export const authRu: Record<string, string> = {
   'admin.body': 'Справочники, настройки и журнал ИИ открываются в браузере.',
   'admin.address': 'Адрес панели',
   'admin.addressPending': 'появится после публикации',
+  'admin.platforms': 'Windows или Mac',
+  'admin.platformsHint': 'В любом браузере',
 
   // demo
   'demo.title': 'Демо',

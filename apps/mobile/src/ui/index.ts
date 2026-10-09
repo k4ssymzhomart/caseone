@@ -66,4 +66,4 @@ export { TapCounter, type TapCounterProps } from './TapCounter';
 export { TextArea, type TextAreaProps } from './TextArea';
 export { TextField, type TextFieldProps } from './TextField';
 export { Timeline, type TimelineItem, type TimelineProps, type TimelineTone } from './Timeline';
-export { PlatformLogo, type PlatformLogoProps } from './PlatformLogo';
+export { LOGO_SIZE, PlatformLogo, type PlatformLogoProps } from './PlatformLogo';
